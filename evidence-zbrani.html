@@ -138,6 +138,16 @@
     }
     .team-auth-status.ok { color: #34d399; }
     .team-auth-status.err { color: #fda4af; }
+    .team-auth.team-auth-logged-in .team-auth-grid,
+    .team-auth.team-auth-logged-in #btnTeamRegisterOwner,
+    .team-auth.team-auth-logged-in #btnTeamLogin,
+    .team-auth.team-auth-logged-in #btnTeamCreateMember,
+    .team-auth.team-auth-logged-in #btnTeamAudit {
+      display: none !important;
+    }
+    .team-auth:not(.team-auth-logged-in) #btnTeamLogout {
+      display: none !important;
+    }
     section {
       margin-bottom: 1rem;
       border: 1px solid var(--border);
@@ -7185,6 +7195,9 @@
 
       function updateTeamAuthVisibility() {
         var loggedIn = teamModeEnabled();
+        if (teamAuthSection) {
+          teamAuthSection.classList.toggle("team-auth-logged-in", loggedIn);
+        }
         if (teamAuthGrid) teamAuthGrid.hidden = loggedIn;
         if (btnTeamRegisterOwner) btnTeamRegisterOwner.hidden = loggedIn;
         if (btnTeamLogin) btnTeamLogin.hidden = loggedIn;
