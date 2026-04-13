@@ -138,15 +138,6 @@
     }
     .team-auth-status.ok { color: #34d399; }
     .team-auth-status.err { color: #fda4af; }
-    .team-auth.team-auth-logged-in .team-auth-grid,
-    .team-auth.team-auth-logged-in #btnTeamLogin,
-    .team-auth.team-auth-logged-in #btnTeamCreateMember,
-    .team-auth.team-auth-logged-in #btnTeamAudit {
-      display: none !important;
-    }
-    .team-auth:not(.team-auth-logged-in) #btnTeamLogout {
-      display: none !important;
-    }
     section {
       margin-bottom: 1rem;
       border: 1px solid var(--border);
@@ -7195,6 +7186,11 @@
       var teamAuthTitle = teamAuthSection ? teamAuthSection.querySelector(".team-auth-title") : null;
       var teamAuthToolbar = teamAuthSection ? teamAuthSection.querySelector(".toolbar") : null;
       var teamAuthStatusEl = document.getElementById("teamAuthStatus");
+      var teamApiWrap = teamApiBaseInput ? teamApiBaseInput.closest("div") : null;
+      var teamOrgWrap = teamOrgNameInput ? teamOrgNameInput.closest("div") : null;
+      var teamEmailWrap = teamEmailInput ? teamEmailInput.closest("div") : null;
+      var teamPasswordWrap = teamPasswordInput ? teamPasswordInput.closest("div") : null;
+      var teamRoleWrap = teamMemberRoleInput ? teamMemberRoleInput.closest("div") : null;
 
       function updateTeamAuthVisibility() {
         var loggedIn = teamModeEnabled();
@@ -7205,20 +7201,20 @@
         if (teamAuthSection) {
           teamAuthSection.classList.toggle("team-auth-logged-in", loggedIn);
         }
-        if (teamAuthTitle) teamAuthTitle.style.display = loggedIn ? "none" : "";
-        if (teamAuthGrid) teamAuthGrid.hidden = loggedIn;
-        if (teamAuthStatusEl) teamAuthStatusEl.style.display = loggedIn ? "none" : "";
+        if (teamAuthTitle) teamAuthTitle.style.display = "";
+        if (teamAuthGrid) teamAuthGrid.hidden = false;
+        if (teamAuthStatusEl) teamAuthStatusEl.style.display = "";
+        if (teamApiWrap) teamApiWrap.style.display = "none";
+        if (teamOrgWrap) teamOrgWrap.style.display = "none";
+        if (teamEmailWrap) teamEmailWrap.style.display = loggedIn ? "none" : "";
+        if (teamPasswordWrap) teamPasswordWrap.style.display = loggedIn ? "none" : "";
+        if (teamRoleWrap) teamRoleWrap.style.display = "none";
         if (teamAuthToolbar) teamAuthToolbar.style.display = "";
         if (btnTeamRegisterOwner) btnTeamRegisterOwner.hidden = !ownerAllowed;
         if (btnTeamLogin) btnTeamLogin.hidden = loggedIn;
-        if (btnTeamCreateMember) btnTeamCreateMember.hidden = loggedIn;
-        if (btnTeamAudit) btnTeamAudit.hidden = loggedIn;
+        if (btnTeamCreateMember) btnTeamCreateMember.hidden = !ownerAllowed;
+        if (btnTeamAudit) btnTeamAudit.hidden = !ownerAllowed;
         if (btnTeamLogout) btnTeamLogout.hidden = !loggedIn;
-        if (teamAuthSection) {
-          teamAuthSection.style.border = loggedIn ? "none" : "";
-          teamAuthSection.style.background = loggedIn ? "transparent" : "";
-          teamAuthSection.style.padding = loggedIn ? "0" : "";
-        }
       }
 
       function getAuthFormData() {
@@ -7229,6 +7225,12 @@
           password: (teamPasswordInput && teamPasswordInput.value ? teamPasswordInput.value : "").trim(),
           memberRole: (teamMemberRoleInput && teamMemberRoleInput.value ? teamMemberRoleInput.value : "viewer").trim()
         };
+      }
+
+      function askPromptRequired(label, initialValue) {
+        var v = prompt(label, initialValue || "");
+        if (v == null) return "";
+        return String(v).trim();
       }
 
       function bindTeamSession(sessionObj) {
@@ -8120,17 +8122,18 @@
       }
       if (btnTeamRegisterOwner) {
         btnTeamRegisterOwner.addEventListener("click", async function () {
-          var a = getAuthFormData();
-          if (!a.orgName) return alert("Vyplňte název týmu.");
-          if (!a.email || !a.password) return alert("Vyplňte e-mail a heslo.");
+          var orgName = askPromptRequired("Název nového týmu:", "");
+          if (!orgName) return;
+          var ownerPassword = askPromptRequired("Heslo pro owner účet (" + TEAM_OWNER_EMAIL + "):", "");
+          if (!ownerPassword) return;
           try {
             setTeamStatus("Registruji tým...", "");
             var out = await apiRequest("/auth/register-owner", {
               method: "POST",
               body: JSON.stringify({
-                organization_name: a.orgName,
-                email: a.email,
-                password: a.password
+                organization_name: orgName,
+                email: TEAM_OWNER_EMAIL,
+                password: ownerPassword
               })
             });
             await loginAndLoadSharedState(out, "Tým vytvořen a přihlášení hotové");
@@ -8161,15 +8164,22 @@
       if (btnTeamCreateMember) {
         btnTeamCreateMember.addEventListener("click", async function () {
           if (!teamModeEnabled()) return alert("Nejdřív se přihlaste jako admin/owner.");
-          var a = getAuthFormData();
-          if (!a.email || !a.password) return alert("Do polí e-mail a heslo zadejte údaje nového člena.");
+          var newMemberEmail = askPromptRequired("E-mail nového člena:", "");
+          if (!newMemberEmail) return;
+          var newMemberPassword = askPromptRequired("Heslo nového člena:", "");
+          if (!newMemberPassword) return;
+          var newMemberRole = askPromptRequired("Role člena (viewer/editor/admin):", "viewer").toLowerCase();
+          if (["viewer", "editor", "admin"].indexOf(newMemberRole) < 0) {
+            alert("Neplatná role. Použijte viewer, editor nebo admin.");
+            return;
+          }
           try {
             var out = await apiRequest("/org/members", {
               method: "POST",
               body: JSON.stringify({
-                email: a.email,
-                password: a.password,
-                role: a.memberRole
+                email: newMemberEmail,
+                password: newMemberPassword,
+                role: newMemberRole
               })
             });
             setTeamStatus(
