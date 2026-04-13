@@ -327,6 +327,16 @@ class AdminAddTeamIn(BaseModel):
     organization_name: str = Field(min_length=2, max_length=255)
 
 
+class AdminAddMembershipIn(BaseModel):
+    user_id: int = Field(ge=1)
+    organization_id: int = Field(ge=1)
+    role: str = Field(default=ROLE_VIEWER, max_length=20)
+
+
+class AdminMemberRoleIn(BaseModel):
+    role: str = Field(min_length=3, max_length=20)
+
+
 def ensure_allowed_owner_email(ctx: AuthContext) -> None:
     actor_email = str(ctx.user.email or "").strip().lower()
     if actor_email != ALLOWED_OWNER_EMAIL:
@@ -474,7 +484,6 @@ def admin_add_team(
     db.add(org)
     db.flush()
 
-    db.add(Membership(organization_id=org.id, user_id=ctx.user.id, role=ROLE_OWNER))
     db.add(
         OrganizationState(
             organization_id=org.id,
@@ -490,7 +499,7 @@ def admin_add_team(
         action="admin.team.create",
         entity="organization",
         entity_id=str(org.id),
-        after={"organization_name": org.name, "created_by": ctx.user.email},
+        after={"organization_name": org.name, "created_by": ctx.user.email, "note": "bez automatického členství"},
     )
     db.commit()
     return {"organization_id": org.id, "organization_name": org.name}
@@ -721,6 +730,107 @@ def admin_remove_member(
 
     db.commit()
     return {"removed": removed}
+
+
+@app.patch("/api/admin/members/{membership_id}/role")
+def admin_set_member_role(
+    membership_id: int,
+    payload: AdminMemberRoleIn,
+    ctx: AuthContext = Depends(require_role(ROLE_VIEWER)),
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    ensure_allowed_owner_email(ctx)
+
+    membership = db.get(Membership, membership_id)
+    if not membership:
+        raise HTTPException(status_code=404, detail="Členství nebylo nalezeno.")
+
+    new_role = payload.role.strip().lower()
+    if new_role not in (ROLE_OWNER, ROLE_ADMIN, ROLE_EDITOR, ROLE_VIEWER):
+        raise HTTPException(status_code=400, detail="Neplatná role. Použijte owner/admin/editor/viewer.")
+
+    org = db.get(Organization, membership.organization_id)
+    before = {"membership_id": membership.id, "user_id": membership.user_id, "role": membership.role}
+    membership.role = new_role
+    log_audit(
+        db,
+        organization_id=membership.organization_id,
+        actor_user_id=ctx.user.id,
+        action="admin.member.role",
+        entity="organization_member",
+        entity_id=str(membership.id),
+        before=before,
+        after={"membership_id": membership.id, "user_id": membership.user_id, "role": new_role},
+        meta={"changed_by": ctx.user.email, "team_name": org.name if org else None},
+    )
+    db.commit()
+    db.refresh(membership)
+    return {
+        "membership_id": membership.id,
+        "user_id": membership.user_id,
+        "organization_id": membership.organization_id,
+        "role": membership.role,
+    }
+
+
+@app.post("/api/admin/members")
+def admin_add_membership(
+    payload: AdminAddMembershipIn,
+    ctx: AuthContext = Depends(require_role(ROLE_VIEWER)),
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    ensure_allowed_owner_email(ctx)
+
+    role = payload.role.strip().lower()
+    if role not in (ROLE_OWNER, ROLE_ADMIN, ROLE_EDITOR, ROLE_VIEWER):
+        raise HTTPException(status_code=400, detail="Neplatná role. Použijte owner/admin/editor/viewer.")
+
+    user = db.get(User, payload.user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="Uživatel nebyl nalezen.")
+
+    org = db.get(Organization, payload.organization_id)
+    if not org:
+        raise HTTPException(status_code=404, detail="Tým nebyl nalezen.")
+
+    dup = db.scalar(
+        select(Membership).where(
+            Membership.organization_id == payload.organization_id,
+            Membership.user_id == payload.user_id,
+        )
+    )
+    if dup:
+        raise HTTPException(status_code=409, detail="Uživatel už je v tomto týmu.")
+
+    member = Membership(organization_id=payload.organization_id, user_id=payload.user_id, role=role)
+    db.add(member)
+    db.flush()
+    log_audit(
+        db,
+        organization_id=payload.organization_id,
+        actor_user_id=ctx.user.id,
+        action="admin.member.create",
+        entity="organization_member",
+        entity_id=str(member.id),
+        after={
+            "membership_id": member.id,
+            "user_id": user.id,
+            "email": user.email,
+            "role": role,
+            "team_name": org.name,
+        },
+        meta={"created_by": ctx.user.email},
+    )
+    db.commit()
+    db.refresh(member)
+    return {
+        "membership_id": member.id,
+        "user_id": user.id,
+        "email": user.email,
+        "organization_id": org.id,
+        "team_name": org.name,
+        "role": member.role,
+    }
 
 
 @app.get("/api/state", response_model=StateOut)

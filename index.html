@@ -167,8 +167,38 @@
       letter-spacing: 0.04em;
     }
     .team-users-panel td.actions {
-      width: 1%;
-      white-space: nowrap;
+      width: auto;
+      min-width: 14rem;
+      white-space: normal;
+    }
+    .team-users-panel .team-user-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+      align-items: center;
+      max-width: 22rem;
+    }
+    .team-users-panel .team-user-role-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.25rem;
+    }
+    .team-users-panel .team-user-role-btn {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 6px;
+      padding: 0.22rem 0.45rem;
+      font-size: 0.72rem;
+      cursor: pointer;
+    }
+    .team-users-panel .team-user-role-btn.is-current {
+      border-color: #60a5fa;
+      color: #bfdbfe;
+    }
+    .team-users-panel .team-user-actions select {
+      font-size: 0.75rem;
+      max-width: 9rem;
     }
     .team-users-panel .danger {
       background: var(--danger-bg);
@@ -7366,20 +7396,57 @@
       function renderAdminUsersList(payload) {
         if (!teamUsersPanel || !teamUsersTbody) return;
         var users = payload && Array.isArray(payload.users) ? payload.users : [];
+        var teamsAll = payload && Array.isArray(payload.teams) ? payload.teams : [];
         if (!users.length) {
-          teamUsersTbody.innerHTML = "<tr><td colspan=\"4\">Žádní uživatelé.</td></tr>";
+          teamUsersTbody.innerHTML = "<tr><td colspan=\"5\">Žádní uživatelé.</td></tr>";
           teamUsersPanel.hidden = false;
           return;
         }
         teamUsersTbody.innerHTML = users.map(function (u) {
+          var mid = escapeHtmlLite(String(u.membership_id || ""));
+          var uid = escapeHtmlLite(String(u.user_id || ""));
+          var tid = Number(u.team_id);
+          var otherTeams = teamsAll.filter(function (t) {
+            return Number(t.team_id) !== tid;
+          });
+          var teamOpts = otherTeams.map(function (t) {
+            return (
+              "<option value=\"" + escapeHtmlLite(String(t.team_id)) + "\">" +
+              escapeHtmlLite(t.team_name || "") + "</option>"
+            );
+          }).join("");
+          if (!teamOpts) {
+            teamOpts = "<option value=\"\">(žádný jiný tým)</option>";
+          }
+          var r = String(u.role || "").toLowerCase();
+          function roleBtn(label) {
+            var cur = r === label ? " is-current" : "";
+            return (
+              "<button type=\"button\" class=\"team-user-role-btn" + cur + "\" data-team-user-role data-membership-id=\"" +
+              mid + "\" data-role=\"" + label + "\">" + label + "</button>"
+            );
+          }
           return (
-            "<tr>" +
+            "<tr data-user-id=\"" + uid + "\">" +
               "<td>" + escapeHtmlLite(u.email || "") + "</td>" +
               "<td>" + escapeHtmlLite(u.team_name || "") + "</td>" +
               "<td>" + escapeHtmlLite(u.role || "") + "</td>" +
               "<td>" + escapeHtmlLite(u.password || "není uloženo") + "</td>" +
-              "<td class=\"actions\"><button type=\"button\" class=\"danger\" data-team-user-del=\"" +
-                escapeHtmlLite(String(u.membership_id || "")) + "\">Odebrat</button></td>" +
+              "<td class=\"actions\">" +
+                "<div class=\"team-user-actions\">" +
+                  "<span class=\"team-user-role-group\" title=\"Role v tomto týmu\">" +
+                    roleBtn("owner") + roleBtn("admin") + roleBtn("viewer") +
+                  "</span>" +
+                  "<select data-team-user-add-team aria-label=\"Přidat do týmu\">" + teamOpts + "</select>" +
+                  "<select data-team-user-add-role aria-label=\"Role při přidání\">" +
+                    "<option value=\"owner\">owner</option>" +
+                    "<option value=\"admin\">admin</option>" +
+                    "<option value=\"viewer\" selected>viewer</option>" +
+                  "</select>" +
+                  "<button type=\"button\" data-team-user-add>Přidat</button>" +
+                  "<button type=\"button\" class=\"danger\" data-team-user-del=\"" + mid + "\">Odebrat</button>" +
+                "</div>" +
+              "</td>" +
             "</tr>"
           );
         }).join("");
@@ -8313,7 +8380,7 @@
                 organization_name: orgName
               })
             });
-            setTeamStatus("Tým přidán: " + (out.organization_name || orgName), "ok");
+            setTeamStatus("Tým přidán: " + (out.organization_name || orgName) + " (jste v něm automaticky nepřidáni — členy nastavte ve výpisu uživatelů).", "ok");
           } catch (err) {
             setTeamStatus("Přidání týmu selhalo: " + (err && err.message ? err.message : String(err)), "err");
           }
@@ -8409,6 +8476,54 @@
       }
       if (teamUsersTbody) {
         teamUsersTbody.addEventListener("click", async function (e) {
+          var roleBtn = e.target && e.target.closest ? e.target.closest("button[data-team-user-role]") : null;
+          if (roleBtn) {
+            var membershipId = String(roleBtn.getAttribute("data-membership-id") || "").trim();
+            var newRole = String(roleBtn.getAttribute("data-role") || "").trim();
+            if (!membershipId || !newRole) return;
+            try {
+              await apiRequest("/admin/members/" + encodeURIComponent(membershipId) + "/role", {
+                method: "PATCH",
+                body: JSON.stringify({ role: newRole })
+              });
+              var data = await apiRequest("/admin/users-list");
+              renderAdminUsersList(data);
+              setTeamStatus("Role byla změněna na „" + newRole + "“.", "ok");
+            } catch (err) {
+              setTeamStatus("Změna role selhala: " + (err && err.message ? err.message : String(err)), "err");
+            }
+            return;
+          }
+          var addBtn = e.target && e.target.closest ? e.target.closest("button[data-team-user-add]") : null;
+          if (addBtn) {
+            var tr = addBtn.closest ? addBtn.closest("tr") : null;
+            if (!tr) return;
+            var userId = String(tr.getAttribute("data-user-id") || "").trim();
+            var selTeam = tr.querySelector("select[data-team-user-add-team]");
+            var selRole = tr.querySelector("select[data-team-user-add-role]");
+            var orgId = selTeam && selTeam.value ? String(selTeam.value).trim() : "";
+            var addRole = selRole && selRole.value ? String(selRole.value).trim() : "viewer";
+            if (!userId || !orgId) {
+              alert("Vyberte tým, do kterého chcete uživatele přidat.");
+              return;
+            }
+            try {
+              await apiRequest("/admin/members", {
+                method: "POST",
+                body: JSON.stringify({
+                  user_id: Number(userId),
+                  organization_id: Number(orgId),
+                  role: addRole
+                })
+              });
+              var data = await apiRequest("/admin/users-list");
+              renderAdminUsersList(data);
+              setTeamStatus("Uživatel byl přidán do vybraného týmu.", "ok");
+            } catch (err) {
+              setTeamStatus("Přidání do týmu selhalo: " + (err && err.message ? err.message : String(err)), "err");
+            }
+            return;
+          }
           var btn = e.target && e.target.closest ? e.target.closest("button[data-team-user-del]") : null;
           if (!btn) return;
           var membershipId = String(btn.getAttribute("data-team-user-del") || "").trim();
