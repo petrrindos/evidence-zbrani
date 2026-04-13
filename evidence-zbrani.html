@@ -139,7 +139,6 @@
     .team-auth-status.ok { color: #34d399; }
     .team-auth-status.err { color: #fda4af; }
     .team-auth.team-auth-logged-in .team-auth-grid,
-    .team-auth.team-auth-logged-in #btnTeamRegisterOwner,
     .team-auth.team-auth-logged-in #btnTeamLogin,
     .team-auth.team-auth-logged-in #btnTeamCreateMember,
     .team-auth.team-auth-logged-in #btnTeamAudit {
@@ -3399,6 +3398,7 @@
       var strelebyPdfZbranSelectInitialized = false;
       var SESSION_KEY = "cz.app.evidenceZbrani.teamSession.v1";
       var TEAM_API_DEFAULT = "https://evidence-zbrani.onrender.com/api";
+      var TEAM_OWNER_EMAIL = "petr.rindos@gmail.com";
       var teamSession = null;
       var remoteStateCache = null;
       var saveRemoteTimer = 0;
@@ -7198,6 +7198,10 @@
 
       function updateTeamAuthVisibility() {
         var loggedIn = teamModeEnabled();
+        var ownerAllowed = !!(
+          teamSession &&
+          String(teamSession.email || "").trim().toLowerCase() === TEAM_OWNER_EMAIL
+        );
         if (teamAuthSection) {
           teamAuthSection.classList.toggle("team-auth-logged-in", loggedIn);
         }
@@ -7205,7 +7209,7 @@
         if (teamAuthGrid) teamAuthGrid.hidden = loggedIn;
         if (teamAuthStatusEl) teamAuthStatusEl.style.display = loggedIn ? "none" : "";
         if (teamAuthToolbar) teamAuthToolbar.style.display = "";
-        if (btnTeamRegisterOwner) btnTeamRegisterOwner.hidden = loggedIn;
+        if (btnTeamRegisterOwner) btnTeamRegisterOwner.hidden = !ownerAllowed;
         if (btnTeamLogin) btnTeamLogin.hidden = loggedIn;
         if (btnTeamCreateMember) btnTeamCreateMember.hidden = loggedIn;
         if (btnTeamAudit) btnTeamAudit.hidden = loggedIn;

@@ -32,6 +32,7 @@ elif DATABASE_URL.startswith("postgresql://") and not DATABASE_URL.startswith("p
 JWT_SECRET = os.getenv("EVIDENCE_JWT_SECRET", "change-me-in-production")
 JWT_ALG = "HS256"
 ACCESS_TTL_MIN = int(os.getenv("EVIDENCE_ACCESS_TTL_MIN", "120"))
+ALLOWED_OWNER_EMAIL = os.getenv("EVIDENCE_ALLOWED_OWNER_EMAIL", "petr.rindos@gmail.com").strip().lower()
 
 ROLE_OWNER = "owner"
 ROLE_ADMIN = "admin"
@@ -322,7 +323,14 @@ def health() -> dict[str, str]:
 
 @app.post("/api/auth/register-owner", response_model=TokenOut)
 def register_owner(payload: RegisterOwnerIn, db: Session = Depends(get_db)) -> TokenOut:
-    existing = db.scalar(select(User).where(User.email == payload.email.lower().strip()))
+    requested_email = payload.email.lower().strip()
+    if requested_email != ALLOWED_OWNER_EMAIL:
+        raise HTTPException(
+            status_code=403,
+            detail="Registrace týmu je povolená jen pro autorizovaný e-mail.",
+        )
+
+    existing = db.scalar(select(User).where(User.email == requested_email))
     if existing:
         raise HTTPException(status_code=409, detail="Uživatel s tímto e-mailem už existuje.")
 
@@ -331,7 +339,7 @@ def register_owner(payload: RegisterOwnerIn, db: Session = Depends(get_db)) -> T
     db.flush()
 
     user = User(
-        email=payload.email.lower().strip(),
+        email=requested_email,
         password_hash=hash_password(payload.password),
         full_name=(payload.full_name or "").strip() or None,
     )

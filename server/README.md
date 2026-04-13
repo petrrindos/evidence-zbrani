@@ -15,6 +15,7 @@ uvicorn app.main:app --reload --port 8000
 - `EVIDENCE_DB_URL` (default: `sqlite:///./evidence_zbrani.db`)
 - `EVIDENCE_JWT_SECRET` (change in production)
 - `EVIDENCE_ACCESS_TTL_MIN` (default: `120`)
+- `EVIDENCE_ALLOWED_OWNER_EMAIL` (default: `petr.rindos@gmail.com`)
 
 ## Main API
 
