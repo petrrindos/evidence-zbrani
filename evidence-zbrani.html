@@ -138,6 +138,47 @@
     }
     .team-auth-status.ok { color: #34d399; }
     .team-auth-status.err { color: #fda4af; }
+    .team-users-panel {
+      margin-top: 0.65rem;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.55rem;
+      background: var(--surface2);
+    }
+    .team-users-panel[hidden] {
+      display: none !important;
+    }
+    .team-users-panel table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+    }
+    .team-users-panel th,
+    .team-users-panel td {
+      border-bottom: 1px solid var(--border);
+      padding: 0.42rem 0.35rem;
+      text-align: left;
+      vertical-align: top;
+    }
+    .team-users-panel th {
+      color: var(--muted);
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .team-users-panel td.actions {
+      width: 1%;
+      white-space: nowrap;
+    }
+    .team-users-panel .danger {
+      background: var(--danger-bg);
+      border: 1px solid var(--danger);
+      color: #fecaca;
+      border-radius: 8px;
+      padding: 0.3rem 0.55rem;
+      font-size: 0.78rem;
+      cursor: pointer;
+    }
     section {
       margin-bottom: 1rem;
       border: 1px solid var(--border);
@@ -3032,9 +3073,23 @@
         <button type="button" class="primary" id="btnTeamRegisterOwner">Registrovat tým + owner</button>
         <button type="button" id="btnTeamLogin">Přihlásit</button>
         <button type="button" id="btnTeamGenerateSeed">Generovat týmy + uživatele</button>
+        <button type="button" id="btnTeamListUsers">Vypsat uživatele</button>
         <button type="button" id="btnTeamCreateMember">Přidat člena</button>
         <button type="button" id="btnTeamAudit">Stáhnout audit JSON</button>
         <button type="button" id="btnTeamLogout">Odhlásit</button>
+      </div>
+      <div id="teamUsersPanel" class="team-users-panel" hidden>
+        <table aria-label="Seznam uživatelů">
+          <thead>
+            <tr>
+              <th>E-mail</th>
+              <th>Tým</th>
+              <th>Role</th>
+              <th class="actions">Akce</th>
+            </tr>
+          </thead>
+          <tbody id="teamUsersTbody"></tbody>
+        </table>
       </div>
       <p id="teamAuthStatus" class="team-auth-status">Lokální režim (bez serveru).</p>
     </section>
@@ -7180,6 +7235,7 @@
       var btnTeamRegisterOwner = document.getElementById("btnTeamRegisterOwner");
       var btnTeamLogin = document.getElementById("btnTeamLogin");
       var btnTeamGenerateSeed = document.getElementById("btnTeamGenerateSeed");
+      var btnTeamListUsers = document.getElementById("btnTeamListUsers");
       var btnTeamCreateMember = document.getElementById("btnTeamCreateMember");
       var btnTeamAudit = document.getElementById("btnTeamAudit");
       var btnTeamLogout = document.getElementById("btnTeamLogout");
@@ -7188,6 +7244,8 @@
       var teamAuthTitle = teamAuthSection ? teamAuthSection.querySelector(".team-auth-title") : null;
       var teamAuthToolbar = teamAuthSection ? teamAuthSection.querySelector(".toolbar") : null;
       var teamAuthStatusEl = document.getElementById("teamAuthStatus");
+      var teamUsersPanel = document.getElementById("teamUsersPanel");
+      var teamUsersTbody = document.getElementById("teamUsersTbody");
       var teamApiWrap = teamApiBaseInput ? teamApiBaseInput.closest("div") : null;
       var teamOrgWrap = teamOrgNameInput ? teamOrgNameInput.closest("div") : null;
       var teamEmailWrap = teamEmailInput ? teamEmailInput.closest("div") : null;
@@ -7215,9 +7273,11 @@
         if (btnTeamRegisterOwner) btnTeamRegisterOwner.hidden = !ownerAllowed;
         if (btnTeamLogin) btnTeamLogin.hidden = loggedIn;
         if (btnTeamGenerateSeed) btnTeamGenerateSeed.hidden = !ownerAllowed;
+        if (btnTeamListUsers) btnTeamListUsers.hidden = !ownerAllowed;
         if (btnTeamCreateMember) btnTeamCreateMember.hidden = !ownerAllowed;
         if (btnTeamAudit) btnTeamAudit.hidden = !ownerAllowed;
         if (btnTeamLogout) btnTeamLogout.hidden = !loggedIn;
+        if (!ownerAllowed && teamUsersPanel) teamUsersPanel.hidden = true;
       }
 
       function getAuthFormData() {
@@ -7234,6 +7294,34 @@
         var v = prompt(label, initialValue || "");
         if (v == null) return "";
         return String(v).trim();
+      }
+
+      function escapeHtmlLite(s) {
+        var d = document.createElement("div");
+        d.textContent = String(s == null ? "" : s);
+        return d.innerHTML;
+      }
+
+      function renderAdminUsersList(payload) {
+        if (!teamUsersPanel || !teamUsersTbody) return;
+        var users = payload && Array.isArray(payload.users) ? payload.users : [];
+        if (!users.length) {
+          teamUsersTbody.innerHTML = "<tr><td colspan=\"4\">Žádní uživatelé.</td></tr>";
+          teamUsersPanel.hidden = false;
+          return;
+        }
+        teamUsersTbody.innerHTML = users.map(function (u) {
+          return (
+            "<tr>" +
+              "<td>" + escapeHtmlLite(u.email || "") + "</td>" +
+              "<td>" + escapeHtmlLite(u.team_name || "") + "</td>" +
+              "<td>" + escapeHtmlLite(u.role || "") + "</td>" +
+              "<td class=\"actions\"><button type=\"button\" class=\"danger\" data-team-user-del=\"" +
+                escapeHtmlLite(String(u.membership_id || "")) + "\">Odebrat</button></td>" +
+            "</tr>"
+          );
+        }).join("");
+        teamUsersPanel.hidden = false;
       }
 
       function bindTeamSession(sessionObj) {
@@ -8223,6 +8311,35 @@
           }
         });
       }
+      if (btnTeamListUsers) {
+        btnTeamListUsers.addEventListener("click", async function () {
+          if (!teamModeEnabled()) return alert("Nejdřív se přihlaste.");
+          try {
+            var data = await apiRequest("/admin/users-list");
+            renderAdminUsersList(data);
+            setTeamStatus("Seznam uživatelů načten.", "ok");
+          } catch (err) {
+            setTeamStatus("Načtení uživatelů selhalo: " + (err && err.message ? err.message : String(err)), "err");
+          }
+        });
+      }
+      if (teamUsersTbody) {
+        teamUsersTbody.addEventListener("click", async function (e) {
+          var btn = e.target && e.target.closest ? e.target.closest("button[data-team-user-del]") : null;
+          if (!btn) return;
+          var membershipId = String(btn.getAttribute("data-team-user-del") || "").trim();
+          if (!membershipId) return;
+          if (!confirm("Odebrat tohoto uživatele z týmu?")) return;
+          try {
+            await apiRequest("/admin/members/" + encodeURIComponent(membershipId), { method: "DELETE" });
+            var data = await apiRequest("/admin/users-list");
+            renderAdminUsersList(data);
+            setTeamStatus("Uživatel byl odebrán.", "ok");
+          } catch (err) {
+            setTeamStatus("Odebrání uživatele selhalo: " + (err && err.message ? err.message : String(err)), "err");
+          }
+        });
+      }
       if (btnTeamAudit) {
         btnTeamAudit.addEventListener("click", async function () {
           if (!teamModeEnabled()) return alert("Nejdřív se přihlaste.");
@@ -8247,6 +8364,8 @@
           bindTeamSession(null);
           remoteStateCache = null;
           saveRemoteTimer = 0;
+          if (teamUsersPanel) teamUsersPanel.hidden = true;
+          if (teamUsersTbody) teamUsersTbody.innerHTML = "";
         });
       }
 

@@ -306,6 +306,12 @@ class AdminGenerateIn(BaseModel):
     users_per_team: int = Field(default=3, ge=1, le=30)
 
 
+def ensure_allowed_owner_email(ctx: AuthContext) -> None:
+    actor_email = str(ctx.user.email or "").strip().lower()
+    if actor_email != ALLOWED_OWNER_EMAIL:
+        raise HTTPException(status_code=403, detail="Tato operace je povolena jen pro autorizovaný e-mail.")
+
+
 app = FastAPI(title="Evidence zbraní API", version="1.0.0")
 
 app.add_middleware(
@@ -481,6 +487,89 @@ def create_member(
     )
 
 
+@app.get("/api/admin/users-list")
+def admin_list_users(
+    ctx: AuthContext = Depends(require_role(ROLE_VIEWER)),
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    ensure_allowed_owner_email(ctx)
+
+    orgs = db.scalars(select(Organization).order_by(Organization.name.asc())).all()
+    org_map = {o.id: o for o in orgs}
+    rows = db.scalars(select(Membership).order_by(Membership.organization_id.asc(), Membership.created_at.asc())).all()
+
+    users: list[dict[str, Any]] = []
+    for m in rows:
+        user = db.get(User, m.user_id)
+        org = org_map.get(m.organization_id)
+        if not user or not org:
+            continue
+        users.append(
+            {
+                "membership_id": m.id,
+                "user_id": user.id,
+                "email": user.email,
+                "full_name": user.full_name,
+                "team_id": org.id,
+                "team_name": org.name,
+                "role": m.role,
+                "created_at": m.created_at.isoformat() if m.created_at else None,
+            }
+        )
+
+    teams = [{"team_id": o.id, "team_name": o.name} for o in orgs]
+    return {"teams": teams, "users": users}
+
+
+@app.delete("/api/admin/members/{membership_id}")
+def admin_remove_member(
+    membership_id: int,
+    ctx: AuthContext = Depends(require_role(ROLE_VIEWER)),
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    ensure_allowed_owner_email(ctx)
+
+    membership = db.get(Membership, membership_id)
+    if not membership:
+        raise HTTPException(status_code=404, detail="Členství nebylo nalezeno.")
+    if membership.user_id == ctx.user.id:
+        raise HTTPException(status_code=400, detail="Nelze odebrat právě přihlášeného uživatele.")
+
+    user = db.get(User, membership.user_id)
+    org = db.get(Organization, membership.organization_id)
+    removed = {
+        "membership_id": membership.id,
+        "user_id": membership.user_id,
+        "organization_id": membership.organization_id,
+        "email": user.email if user else None,
+        "team_name": org.name if org else None,
+    }
+
+    db.delete(membership)
+    db.flush()
+
+    still_member = db.scalar(
+        select(Membership).where(Membership.user_id == removed["user_id"]).limit(1)
+    )
+    if not still_member and user:
+        db.delete(user)
+
+    if org:
+        log_audit(
+            db,
+            organization_id=org.id,
+            actor_user_id=ctx.user.id,
+            action="admin.member.delete",
+            entity="organization_member",
+            entity_id=str(removed["membership_id"]),
+            before=removed,
+            meta={"deleted_by": ctx.user.email},
+        )
+
+    db.commit()
+    return {"removed": removed}
+
+
 @app.get("/api/state", response_model=StateOut)
 def get_state(ctx: AuthContext = Depends(require_role(ROLE_VIEWER)), db: Session = Depends(get_db)) -> StateOut:
     row = db.get(OrganizationState, ctx.organization_id)
@@ -571,9 +660,8 @@ def admin_generate_teams_users(
     ctx: AuthContext = Depends(require_role(ROLE_VIEWER)),
     db: Session = Depends(get_db),
 ) -> dict[str, Any]:
+    ensure_allowed_owner_email(ctx)
     actor_email = str(ctx.user.email or "").strip().lower()
-    if actor_email != ALLOWED_OWNER_EMAIL:
-        raise HTTPException(status_code=403, detail="Tato operace je povolena jen pro autorizovaný e-mail.")
 
     created: list[dict[str, Any]] = []
     stamp = datetime.now(UTC).strftime("%Y%m%d%H%M")
