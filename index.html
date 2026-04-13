@@ -234,6 +234,29 @@
       font-size: 0.78rem;
       cursor: pointer;
     }
+    .team-members-expand td {
+      background: var(--surface2, rgba(0, 0, 0, 0.12));
+      border-top: none;
+      padding-top: 0;
+      padding-bottom: 0.65rem;
+    }
+    .team-members-expanded-inner {
+      padding: 0.5rem 0 0.15rem;
+    }
+    .team-members-expanded-h {
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-bottom: 0.45rem;
+      opacity: 0.92;
+    }
+    .team-members-subtable {
+      width: 100%;
+      font-size: 0.85rem;
+    }
+    .team-members-subtable th,
+    .team-members-subtable td {
+      padding: 0.35rem 0.45rem;
+    }
     section {
       margin-bottom: 1rem;
       border: 1px solid var(--border);
@@ -7747,6 +7770,62 @@
         }
       }
 
+      function renderTeamMembersSubRows(subTbody, members, teamIdStr) {
+        if (!subTbody) return;
+        var tid = teamIdStr;
+        var myUid = teamSession && teamSession.userId != null ? Number(teamSession.userId) : NaN;
+        var list = Array.isArray(members) ? members : [];
+        if (!list.length) {
+          subTbody.innerHTML = "<tr><td colspan=\"3\">Žádní členové.</td></tr>";
+          return;
+        }
+        subTbody.innerHTML = list
+          .map(function (m) {
+            var mid = m.membership_id != null ? String(m.membership_id) : "";
+            var uid = m.user_id != null ? Number(m.user_id) : NaN;
+            var isSelf = Number.isFinite(myUid) && Number.isFinite(uid) && uid === myUid;
+            var removeCell = isSelf
+              ? "<span title=\"Vlastní účet z týmu neodebereš tímto tlačítkem.\">—</span>"
+              : "<button type=\"button\" class=\"danger\" data-member-remove=\"" +
+                escapeHtmlLite(mid) +
+                "\" data-member-team=\"" +
+                escapeHtmlLite(tid) +
+                "\">Odebrat z týmu</button>";
+            var nameBit =
+              m.full_name && String(m.full_name).trim()
+                ? " <span style=\"opacity:0.78\">(" + escapeHtmlLite(String(m.full_name).trim()) + ")</span>"
+                : "";
+            return (
+              "<tr>" +
+                "<td>" +
+                escapeHtmlLite(m.email || "") +
+                nameBit +
+                "</td>" +
+                "<td>" +
+                escapeHtmlLite(m.role || "") +
+                "</td>" +
+                "<td class=\"actions\">" +
+                removeCell +
+                "</td>" +
+              "</tr>"
+            );
+          })
+          .join("");
+      }
+
+      async function refreshTeamsTableAndKeepMembersOpen(expandedTeamId) {
+        var tid = expandedTeamId != null ? String(expandedTeamId).trim() : "";
+        var data = await apiRequest("/admin/teams-list");
+        renderAdminTeamsList(data);
+        if (!tid) return;
+        var expand = document.getElementById("teamMembersExpand-" + tid);
+        var subTbody = document.getElementById("teamMembersSubTbody-" + tid);
+        if (!expand || !subTbody) return;
+        var mdata = await apiRequest("/admin/teams/" + encodeURIComponent(tid) + "/members");
+        renderTeamMembersSubRows(subTbody, mdata.members || [], tid);
+        expand.hidden = false;
+      }
+
       function renderAdminTeamsList(payload) {
         if (!teamTeamsPanel || !teamTeamsTbody) return;
         var teams = payload && Array.isArray(payload.teams) ? payload.teams : [];
@@ -7755,16 +7834,55 @@
           teamTeamsPanel.hidden = false;
           return;
         }
-        teamTeamsTbody.innerHTML = teams.map(function (t) {
-          return (
-            "<tr>" +
-              "<td>" + escapeHtmlLite(t.team_name || "") + "</td>" +
-              "<td>" + escapeHtmlLite(String(t.members_count != null ? t.members_count : "")) + "</td>" +
-              "<td class=\"actions\"><button type=\"button\" class=\"danger\" data-team-del=\"" +
-                escapeHtmlLite(String(t.team_id || "")) + "\">Vymazat</button></td>" +
-            "</tr>"
-          );
-        }).join("");
+        var rowHtml = teams
+          .map(function (t) {
+            var tid = String(t.team_id != null ? t.team_id : "").trim();
+            if (!tid) return "";
+            var tname = escapeHtmlLite(t.team_name || "");
+            return (
+              "<tr data-team-row=\"" +
+              escapeHtmlLite(tid) +
+              "\">" +
+              "<td>" +
+              tname +
+              "</td>" +
+              "<td>" +
+              escapeHtmlLite(String(t.members_count != null ? t.members_count : "")) +
+              "</td>" +
+              "<td class=\"actions\">" +
+              "<button type=\"button\" data-team-members=\"" +
+              escapeHtmlLite(tid) +
+              "\">Vypsat člen týmu</button> " +
+              "<button type=\"button\" class=\"danger\" data-team-del=\"" +
+              escapeHtmlLite(tid) +
+              "\">Vymazat tým</button>" +
+              "</td>" +
+              "</tr>" +
+              "<tr class=\"team-members-expand\" id=\"teamMembersExpand-" +
+              escapeHtmlLite(tid) +
+              "\" hidden>" +
+              "<td colspan=\"3\">" +
+              "<div class=\"team-members-expanded-inner\">" +
+              "<div class=\"team-members-expanded-h\">Členové týmu</div>" +
+              "<table class=\"team-members-subtable\" aria-label=\"Členové týmu\">" +
+              "<thead><tr><th>E-mail</th><th>Role</th><th class=\"actions\">Akce</th></tr></thead>" +
+              "<tbody id=\"teamMembersSubTbody-" +
+              escapeHtmlLite(tid) +
+              "\"></tbody>" +
+              "</table>" +
+              "</div>" +
+              "</td>" +
+              "</tr>"
+            );
+          })
+          .filter(Boolean)
+          .join("");
+        if (!rowHtml) {
+          teamTeamsTbody.innerHTML = "<tr><td colspan=\"3\">Žádné týmy.</td></tr>";
+          teamTeamsPanel.hidden = false;
+          return;
+        }
+        teamTeamsTbody.innerHTML = rowHtml;
         teamTeamsPanel.hidden = false;
       }
 
@@ -7797,6 +7915,7 @@
         teamSession.email = me.email;
         teamSession.role = me.role;
         teamSession.organizationId = me.organization_id;
+        teamSession.userId = me.user_id;
         saveTeamSession();
         await refreshRemoteStateFromServer();
         applyHolderToForm(loadState().holder);
@@ -7824,6 +7943,7 @@
           teamSession.email = me.email;
           teamSession.role = me.role;
           teamSession.organizationId = me.organization_id;
+          teamSession.userId = me.user_id;
           saveTeamSession();
           await refreshRemoteStateFromServer();
           bindTeamSession(teamSession);
@@ -8870,9 +8990,56 @@
       }
       if (teamTeamsTbody) {
         teamTeamsTbody.addEventListener("click", async function (e) {
-          var btn = e.target && e.target.closest ? e.target.closest("button[data-team-del]") : null;
-          if (!btn) return;
-          var teamId = String(btn.getAttribute("data-team-del") || "").trim();
+          var removeMem =
+            e.target && e.target.closest ? e.target.closest("button[data-member-remove]") : null;
+          if (removeMem) {
+            var mid = String(removeMem.getAttribute("data-member-remove") || "").trim();
+            var memberTeamId = String(removeMem.getAttribute("data-member-team") || "").trim();
+            if (!mid || !memberTeamId) return;
+            if (!confirm("Odebrat uživatele z tohoto týmu?")) return;
+            try {
+              await apiRequest("/admin/members/" + encodeURIComponent(mid), { method: "DELETE" });
+              await refreshTeamsTableAndKeepMembersOpen(memberTeamId);
+              setTeamStatus("Uživatel byl odebrán z týmu.", "ok");
+            } catch (err) {
+              setTeamStatus(
+                "Odebrání z týmu selhalo: " + (err && err.message ? err.message : String(err)),
+                "err"
+              );
+            }
+            return;
+          }
+
+          var membersBtn =
+            e.target && e.target.closest ? e.target.closest("button[data-team-members]") : null;
+          if (membersBtn) {
+            if (!teamModeEnabled()) return alert("Nejdřív se přihlaste.");
+            var listTeamId = String(membersBtn.getAttribute("data-team-members") || "").trim();
+            if (!listTeamId) return;
+            var expand = document.getElementById("teamMembersExpand-" + listTeamId);
+            var subTbody = document.getElementById("teamMembersSubTbody-" + listTeamId);
+            if (!expand || !subTbody) return;
+            if (!expand.hidden) {
+              expand.hidden = true;
+              return;
+            }
+            try {
+              var mdata = await apiRequest("/admin/teams/" + encodeURIComponent(listTeamId) + "/members");
+              renderTeamMembersSubRows(subTbody, mdata.members || [], listTeamId);
+              expand.hidden = false;
+              setTeamStatus("Členové týmu načteni.", "ok");
+            } catch (err) {
+              setTeamStatus(
+                "Načtení členů týmu selhalo: " + (err && err.message ? err.message : String(err)),
+                "err"
+              );
+            }
+            return;
+          }
+
+          var delBtn = e.target && e.target.closest ? e.target.closest("button[data-team-del]") : null;
+          if (!delBtn) return;
+          var teamId = String(delBtn.getAttribute("data-team-del") || "").trim();
           if (!teamId) return;
           if (!confirm("Vymazat tento tým?")) return;
           try {

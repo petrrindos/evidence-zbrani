@@ -648,6 +648,37 @@ def admin_list_teams(
     return {"teams": rows}
 
 
+@app.get("/api/admin/teams/{team_id}/members")
+def admin_list_team_members(
+    team_id: int,
+    ctx: AuthContext = Depends(require_role(ROLE_VIEWER)),
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    ensure_allowed_owner_email(ctx)
+    org = db.get(Organization, team_id)
+    if not org:
+        raise HTTPException(status_code=404, detail="Tým nebyl nalezen.")
+    rows = db.scalars(
+        select(Membership).where(Membership.organization_id == team_id).order_by(Membership.created_at.desc())
+    ).all()
+    members: list[dict[str, Any]] = []
+    for m in rows:
+        user = db.get(User, m.user_id)
+        if not user:
+            continue
+        members.append(
+            {
+                "membership_id": m.id,
+                "user_id": user.id,
+                "email": user.email,
+                "full_name": user.full_name,
+                "role": m.role,
+                "created_at": m.created_at.isoformat() if m.created_at else None,
+            }
+        )
+    return {"team_id": org.id, "team_name": org.name, "members": members}
+
+
 @app.delete("/api/admin/teams/{team_id}")
 def admin_delete_team(
     team_id: int,
