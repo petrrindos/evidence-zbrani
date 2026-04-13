@@ -3108,6 +3108,7 @@
       <div class="toolbar" style="margin:0;">
         <button type="button" id="btnTeamLogin">Přihlásit</button>
         <button type="button" id="btnTeamListUsers">Vypsat uživatele</button>
+        <button type="button" id="btnTeamManageMemberships">Členství v týmech</button>
         <button type="button" id="btnTeamListTeams">Vypsat týmy</button>
         <button type="button" id="btnTeamCreateMember">Přidat člena</button>
         <button type="button" class="primary" id="btnTeamRegisterOwner">Přidat tým</button>
@@ -3115,17 +3116,30 @@
         <button type="button" id="btnTeamLogout">Odhlásit</button>
       </div>
       <div id="teamUsersPanel" class="team-users-panel" hidden>
-        <table aria-label="Seznam uživatelů">
+        <table aria-label="Seznam uživatelů (e-mail a heslo)">
+          <thead>
+            <tr>
+              <th>E-mail</th>
+              <th>Heslo</th>
+            </tr>
+          </thead>
+          <tbody id="teamUsersTbody"></tbody>
+        </table>
+      </div>
+      <div id="teamMembershipsPanel" class="team-users-panel" hidden>
+        <p class="team-memberships-hint" style="margin:0 0 0.5rem;font-size:0.82rem;color:var(--muted);">
+          Úprava členství v týmech — role, přidání do jiného týmu, odebrání z týmu.
+        </p>
+        <table aria-label="Členství uživatelů v týmech">
           <thead>
             <tr>
               <th>E-mail</th>
               <th>Tým</th>
               <th>Role</th>
-              <th>Heslo</th>
               <th class="actions">Akce</th>
             </tr>
           </thead>
-          <tbody id="teamUsersTbody"></tbody>
+          <tbody id="teamMembershipsTbody"></tbody>
         </table>
       </div>
       <div id="teamTeamsPanel" class="team-users-panel" hidden>
@@ -7291,6 +7305,7 @@
       var btnTeamRegisterOwner = document.getElementById("btnTeamRegisterOwner");
       var btnTeamLogin = document.getElementById("btnTeamLogin");
       var btnTeamListUsers = document.getElementById("btnTeamListUsers");
+      var btnTeamManageMemberships = document.getElementById("btnTeamManageMemberships");
       var btnTeamListTeams = document.getElementById("btnTeamListTeams");
       var btnTeamCreateMember = document.getElementById("btnTeamCreateMember");
       var btnTeamAudit = document.getElementById("btnTeamAudit");
@@ -7302,6 +7317,8 @@
       var teamAuthStatusEl = document.getElementById("teamAuthStatus");
       var teamUsersPanel = document.getElementById("teamUsersPanel");
       var teamUsersTbody = document.getElementById("teamUsersTbody");
+      var teamMembershipsPanel = document.getElementById("teamMembershipsPanel");
+      var teamMembershipsTbody = document.getElementById("teamMembershipsTbody");
       var teamTeamsPanel = document.getElementById("teamTeamsPanel");
       var teamTeamsTbody = document.getElementById("teamTeamsTbody");
       var teamApiWrap = teamApiBaseInput ? teamApiBaseInput.closest("div") : null;
@@ -7333,11 +7350,13 @@
         if (btnTeamRegisterOwner) btnTeamRegisterOwner.hidden = !ownerAllowed;
         if (btnTeamLogin) btnTeamLogin.hidden = loggedIn;
         if (btnTeamListUsers) btnTeamListUsers.hidden = !ownerAllowed;
+        if (btnTeamManageMemberships) btnTeamManageMemberships.hidden = !ownerAllowed;
         if (btnTeamListTeams) btnTeamListTeams.hidden = !ownerAllowed;
         if (btnTeamCreateMember) btnTeamCreateMember.hidden = !ownerAllowed;
         if (btnTeamAudit) btnTeamAudit.hidden = !ownerAllowed;
         if (btnTeamLogout) btnTeamLogout.hidden = !loggedIn;
         if (!ownerAllowed && teamUsersPanel) teamUsersPanel.hidden = true;
+        if (!ownerAllowed && teamMembershipsPanel) teamMembershipsPanel.hidden = true;
         if (!ownerAllowed && teamTeamsPanel) teamTeamsPanel.hidden = true;
       }
 
@@ -7393,16 +7412,56 @@
         return d.innerHTML;
       }
 
-      function renderAdminUsersList(payload) {
+      function renderAdminUsersSimple(payload) {
         if (!teamUsersPanel || !teamUsersTbody) return;
-        var users = payload && Array.isArray(payload.users) ? payload.users : [];
-        var teamsAll = payload && Array.isArray(payload.teams) ? payload.teams : [];
-        if (!users.length) {
-          teamUsersTbody.innerHTML = "<tr><td colspan=\"5\">Žádní uživatelé.</td></tr>";
+        var rows = payload && Array.isArray(payload.users) ? payload.users : [];
+        var byKey = {};
+        rows.forEach(function (u) {
+          var uid = u.user_id != null ? String(u.user_id) : "";
+          var emailKey = String(u.email || "").trim().toLowerCase();
+          var key = uid || emailKey;
+          if (!key) return;
+          if (!byKey[key]) {
+            byKey[key] = {
+              email: u.email || "",
+              password: u.password || ""
+            };
+          } else if (!byKey[key].password && u.password) {
+            byKey[key].password = u.password;
+          }
+        });
+        var list = Object.keys(byKey).map(function (k) {
+          return byKey[k];
+        });
+        list.sort(function (a, b) {
+          return String(a.email || "").localeCompare(String(b.email || ""), "cs");
+        });
+        if (!list.length) {
+          teamUsersTbody.innerHTML = "<tr><td colspan=\"2\">Žádní uživatelé.</td></tr>";
           teamUsersPanel.hidden = false;
           return;
         }
-        teamUsersTbody.innerHTML = users.map(function (u) {
+        teamUsersTbody.innerHTML = list.map(function (row) {
+          return (
+            "<tr>" +
+              "<td>" + escapeHtmlLite(row.email || "") + "</td>" +
+              "<td>" + escapeHtmlLite(row.password || "není uloženo") + "</td>" +
+            "</tr>"
+          );
+        }).join("");
+        teamUsersPanel.hidden = false;
+      }
+
+      function renderAdminMembershipsList(payload) {
+        if (!teamMembershipsPanel || !teamMembershipsTbody) return;
+        var users = payload && Array.isArray(payload.users) ? payload.users : [];
+        var teamsAll = payload && Array.isArray(payload.teams) ? payload.teams : [];
+        if (!users.length) {
+          teamMembershipsTbody.innerHTML = "<tr><td colspan=\"4\">Žádná členství.</td></tr>";
+          teamMembershipsPanel.hidden = false;
+          return;
+        }
+        teamMembershipsTbody.innerHTML = users.map(function (u) {
           var mid = escapeHtmlLite(String(u.membership_id || ""));
           var uid = escapeHtmlLite(String(u.user_id || ""));
           var tid = Number(u.team_id);
@@ -7431,7 +7490,6 @@
               "<td>" + escapeHtmlLite(u.email || "") + "</td>" +
               "<td>" + escapeHtmlLite(u.team_name || "") + "</td>" +
               "<td>" + escapeHtmlLite(u.role || "") + "</td>" +
-              "<td>" + escapeHtmlLite(u.password || "není uloženo") + "</td>" +
               "<td class=\"actions\">" +
                 "<div class=\"team-user-actions\">" +
                   "<span class=\"team-user-role-group\" title=\"Role v tomto týmu\">" +
@@ -7449,7 +7507,17 @@
             "</tr>"
           );
         }).join("");
-        teamUsersPanel.hidden = false;
+        teamMembershipsPanel.hidden = false;
+      }
+
+      async function refreshAdminUserViewsAfterMutation() {
+        var data = await apiRequest("/admin/users-list");
+        if (teamUsersPanel && !teamUsersPanel.hidden) {
+          renderAdminUsersSimple(data);
+        }
+        if (teamMembershipsPanel && !teamMembershipsPanel.hidden) {
+          renderAdminMembershipsList(data);
+        }
       }
 
       function renderAdminTeamsList(payload) {
@@ -8449,11 +8517,29 @@
             return;
           }
           try {
+            if (teamMembershipsPanel) teamMembershipsPanel.hidden = true;
             var data = await apiRequest("/admin/users-list");
-            renderAdminUsersList(data);
+            renderAdminUsersSimple(data);
             setTeamStatus("Seznam uživatelů načten.", "ok");
           } catch (err) {
             setTeamStatus("Načtení uživatelů selhalo: " + (err && err.message ? err.message : String(err)), "err");
+          }
+        });
+      }
+      if (btnTeamManageMemberships) {
+        btnTeamManageMemberships.addEventListener("click", async function () {
+          if (!teamModeEnabled()) return alert("Nejdřív se přihlaste.");
+          if (teamMembershipsPanel && !teamMembershipsPanel.hidden) {
+            teamMembershipsPanel.hidden = true;
+            return;
+          }
+          try {
+            if (teamUsersPanel) teamUsersPanel.hidden = true;
+            var data = await apiRequest("/admin/users-list");
+            renderAdminMembershipsList(data);
+            setTeamStatus("Členství v týmech načteno.", "ok");
+          } catch (err) {
+            setTeamStatus("Načtení členství selhalo: " + (err && err.message ? err.message : String(err)), "err");
           }
         });
       }
@@ -8473,8 +8559,8 @@
           }
         });
       }
-      if (teamUsersTbody) {
-        teamUsersTbody.addEventListener("click", async function (e) {
+      if (teamMembershipsTbody) {
+        teamMembershipsTbody.addEventListener("click", async function (e) {
           var roleBtn = e.target && e.target.closest ? e.target.closest("button[data-team-user-role]") : null;
           if (roleBtn) {
             var membershipId = String(roleBtn.getAttribute("data-membership-id") || "").trim();
@@ -8485,8 +8571,7 @@
                 method: "PATCH",
                 body: JSON.stringify({ role: newRole })
               });
-              var data = await apiRequest("/admin/users-list");
-              renderAdminUsersList(data);
+              await refreshAdminUserViewsAfterMutation();
               setTeamStatus("Role byla změněna na „" + newRole + "“.", "ok");
             } catch (err) {
               setTeamStatus("Změna role selhala: " + (err && err.message ? err.message : String(err)), "err");
@@ -8514,8 +8599,7 @@
                   role: addRole
                 })
               });
-              var data = await apiRequest("/admin/users-list");
-              renderAdminUsersList(data);
+              await refreshAdminUserViewsAfterMutation();
               setTeamStatus("Uživatel byl přidán do vybraného týmu.", "ok");
             } catch (err) {
               setTeamStatus("Přidání do týmu selhalo: " + (err && err.message ? err.message : String(err)), "err");
@@ -8529,8 +8613,7 @@
           if (!confirm("Odebrat tohoto uživatele z týmu?")) return;
           try {
             await apiRequest("/admin/members/" + encodeURIComponent(membershipId), { method: "DELETE" });
-            var data = await apiRequest("/admin/users-list");
-            renderAdminUsersList(data);
+            await refreshAdminUserViewsAfterMutation();
             setTeamStatus("Uživatel byl odebrán.", "ok");
           } catch (err) {
             setTeamStatus("Odebrání uživatele selhalo: " + (err && err.message ? err.message : String(err)), "err");
@@ -8581,6 +8664,8 @@
           saveRemoteTimer = 0;
           if (teamUsersPanel) teamUsersPanel.hidden = true;
           if (teamUsersTbody) teamUsersTbody.innerHTML = "";
+          if (teamMembershipsPanel) teamMembershipsPanel.hidden = true;
+          if (teamMembershipsTbody) teamMembershipsTbody.innerHTML = "";
           if (teamTeamsPanel) teamTeamsPanel.hidden = true;
           if (teamTeamsTbody) teamTeamsTbody.innerHTML = "";
         });
