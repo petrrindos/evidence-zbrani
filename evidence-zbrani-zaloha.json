@@ -1,0 +1,2385 @@
+{
+  "version": 12,
+  "holder": {
+    "jmeno": "Petr",
+    "prijmeni": "Rindoš",
+    "datumNarozeni": "1965-09-11",
+    "druhZO": "Rozšířené",
+    "datumZapisu": "2021-12-10",
+    "platnostDo": "2026-12-10"
+  },
+  "vyjimky": [
+    {
+      "id": "9c9e7618-98bd-4840-bda8-f8f98afc6acd",
+      "nazevVyjimky": "Výjimka na zbraň kategorie R2 a střelivo S2",
+      "cisloJednaci": "KRPA-340378-1/ČJ-2021-0011IY",
+      "zbranHcZStrelivo": "Střelivo S2",
+      "datumVydani": "2021-12-23"
+    },
+    {
+      "id": "f831455e-1136-4cc1-a4f0-a1af14ed46ad",
+      "nazevVyjimky": "Výjimka na nadlimitní zásobník",
+      "cisloJednaci": "KRPA-340244-1/ČJ-2021-0011IY",
+      "zbranHcZStrelivo": "Nadlimitní zásobník",
+      "datumVydani": "2021-12-23"
+    }
+  ],
+  "aprobace": [
+    {
+      "id": "acbb2f89-7509-4129-977d-128264a65294",
+      "druhAprobace": "Aprobace MV-102 Základní",
+      "datumZapisu": "2022-09-15"
+    }
+  ],
+  "registrovaneZbrane": [
+    {
+      "id": "11e8f12d-73e0-46d2-a4e7-0bb063e9bda2",
+      "poradoveCislo": "1",
+      "kategorieZbrane": "R3",
+      "druhZbrane": "PISTOLE SAMONABÍJECÍ",
+      "vyrobce": "BERETTA",
+      "vzor": "92",
+      "raze": "9 mm Luger",
+      "vyrobniCisla": "BST14100, BST14100, BST14100",
+      "datumRegistrace": "2021-12-27"
+    },
+    {
+      "id": "0cd5eab6-79d6-4b47-b7ef-645e24d201af",
+      "poradoveCislo": "2",
+      "kategorieZbrane": "R3",
+      "druhZbrane": "PISTOLE SAMONABÍJECÍ",
+      "vyrobce": "WALTHER",
+      "vzor": "Q4",
+      "raze": "9 mm Luger",
+      "vyrobniCisla": "FDC8568, FDC8568, FDC8568",
+      "datumRegistrace": "2022-02-09"
+    },
+    {
+      "id": "647cbd48-96df-48fe-8ca6-8f84fff51b8a",
+      "poradoveCislo": "3",
+      "kategorieZbrane": "R3",
+      "druhZbrane": "PUŠKA SAMONABÍJECÍ",
+      "vyrobce": "DANIEL DEFENSE",
+      "vzor": "DDM4 V7",
+      "raze": "223 Rem.",
+      "vyrobniCisla": "DDM4231294",
+      "datumRegistrace": "2022-05-09"
+    },
+    {
+      "id": "05af5425-c5a5-4e3c-a6c2-13779a20522b",
+      "poradoveCislo": "4",
+      "kategorieZbrane": "R3",
+      "druhZbrane": "PISTOLE SAMONABÍJECÍ",
+      "vyrobce": "ČZ UHERSKÝ BROD",
+      "vzor": "CZ SHADOW 2",
+      "raze": "9 mm Luger",
+      "vyrobniCisla": "G212524, G212524, G212524",
+      "datumRegistrace": "2022-11-07"
+    },
+    {
+      "id": "1022b35c-1027-4f56-901e-31a83be21d88",
+      "poradoveCislo": "5",
+      "kategorieZbrane": "R3",
+      "druhZbrane": "PISTOLE SAMONABÍJECÍ",
+      "vyrobce": "SPRINGFIELD ARMORY",
+      "vzor": "HELLCAT",
+      "raze": "9 mm Luger",
+      "vyrobniCisla": "BA746481, BA746481, BA746481",
+      "datumRegistrace": "2023-02-06"
+    },
+    {
+      "id": "71ee2a3b-459f-4f36-b763-0dce1a68c0d1",
+      "poradoveCislo": "6",
+      "kategorieZbrane": "R3",
+      "druhZbrane": "PISTOLE SAMONABÍJECÍ",
+      "vyrobce": "ČZ UHERSKÝ BROD",
+      "vzor": "CZ SCORPION EVO 3 S1",
+      "raze": "9 mm Luger",
+      "vyrobniCisla": "H025365, H025365, H025365",
+      "datumRegistrace": "2023-06-14"
+    },
+    {
+      "id": "cb727f40-a6c3-4258-ae9c-ec21b8311816",
+      "poradoveCislo": "7",
+      "kategorieZbrane": "R4",
+      "druhZbrane": "TLUMIČ HLUKU",
+      "vyrobce": "ASE UTRA",
+      "vzor": "DUAL",
+      "raze": "223 Rem.",
+      "vyrobniCisla": "128010",
+      "datumRegistrace": "2025-05-14"
+    },
+    {
+      "id": "5083e4ec-0316-4bc8-8680-7cc92ce75013",
+      "poradoveCislo": "8",
+      "kategorieZbrane": "R3",
+      "druhZbrane": "PISTOLE SAMONABÍJECÍ",
+      "vyrobce": "GLOCK",
+      "vzor": "45 GEN6",
+      "raze": "9 mm Luger",
+      "vyrobniCisla": "CGWN775, CGWN775, CGWN775",
+      "datumRegistrace": "2026-01-17"
+    }
+  ],
+  "streleby": [
+    {
+      "id": "a3fa16a1-bfc0-4c6f-92e2-77817fbfb85c",
+      "datum": "2026-02-21",
+      "strelnice": "střelnice Polárka FM",
+      "zbran": "Glock 45 gen6",
+      "naboje": "9 mm Luger",
+      "pocetNaboju": "150"
+    },
+    {
+      "id": "914211e8-7215-40f5-9087-1c4507ce2de3",
+      "datum": "2026-01-03",
+      "strelnice": "střelnice Polárka FM",
+      "zbran": "Glock 45 gen6",
+      "naboje": "9 mm Luger",
+      "pocetNaboju": "150"
+    },
+    {
+      "id": "60014a27-c53e-4a02-a3a8-fb27e763fd27",
+      "datum": "2025-08-24",
+      "strelnice": "střelnice Polárka FM",
+      "zbran": "CZ Shadow 2 (konfigurátor) 9 mm Luger",
+      "naboje": "9 mm Luger",
+      "pocetNaboju": "150"
+    },
+    {
+      "id": "6848a292-59aa-47c0-ad77-41674e2b749b",
+      "datum": "2025-06-21",
+      "strelnice": "střelnice Polárka FM",
+      "zbran": "CZ Shadow 2 (konfigurátor) 9 mm Luger",
+      "naboje": "9 mm Luger",
+      "pocetNaboju": "150"
+    },
+    {
+      "id": "2845c0cd-23f8-4dad-ac78-20cfeb7dfa00",
+      "datum": "2025-01-06",
+      "strelnice": "střelnice Polárka FM",
+      "zbran": "Walther Q4 SF OR 9 mm Luger",
+      "naboje": "9 mm Luger",
+      "pocetNaboju": "125"
+    },
+    {
+      "id": "550edd88-160d-4af6-9453-65b3d196ed0a",
+      "datum": "2024-12-22",
+      "strelnice": "střelnice Polárka FM",
+      "zbran": "CZ Shadow 2 (konfigurátor) 9 mm Luger",
+      "naboje": "9 mm Luger",
+      "pocetNaboju": "125"
+    },
+    {
+      "id": "a0c6522d-68ca-44e0-a177-66963aac9ace",
+      "datum": "2024-12-22",
+      "strelnice": "střelnice Polárka FM",
+      "zbran": "Springfield Armatory Hellcat 9 mm Luger",
+      "naboje": "9 mm Luger",
+      "pocetNaboju": "50"
+    },
+    {
+      "id": "509f07c8-393e-4b60-af4a-e905c70e8f70",
+      "datum": "2024-10-19",
+      "strelnice": "střelnice Polárka FM",
+      "zbran": "Walther Q4 SF OR 9 mm Luger",
+      "naboje": "9 mm Luger",
+      "pocetNaboju": "150"
+    },
+    {
+      "id": "193d31b6-5552-4068-800f-35ddd2a57c0c",
+      "datum": "2024-09-08",
+      "strelnice": "střelnice Lazce Olomouc",
+      "zbran": "CZ Shadow 2 (konfigurátor) 9 mm Luger",
+      "naboje": "9 mm Luger",
+      "pocetNaboju": "280"
+    },
+    {
+      "id": "ef53c607-a920-4b69-a36a-8031fc698066",
+      "datum": "2024-09-08",
+      "strelnice": "střelnice Lazce Olomouc",
+      "zbran": "Springfield Armatory Hellcat 9 mm Luger",
+      "naboje": "9 mm Luger",
+      "pocetNaboju": "20"
+    },
+    {
+      "id": "54647782-b3c9-4e57-9480-6340ba98c403",
+      "datum": "2024-08-10",
+      "strelnice": "střelnice Polárka FM",
+      "zbran": "Springfield Armatory Hellcat 9 mm Luger",
+      "naboje": "9 mm Luger",
+      "pocetNaboju": "150"
+    },
+    {
+      "id": "7ad2c915-23b8-4551-9b6b-99b80af1ce22",
+      "datum": "2024-06-20",
+      "strelnice": "střelnice Lazce Olomouc",
+      "zbran": "CZ Shadow 2 (konfigurátor) 9 mm Luger",
+      "naboje": "9 mm Luger",
+      "pocetNaboju": "50"
+    },
+    {
+      "id": "bcd843e5-e2d3-4a40-af83-3695c9e5bba4",
+      "datum": "2024-06-20",
+      "strelnice": "střelnice Lazce Olomouc",
+      "zbran": "Daniel Defense DDM4V7 MilSpec + .223 REM",
+      "naboje": ".223 REM",
+      "pocetNaboju": "140"
+    },
+    {
+      "id": "466f66a8-8336-4fc4-b5cf-d54728e9e5e3",
+      "datum": "2024-06-02",
+      "strelnice": "střelnice Polárka FM",
+      "zbran": "CZ Shadow 2 (konfigurátor) 9 mm Luger",
+      "naboje": "9 mm Luger",
+      "pocetNaboju": "150"
+    },
+    {
+      "id": "bb901494-1e7b-435b-94b6-34af46c11fb1",
+      "datum": "2024-01-21",
+      "strelnice": "střelnice Polárka FM",
+      "zbran": "CZ Shadow 2 (konfigurátor) 9 mm Luger",
+      "naboje": "9 mm Luger",
+      "pocetNaboju": "45"
+    },
+    {
+      "id": "c5e4f461-9cd2-469e-91c8-5eb3023a9bb3",
+      "datum": "2024-01-21",
+      "strelnice": "střelnice Polárka FM",
+      "zbran": "Walther Q4 SF OR 9 mm Luger",
+      "naboje": "9 mm Luger",
+      "pocetNaboju": "40"
+    },
+    {
+      "id": "3010a7ab-2be7-4d0f-b86d-bba8bf1e9200",
+      "datum": "2024-01-21",
+      "strelnice": "střelnice Polárka FM",
+      "zbran": "Springfield Armatory Hellcat 9 mm Luger",
+      "naboje": "9 mm Luger",
+      "pocetNaboju": "15"
+    },
+    {
+      "id": "4064bd3d-b338-4b71-a71a-e3bdae786d50",
+      "datum": "2023-10-15",
+      "strelnice": "střelnice Polárka FM",
+      "zbran": "CZ Shadow 2 (konfigurátor) 9 mm Luger",
+      "naboje": "9 mm Luger",
+      "pocetNaboju": "150"
+    },
+    {
+      "id": "fef1f824-1887-4dd5-a015-6295105cec93",
+      "datum": "2023-10-08",
+      "strelnice": "střelnice Lazce Olomouc",
+      "zbran": "CZ Scorpion EVO 3 9 mm luger",
+      "naboje": "9 mm Luger",
+      "pocetNaboju": "200"
+    },
+    {
+      "id": "0c31f7d4-634e-499a-b291-cf5722573a10",
+      "datum": "2023-10-08",
+      "strelnice": "střelnice Lazce Olomouc",
+      "zbran": "Beretta 92x Performance 9 mm Luger",
+      "naboje": "9 mm Luger",
+      "pocetNaboju": "150"
+    },
+    {
+      "id": "34ac5d2d-493e-4edb-afca-b21d43e4205f",
+      "datum": "2023-10-08",
+      "strelnice": "střelnice Lazce Olomouc",
+      "zbran": "Walther Q4 SF OR 9 mm Luger",
+      "naboje": "9 mm Luger",
+      "pocetNaboju": "150"
+    },
+    {
+      "id": "ed9064f7-7f6e-4ec0-8e31-c20b29a7a805",
+      "datum": "2023-10-01",
+      "strelnice": "střelnice Polárka FM",
+      "zbran": "Walther Q4 SF OR 9 mm Luger",
+      "naboje": "9 mm Luger",
+      "pocetNaboju": "50"
+    },
+    {
+      "id": "dddef5e8-d334-47b1-8c5c-b20d47d0eca0",
+      "datum": "2023-10-01",
+      "strelnice": "střelnice Polárka FM",
+      "zbran": "CZ Scorpion EVO 3 9 mm luger",
+      "naboje": "9 mm Luger",
+      "pocetNaboju": "50"
+    },
+    {
+      "id": "f4312d01-bd9a-4375-9053-3ab3be744e3d",
+      "datum": "2023-09-09",
+      "strelnice": "střelnice Polárka FM",
+      "zbran": "CZ Scorpion EVO 3 9 mm luger",
+      "naboje": "9 mm Luger",
+      "pocetNaboju": "80"
+    },
+    {
+      "id": "66961314-8031-4bbf-a605-3f0f6955fc3c",
+      "datum": "2023-09-09",
+      "strelnice": "střelnice Polárka FM",
+      "zbran": "Springfield Armatory Hellcat 9 mm Luger",
+      "naboje": "9 mm Luger",
+      "pocetNaboju": "20"
+    },
+    {
+      "id": "4bab8122-c52a-4bcc-a9be-c5a1b893acaf",
+      "datum": "2023-08-19",
+      "strelnice": "střelnice Lazce Olomouc",
+      "zbran": "Daniel Defense DDM4V7 MilSpec + .223 REM",
+      "naboje": ".223 REM",
+      "pocetNaboju": "260"
+    },
+    {
+      "id": "c3ef6f8c-de78-4590-9e46-f0b0f5a2f8be",
+      "datum": "2023-08-19",
+      "strelnice": "střelnice Lazce Olomouc",
+      "zbran": "CZ Scorpion EVO 3 9 mm luger",
+      "naboje": "9 mm Luger",
+      "pocetNaboju": "300"
+    },
+    {
+      "id": "914f7ddc-0d10-4b47-ba62-ff08643534f3",
+      "datum": "2023-08-19",
+      "strelnice": "střelnice Lazce Olomouc",
+      "zbran": "CZ Shadow 2 (konfigurátor) 9 mm Luger",
+      "naboje": "9 mm Luger",
+      "pocetNaboju": "200"
+    },
+    {
+      "id": "71e91e27-7593-411a-bedd-6e712b9c160c",
+      "datum": "2023-07-15",
+      "strelnice": "střelnice Lazce Olomouc",
+      "zbran": "CZ Scorpion EVO 3 9 mm luger",
+      "naboje": "9 mm Luger",
+      "pocetNaboju": "300"
+    },
+    {
+      "id": "cc5df1bf-8612-4572-88a2-efa64c46227e",
+      "datum": "2023-07-15",
+      "strelnice": "střelnice Lazce Olomouc",
+      "zbran": "Walther Q4 SF OR 9 mm Luger",
+      "naboje": "9 mm Luger",
+      "pocetNaboju": "50"
+    },
+    {
+      "id": "026e47a7-8b5c-4718-be66-af0f99c447ff",
+      "datum": "2023-07-15",
+      "strelnice": "střelnice Lazce Olomouc",
+      "zbran": "Daniel Defense DDM4V7 MilSpec + .223 REM",
+      "naboje": ".223 REM",
+      "pocetNaboju": "256"
+    },
+    {
+      "id": "5ff87cce-5d5f-43ee-8b9a-7d4f1cd6e361",
+      "datum": "2023-06-24",
+      "strelnice": "střelnice Lazce Olomouc",
+      "zbran": "CZ Scorpion EVO 3 9 mm luger",
+      "naboje": "9 mm Luger",
+      "pocetNaboju": "200"
+    },
+    {
+      "id": "05f64eec-ae9f-46e8-9385-4aaac9eb0743",
+      "datum": "2023-06-24",
+      "strelnice": "střelnice Lazce Olomouc",
+      "zbran": "CZ Shadow 2 (konfigurátor) 9 mm Luger",
+      "naboje": "9 mm Luger",
+      "pocetNaboju": "100"
+    },
+    {
+      "id": "04faaa15-8ca9-4540-905e-fbe46a35eab7",
+      "datum": "2023-06-24",
+      "strelnice": "střelnice Lazce Olomouc",
+      "zbran": "Beretta 92x Performance 9 mm Luger",
+      "naboje": "9 mm Luger",
+      "pocetNaboju": "100"
+    },
+    {
+      "id": "978b81d7-0a65-4073-9620-6237c802f7e2",
+      "datum": "2023-06-10",
+      "strelnice": "střelnice Lazce Olomouc",
+      "zbran": "Walther Q4 SF OR 9 mm Luger",
+      "naboje": "9 mm Luger",
+      "pocetNaboju": "150"
+    },
+    {
+      "id": "60dba573-c34f-44de-a048-e3e3ff4af54e",
+      "datum": "2023-06-10",
+      "strelnice": "střelnice Lazce Olomouc",
+      "zbran": "CZ Scorpion EVO 3 9 mm luger",
+      "naboje": "9 mm Luger",
+      "pocetNaboju": "250"
+    },
+    {
+      "id": "d660f970-0223-4958-8761-4c6a7841879c",
+      "datum": "2023-06-09",
+      "strelnice": "střelnice Polárka FM",
+      "zbran": "Walther Q4 SF OR 9 mm Luger",
+      "naboje": "9 mm Luger",
+      "pocetNaboju": "50"
+    },
+    {
+      "id": "c7b65ad4-0698-43db-9412-3b7b5ebb42d2",
+      "datum": "2023-06-09",
+      "strelnice": "střelnice Polárka FM",
+      "zbran": "CZ Scorpion EVO 3 9 mm luger",
+      "naboje": "9 mm Luger",
+      "pocetNaboju": "150"
+    },
+    {
+      "id": "6383861b-8a5a-45cf-a477-dbe920df4d12",
+      "datum": "2023-04-29",
+      "strelnice": "střelnice Lazce Olomouc",
+      "zbran": "CZ Shadow 2 (konfigurátor) 9 mm Luger",
+      "naboje": "9 mm Luger",
+      "pocetNaboju": "430"
+    },
+    {
+      "id": "0a703eb7-59ce-44e5-9a58-fff7d3ff294e",
+      "datum": "2023-04-16",
+      "strelnice": "střelnice Polárka FM",
+      "zbran": "Walther Q4 SF OR 9 mm Luger",
+      "naboje": "9 mm Luger",
+      "pocetNaboju": "170"
+    },
+    {
+      "id": "c943d263-6044-4ecd-a0e4-e54c1fbb50df",
+      "datum": "2023-04-16",
+      "strelnice": "střelnice Polárka FM",
+      "zbran": "CZ Shadow 2 (konfigurátor) 9 mm Luger",
+      "naboje": "9 mm Luger",
+      "pocetNaboju": "100"
+    },
+    {
+      "id": "531a5c96-4c0c-4c7f-a022-630c51ea227c",
+      "datum": "2023-03-26",
+      "strelnice": "střelnice Polárka FM",
+      "zbran": "Springfield Armatory Hellcat 9 mm Luger",
+      "naboje": "9 mm Luger",
+      "pocetNaboju": "30"
+    },
+    {
+      "id": "0430f2cc-0f20-470a-8d34-c84ecc15b5f2",
+      "datum": "2023-03-26",
+      "strelnice": "střelnice Polárka FM",
+      "zbran": "Walther Q4 SF OR 9 mm Luger",
+      "naboje": "9 mm Luger",
+      "pocetNaboju": "70"
+    },
+    {
+      "id": "2364c84a-ff85-4a7f-aff5-d0163cc98271",
+      "datum": "2023-02-06",
+      "strelnice": "střelnice Polárka FM",
+      "zbran": "Springfield Armatory Hellcat 9 mm Luger",
+      "naboje": "9 mm Luger",
+      "pocetNaboju": "100"
+    },
+    {
+      "id": "9ffe64d0-d8c5-4fe6-b483-9c1bb6f01a13",
+      "datum": "2023-01-29",
+      "strelnice": "střelnice Polárka FM",
+      "zbran": "CZ Shadow 2 (konfigurátor) 9 mm Luger",
+      "naboje": "9 mm Luger",
+      "pocetNaboju": "125"
+    },
+    {
+      "id": "d5aa8bb3-210f-4fe0-b39c-79a8a461423a",
+      "datum": "2023-01-15",
+      "strelnice": "střelnice Polárka FM",
+      "zbran": "CZ Shadow 2 (konfigurátor) 9 mm Luger",
+      "naboje": "9 mm Luger",
+      "pocetNaboju": "125"
+    },
+    {
+      "id": "7c875b49-2a23-4a02-bcb3-507cfb8011d5",
+      "datum": "2022-12-27",
+      "strelnice": "střelnice Polárka FM",
+      "zbran": "Walther Q4 SF OR 9 mm Luger",
+      "naboje": "9 mm Luger",
+      "pocetNaboju": "55"
+    },
+    {
+      "id": "4293dc7e-8507-4bdf-9436-24f5eaf04663",
+      "datum": "2022-12-27",
+      "strelnice": "střelnice Polárka FM",
+      "zbran": "Beretta 92x Performance 9 mm Luger",
+      "naboje": "9 mm Luger",
+      "pocetNaboju": "345"
+    },
+    {
+      "id": "91e7e6a4-7b78-44a5-8ef0-312622c759c8",
+      "datum": "2022-12-10",
+      "strelnice": "střelnice Polárka FM",
+      "zbran": "CZ Shadow 2 (konfigurátor) 9 mm Luger",
+      "naboje": "9 mm Luger",
+      "pocetNaboju": "150"
+    },
+    {
+      "id": "3d11709f-9f90-4bcd-b585-439db77afb52",
+      "datum": "2022-11-19",
+      "strelnice": "střelnice Polárka FM",
+      "zbran": "CZ Shadow 2 (konfigurátor) 9 mm Luger",
+      "naboje": "9 mm Luger",
+      "pocetNaboju": "150"
+    },
+    {
+      "id": "21e26b23-da55-4022-b1cf-944f45392e79",
+      "datum": "2022-11-19",
+      "strelnice": "střelnice Polárka FM",
+      "zbran": "Walther Q4 SF OR 9 mm Luger",
+      "naboje": "9 mm Luger",
+      "pocetNaboju": "70"
+    },
+    {
+      "id": "95b8d91e-c99d-4b29-88af-b314db8436ef",
+      "datum": "2022-11-12",
+      "strelnice": "střelnice Corrado Ostrava",
+      "zbran": "CZ Shadow 2 (konfigurátor) 9 mm Luger",
+      "naboje": "9 mm Luger",
+      "pocetNaboju": "150"
+    },
+    {
+      "id": "40314440-5c40-46b0-8c0d-d3244c14d95d",
+      "datum": "2022-11-12",
+      "strelnice": "střelnice Lazce Olomouc",
+      "zbran": "Beretta 92x Performance 9 mm Luger",
+      "naboje": "9 mm Luger",
+      "pocetNaboju": "150"
+    },
+    {
+      "id": "a7b7fb50-3c43-45ff-8224-b673e3ff9a24",
+      "datum": "2022-11-12",
+      "strelnice": "střelnice Lazce Olomouc",
+      "zbran": "Beretta 92x Performance 9 mm Luger",
+      "naboje": "9 mm Luger",
+      "pocetNaboju": "160"
+    },
+    {
+      "id": "d4698ca4-c6db-4018-940e-f94eca19221f",
+      "datum": "2022-11-08",
+      "strelnice": "střelnice Corrado Ostrava",
+      "zbran": "CZ Shadow 2 (konfigurátor) 9 mm Luger",
+      "naboje": "9 mm Luger",
+      "pocetNaboju": "150"
+    },
+    {
+      "id": "1ee520ee-b181-486c-b43a-78f2be58ac7b",
+      "datum": "2022-10-01",
+      "strelnice": "střelnice Lazce Olomouc",
+      "zbran": "Walther Q4 SF OR 9 mm Luger",
+      "naboje": "9 mm Luger",
+      "pocetNaboju": "120"
+    },
+    {
+      "id": "0dfcb462-ae8c-4275-82f1-ce447bd9b3ff",
+      "datum": "2022-10-01",
+      "strelnice": "střelnice Lazce Olomouc",
+      "zbran": "Beretta 92x Performance 9 mm Luger",
+      "naboje": "9 mm Luger",
+      "pocetNaboju": "168"
+    },
+    {
+      "id": "3db25994-7378-4a92-89af-08ee30409838",
+      "datum": "2022-10-01",
+      "strelnice": "střelnice Lazce Olomouc",
+      "zbran": "Daniel Defense DDM4V7 MilSpec + .223 REM",
+      "naboje": ".223 REM",
+      "pocetNaboju": "144"
+    },
+    {
+      "id": "e9504fc8-c187-4631-9c24-f2561ba016c4",
+      "datum": "2022-09-28",
+      "strelnice": "střelnice Třinec",
+      "zbran": "Daniel Defense DDM4V7 MilSpec + .223 REM",
+      "naboje": ".223 REM",
+      "pocetNaboju": "70"
+    },
+    {
+      "id": "cf60e1f3-8e19-40aa-9c71-0f07bc129608",
+      "datum": "2022-08-27",
+      "strelnice": "střelnice Uherský Brod",
+      "zbran": "Walther Q4 SF OR 9 mm Luger",
+      "naboje": "9 mm Luger",
+      "pocetNaboju": "12"
+    },
+    {
+      "id": "4c17e59a-6657-4112-a1c5-e7bf16ea7b9b",
+      "datum": "2022-08-24",
+      "strelnice": "střelnice Polárka FM",
+      "zbran": "Walther Q4 SF OR 9 mm Luger",
+      "naboje": "9 mm Luger",
+      "pocetNaboju": "130"
+    },
+    {
+      "id": "614eb87b-f73e-4dd7-9342-faaccfa22d1d",
+      "datum": "2022-08-14",
+      "strelnice": "střelnice Břidličná",
+      "zbran": "Walther Q4 SF OR 9 mm Luger",
+      "naboje": "9 mm Luger",
+      "pocetNaboju": "140"
+    },
+    {
+      "id": "d6ad99b8-130a-4ef2-a53d-12799aeb6d17",
+      "datum": "2022-08-06",
+      "strelnice": "střelnice Corrado Ostrava",
+      "zbran": "Walther Q4 SF OR 9 mm Luger",
+      "naboje": "9 mm Luger",
+      "pocetNaboju": "150"
+    },
+    {
+      "id": "238ffa25-0b35-44ee-9d56-d5ff07b2eb4b",
+      "datum": "2022-08-06",
+      "strelnice": "střelnice Lazce Olomouc",
+      "zbran": "Beretta 92x Performance 9 mm Luger",
+      "naboje": "9 mm Luger",
+      "pocetNaboju": "170"
+    },
+    {
+      "id": "7b27af52-4a1b-4253-92ba-fbf84e537ebd",
+      "datum": "2022-07-24",
+      "strelnice": "střelnice Polárka FM",
+      "zbran": "Walther Q4 SF OR 9 mm Luger",
+      "naboje": "9 mm Luger",
+      "pocetNaboju": "100"
+    },
+    {
+      "id": "c56e03c9-17a5-4ee2-a003-07ba492e2988",
+      "datum": "2022-07-24",
+      "strelnice": "střelnice Polárka FM",
+      "zbran": "Beretta 92x Performance 9 mm Luger",
+      "naboje": "9 mm Luger",
+      "pocetNaboju": "50"
+    },
+    {
+      "id": "308ea50a-60a3-4c79-bb9b-e4da1c003879",
+      "datum": "2022-07-17",
+      "strelnice": "střelnice Polárka FM",
+      "zbran": "Walther Q4 SF OR 9 mm Luger",
+      "naboje": "9 mm Luger",
+      "pocetNaboju": "200"
+    },
+    {
+      "id": "fa1f1348-968d-4c2f-870b-18b5ca7fb0ae",
+      "datum": "2022-07-10",
+      "strelnice": "střelnice Krnov",
+      "zbran": "Walther Q4 SF OR 9 mm Luger",
+      "naboje": "9 mm Luger",
+      "pocetNaboju": "250"
+    },
+    {
+      "id": "d1df16ea-cd88-4829-9349-36fd27909675",
+      "datum": "2022-07-05",
+      "strelnice": "střelnice Polárka FM",
+      "zbran": "Walther Q4 SF OR 9 mm Luger",
+      "naboje": "9 mm Luger",
+      "pocetNaboju": "125"
+    },
+    {
+      "id": "919cbb71-a92c-4f45-8756-bc683f8b682b",
+      "datum": "2022-06-26",
+      "strelnice": "střelnice Polárka FM",
+      "zbran": "Walther Q4 SF OR 9 mm Luger",
+      "naboje": "9 mm Luger",
+      "pocetNaboju": "160"
+    },
+    {
+      "id": "3805d508-b0e8-4729-b913-cc4176a1af76",
+      "datum": "2022-06-26",
+      "strelnice": "střelnice Polárka FM",
+      "zbran": "Beretta 92x Performance 9 mm Luger",
+      "naboje": "9 mm Luger",
+      "pocetNaboju": "50"
+    },
+    {
+      "id": "776f33bb-6b3e-4dba-bc18-b7f42ae09c24",
+      "datum": "2022-06-10",
+      "strelnice": "střelnice Lazce Olomouc",
+      "zbran": "Daniel Defense DDM4V7 MilSpec + .223 REM",
+      "naboje": ".223 REM",
+      "pocetNaboju": "130"
+    },
+    {
+      "id": "30c5e9f4-7a32-448c-b305-a1a38744fd2a",
+      "datum": "2022-06-04",
+      "strelnice": "střelnice Polárka FM",
+      "zbran": "Walther Q4 SF OR 9 mm Luger",
+      "naboje": "9 mm Luger",
+      "pocetNaboju": "115"
+    },
+    {
+      "id": "2e4e73fd-542a-496a-a204-0a8ed7bd86a8",
+      "datum": "2022-05-14",
+      "strelnice": "střelnice Lazce Olomouc",
+      "zbran": "Daniel Defense DDM4V7 MilSpec + .223 REM",
+      "naboje": ".223 REM",
+      "pocetNaboju": "100"
+    },
+    {
+      "id": "7430eda1-f6f8-41ae-8f7d-5461ec818da4",
+      "datum": "2022-04-15",
+      "strelnice": "střelnice Polárka FM",
+      "zbran": "Walther Q4 SF OR 9 mm Luger",
+      "naboje": "9 mm Luger",
+      "pocetNaboju": "80"
+    },
+    {
+      "id": "6b4c0173-813e-4838-bc4c-586a7401a383",
+      "datum": "2022-04-15",
+      "strelnice": "střelnice Polárka FM",
+      "zbran": "Beretta 92x Performance 9 mm Luger",
+      "naboje": "9 mm Luger",
+      "pocetNaboju": "20"
+    },
+    {
+      "id": "0b2a4863-bd23-4063-b25f-27567ba96499",
+      "datum": "2022-04-08",
+      "strelnice": "střelnice Corrado Ostrava",
+      "zbran": "Walther Q4 SF OR 9 mm Luger",
+      "naboje": "9 mm Luger",
+      "pocetNaboju": "143"
+    },
+    {
+      "id": "57d756b0-daca-4b73-9a8d-3572de8674fd",
+      "datum": "2022-03-19",
+      "strelnice": "střelnice Corrado Ostrava",
+      "zbran": "Walther Q4 SF OR 9 mm Luger",
+      "naboje": "9 mm Luger",
+      "pocetNaboju": "110"
+    },
+    {
+      "id": "1ac0ca31-3147-412b-adf6-a6396cdee9be",
+      "datum": "2022-03-19",
+      "strelnice": "střelnice Corrado Ostrava",
+      "zbran": "Beretta 92x Performance 9 mm Luger",
+      "naboje": "9 mm Luger",
+      "pocetNaboju": "77"
+    },
+    {
+      "id": "dbac3199-2b5a-44af-a34d-04fe554fc913",
+      "datum": "2022-03-13",
+      "strelnice": "střelnice Corrado Ostrava",
+      "zbran": "Walther Q4 SF OR 9 mm Luger",
+      "naboje": "9 mm Luger",
+      "pocetNaboju": "200"
+    },
+    {
+      "id": "cd1d687d-0156-45f7-820c-7e45faad8a0f",
+      "datum": "2022-02-18",
+      "strelnice": "střelnice Corrado Ostrava",
+      "zbran": "Walther Q4 SF OR 9 mm Luger",
+      "naboje": "9 mm Luger",
+      "pocetNaboju": "200"
+    },
+    {
+      "id": "c7b879bf-85ee-4cb0-a727-88dedc4d0e68",
+      "datum": "2022-02-10",
+      "strelnice": "střelnice Corrado Ostrava",
+      "zbran": "Walther Q4 SF OR 9 mm Luger",
+      "naboje": "9 mm Luger",
+      "pocetNaboju": "150"
+    },
+    {
+      "id": "136a0fd2-1baa-400d-b9e2-8613be3ffbcf",
+      "datum": "2022-01-30",
+      "strelnice": "střelnice Corrado Ostrava",
+      "zbran": "Beretta 92x Performance 9 mm Luger",
+      "naboje": "9 mm Luger",
+      "pocetNaboju": "300"
+    },
+    {
+      "id": "e4dd9b4a-f247-4e2c-9570-56e7cfc50584",
+      "datum": "2022-01-15",
+      "strelnice": "střelnice Corrado Ostrava",
+      "zbran": "Beretta 92x Performance 9 mm Luger",
+      "naboje": "9 mm Luger",
+      "pocetNaboju": "130"
+    },
+    {
+      "id": "7c43bdea-9389-46ed-ba22-0a963fd399f6",
+      "datum": "2022-01-09",
+      "strelnice": "střelnice Corrado Ostrava",
+      "zbran": "Beretta 92x Performance 9 mm Luger",
+      "naboje": "9 mm Luger",
+      "pocetNaboju": "142"
+    },
+    {
+      "id": "af472e62-9f1c-4ad9-ad12-81ae1a1de0ad",
+      "datum": "2021-12-30",
+      "strelnice": "střelnice Polárka FM",
+      "zbran": "Beretta 92x Performance 9 mm Luger",
+      "naboje": "9 mm Luger",
+      "pocetNaboju": "98"
+    },
+    {
+      "id": "0a3d92e6-0be5-4be0-a670-206ca992d677",
+      "datum": "2021-12-28",
+      "strelnice": "střelnice Corrado Ostrava",
+      "zbran": "Beretta 92x Performance 9 mm Luger",
+      "naboje": "9 mm Luger",
+      "pocetNaboju": "130"
+    }
+  ],
+  "strelebyCelkemKs": 11850,
+  "nakupy": [
+    {
+      "id": "a94201fe-cd4d-472a-8941-f0c8c5a4844b",
+      "datum": "2026-02-21",
+      "kategorie": "Střelnice",
+      "nazev": "střelnice Polárka FM",
+      "strelnice": "střelnice Polárka FM",
+      "pocet": "1",
+      "proZbran": "",
+      "cena": "300"
+    },
+    {
+      "id": "8d4fffd6-4de6-4103-8985-739ae12d88de",
+      "datum": "2026-02-21",
+      "kategorie": "Náboje 9 mm Luger",
+      "nazev": "Náboje 9 mm Luger",
+      "strelnice": "",
+      "pocet": "100",
+      "proZbran": "",
+      "cena": "1000"
+    },
+    {
+      "id": "06b9a38c-2c9c-46a8-90f8-8c02cc2e6080",
+      "datum": "2026-01-03",
+      "kategorie": "Střelnice",
+      "nazev": "střelnice Polárka FM",
+      "strelnice": "střelnice Polárka FM",
+      "pocet": "1",
+      "proZbran": "",
+      "cena": "280"
+    },
+    {
+      "id": "49eb0c68-6c69-4941-85ea-67b0f358dc00",
+      "datum": "2026-01-03",
+      "kategorie": "Náboje 9 mm Luger",
+      "nazev": "Náboje 9 mm Luger",
+      "strelnice": "",
+      "pocet": "100",
+      "proZbran": "",
+      "cena": "720"
+    },
+    {
+      "id": "f0d3ea95-4e34-4713-9bf1-0551337bd465",
+      "datum": "2026-01-03",
+      "kategorie": "Pouzdro na zbraň",
+      "nazev": "Pouzdro na zbraň",
+      "strelnice": "",
+      "pocet": "1",
+      "proZbran": "Glock 45 gen6",
+      "cena": "2640"
+    },
+    {
+      "id": "75ce8107-c22a-4182-b9d6-22e15cad49fd",
+      "datum": "2026-01-02",
+      "kategorie": "Zbraň",
+      "nazev": "Zbraň",
+      "strelnice": "",
+      "pocet": "1",
+      "proZbran": "Glock 45 gen6",
+      "cena": "21600"
+    },
+    {
+      "id": "c3043447-b1d6-462a-adf1-4c3804d2e91b",
+      "datum": "2026-01-02",
+      "kategorie": "Ostatní doplňky",
+      "nazev": "Svítilna",
+      "strelnice": "",
+      "pocet": "1",
+      "proZbran": "Glock 45 gen6",
+      "cena": "4860"
+    },
+    {
+      "id": "f04eb2fe-73eb-42f8-9fa6-c80a5f142b8d",
+      "datum": "2025-08-24",
+      "kategorie": "Náboje 9 mm Luger",
+      "nazev": "Náboje 9 mm Luger",
+      "strelnice": "",
+      "pocet": "100",
+      "proZbran": "",
+      "cena": "700"
+    },
+    {
+      "id": "fc121a68-b737-4663-8325-814253ed1173",
+      "datum": "2025-08-24",
+      "kategorie": "Střelnice",
+      "nazev": "Střelnice",
+      "strelnice": "",
+      "pocet": "1",
+      "proZbran": "",
+      "cena": "290"
+    },
+    {
+      "id": "f0b4bcb7-2a6a-4a98-a995-a8140937a523",
+      "datum": "2025-06-21",
+      "kategorie": "Náboje 9 mm Luger",
+      "nazev": "Náboje 9 mm Luger",
+      "strelnice": "",
+      "pocet": "100",
+      "proZbran": "",
+      "cena": "700"
+    },
+    {
+      "id": "96c655f4-6fd3-423b-9b7f-6a2dee407764",
+      "datum": "2025-06-21",
+      "kategorie": "Střelnice",
+      "nazev": "Střelnice",
+      "strelnice": "",
+      "pocet": "1",
+      "proZbran": "",
+      "cena": "300"
+    },
+    {
+      "id": "26261db6-a0f0-4179-8215-7e37a0ee5689",
+      "datum": "2025-05-05",
+      "kategorie": "Tlumič",
+      "nazev": "Tlumič",
+      "strelnice": "",
+      "pocet": "1",
+      "proZbran": "Daniel Defense DDM4V7 MilSpec + .223 REM",
+      "cena": "18700"
+    },
+    {
+      "id": "15047652-b520-4238-8abe-ff4f1a459258",
+      "datum": "2025-05-05",
+      "kategorie": "Ostatní",
+      "nazev": "Tlumiš výšlehu",
+      "strelnice": "",
+      "pocet": "1",
+      "proZbran": "Daniel Defense DDM4V7 MilSpec + .223 REM",
+      "cena": "3800"
+    },
+    {
+      "id": "2795d3f6-5bfc-4f61-9aeb-b8d2bff126a1",
+      "datum": "2025-04-03",
+      "kategorie": "Nářadí",
+      "nazev": "Nářadí",
+      "strelnice": "",
+      "pocet": "1",
+      "proZbran": "",
+      "cena": "2455"
+    },
+    {
+      "id": "77eece4a-5a06-4095-82c5-762b50a91767",
+      "datum": "2025-04-03",
+      "kategorie": "Ostatní doplňky",
+      "nazev": "Ostatní doplňky",
+      "strelnice": "",
+      "pocet": "1",
+      "proZbran": "Daniel Defense DDM4V7 MilSpec + .223 REM",
+      "cena": "9990"
+    },
+    {
+      "id": "3effc5b0-fa2a-49ce-87b4-ec43fc3a79d7",
+      "datum": "2025-04-03",
+      "kategorie": "Náhradní díly",
+      "nazev": "Náhradní díly",
+      "strelnice": "",
+      "pocet": "1",
+      "proZbran": "Walther Q4 SF OR 9 mm Luger",
+      "cena": "5550"
+    },
+    {
+      "id": "c2e17732-1b82-4f7c-80b3-b1bb6204337c",
+      "datum": "2025-01-06",
+      "kategorie": "Střelnice",
+      "nazev": "střelnice Polárka FM",
+      "strelnice": "střelnice Polárka FM",
+      "pocet": "1",
+      "proZbran": "",
+      "cena": "300"
+    },
+    {
+      "id": "66d7b32a-0475-47d2-b5c5-420c0c834655",
+      "datum": "2024-12-21",
+      "kategorie": "Střelnice",
+      "nazev": "střelnice Polárka FM",
+      "strelnice": "střelnice Polárka FM",
+      "pocet": "1",
+      "proZbran": "",
+      "cena": "400"
+    },
+    {
+      "id": "970a38ab-67e5-40ba-81e6-2edd593f8ac2",
+      "datum": "2024-12-20",
+      "kategorie": "Náboje 9 mm Luger",
+      "nazev": "Náboje 9 mm Luger",
+      "strelnice": "",
+      "pocet": "400",
+      "proZbran": "",
+      "cena": "2440"
+    },
+    {
+      "id": "c225213b-b224-485f-ae06-d4e4a2314f48",
+      "datum": "2024-10-19",
+      "kategorie": "Střelnice",
+      "nazev": "střelnice Polárka FM",
+      "strelnice": "střelnice Polárka FM",
+      "pocet": "1",
+      "proZbran": "",
+      "cena": "400"
+    },
+    {
+      "id": "28e9414d-1611-41ef-a97f-33d2b438afb6",
+      "datum": "2024-10-19",
+      "kategorie": "Náboje 9 mm Luger",
+      "nazev": "Náboje 9 mm Luger",
+      "strelnice": "",
+      "pocet": "100",
+      "proZbran": "",
+      "cena": "710"
+    },
+    {
+      "id": "168126ca-53fc-432b-8f61-06f8edbc1583",
+      "datum": "2024-09-08",
+      "kategorie": "Náboje 9 mm Luger",
+      "nazev": "Náboje 9 mm Luger",
+      "strelnice": "",
+      "pocet": "100",
+      "proZbran": "",
+      "cena": "800"
+    },
+    {
+      "id": "46bcede8-8be8-4635-8210-5650f3f48343",
+      "datum": "2024-09-08",
+      "kategorie": "Střelnice",
+      "nazev": "střelnice Lazce Olomouc",
+      "strelnice": "střelnice Lazce Olomouc",
+      "pocet": "1",
+      "proZbran": "",
+      "cena": "500"
+    },
+    {
+      "id": "9586626d-3582-4c18-9393-b66190116001",
+      "datum": "2024-09-06",
+      "kategorie": "Náboje 9 mm Luger",
+      "nazev": "Náboje 9 mm Luger",
+      "strelnice": "",
+      "pocet": "400",
+      "proZbran": "",
+      "cena": "2440"
+    },
+    {
+      "id": "0a04fdc7-2d14-488e-8452-45595c2a5d90",
+      "datum": "2024-09-06",
+      "kategorie": "Pouzdro na zbraň",
+      "nazev": "Falco A118",
+      "strelnice": "",
+      "pocet": "1",
+      "proZbran": "Springfield Armory Hellcat 9 mm Luger",
+      "cena": "2952"
+    },
+    {
+      "id": "bbd92ebd-fac6-4b3b-b743-afb3104925bf",
+      "datum": "2024-09-04",
+      "kategorie": "Optika",
+      "nazev": "Streamlight TLR-6 s červeným laserem pro H11/Hellcat",
+      "strelnice": "",
+      "pocet": "1",
+      "proZbran": "Springfield Armory Hellcat 9 mm Luger",
+      "cena": "5350"
+    },
+    {
+      "id": "dcd6999b-3fc5-4439-bdbd-db9497485f64",
+      "datum": "2024-08-10",
+      "kategorie": "Střelnice",
+      "nazev": "střelnice Polárka FM",
+      "strelnice": "střelnice Polárka FM",
+      "pocet": "1",
+      "proZbran": "",
+      "cena": "300"
+    },
+    {
+      "id": "03e55ce7-1534-45c9-bdeb-1214605bd3dc",
+      "datum": "2024-08-10",
+      "kategorie": "Náboje 9 mm Luger",
+      "nazev": "Náboje 9 mm Luger",
+      "strelnice": "",
+      "pocet": "100",
+      "proZbran": "",
+      "cena": "700"
+    },
+    {
+      "id": "54d8f744-26db-4a31-a2d9-5f0907b5903c",
+      "datum": "2024-08-03",
+      "kategorie": "Kolimátor",
+      "nazev": "Schield RMSc",
+      "strelnice": "",
+      "pocet": "1",
+      "proZbran": "Springfield Armory Hellcat 9 mm Luger",
+      "cena": "12335"
+    },
+    {
+      "id": "76aebf24-3d81-4944-aabd-302fe76a5980",
+      "datum": "2024-06-20",
+      "kategorie": "Náboje .223 REM",
+      "nazev": "Náboje .223 REM",
+      "strelnice": "",
+      "pocet": "200",
+      "proZbran": "",
+      "cena": "2600"
+    },
+    {
+      "id": "ac020f2e-05d1-4979-a9e6-b3f6d753c683",
+      "datum": "2024-06-20",
+      "kategorie": "Střelnice",
+      "nazev": "střelnice Lazce Olomouc",
+      "strelnice": "střelnice Lazce Olomouc",
+      "pocet": "1",
+      "proZbran": "",
+      "cena": "500"
+    },
+    {
+      "id": "cd01c416-2052-40c1-afe6-bd6dafa76068",
+      "datum": "2024-06-02",
+      "kategorie": "Střelnice",
+      "nazev": "střelnice Polárka FM",
+      "strelnice": "střelnice Polárka FM",
+      "pocet": "1",
+      "proZbran": "",
+      "cena": "290"
+    },
+    {
+      "id": "05c5618f-5edc-4f21-a837-293dadd79f29",
+      "datum": "2024-06-02",
+      "kategorie": "Náboje 9 mm Luger",
+      "nazev": "Náboje 9 mm Luger",
+      "strelnice": "",
+      "pocet": "100",
+      "proZbran": "",
+      "cena": "720"
+    },
+    {
+      "id": "8b4eea4f-1293-4e0c-a59c-4bbcd89be4a8",
+      "datum": "2024-01-21",
+      "kategorie": "Střelnice",
+      "nazev": "střelnice Polárka FM",
+      "strelnice": "střelnice Polárka FM",
+      "pocet": "1",
+      "proZbran": "",
+      "cena": "280"
+    },
+    {
+      "id": "8b5360e0-c033-4be5-a73f-cd5d2aa9c943",
+      "datum": "2023-10-08",
+      "kategorie": "Střelnice",
+      "nazev": "střelnice Lazce Olomouc",
+      "strelnice": "střelnice Lazce Olomouc",
+      "pocet": "1",
+      "proZbran": "",
+      "cena": "700"
+    },
+    {
+      "id": "bb33e950-80f2-443f-b37b-b1db7a66c1b3",
+      "datum": "2023-09-09",
+      "kategorie": "Střelnice",
+      "nazev": "střelnice Polárka FM",
+      "strelnice": "střelnice Polárka FM",
+      "pocet": "1",
+      "proZbran": "",
+      "cena": "320"
+    },
+    {
+      "id": "bf75d059-c160-4130-800f-70194d92001b",
+      "datum": "2023-09-06",
+      "kategorie": "Náboje 9 mm Luger",
+      "nazev": "Náboje 9 mm Luger",
+      "strelnice": "",
+      "pocet": "1100",
+      "proZbran": "",
+      "cena": "7272"
+    },
+    {
+      "id": "4ae642b0-968e-4a72-b421-d05b431b719f",
+      "datum": "2023-09-06",
+      "kategorie": "Kolimátor",
+      "nazev": "Kolimátor",
+      "strelnice": "",
+      "pocet": "1",
+      "proZbran": "CZ Scorpion EVO 3 9 mm luger",
+      "cena": "24800"
+    },
+    {
+      "id": "67375fb7-3ecf-452a-b5e6-46489da1d0a3",
+      "datum": "2023-08-19",
+      "kategorie": "Střelnice",
+      "nazev": "střelnice Lazce Olomouc",
+      "strelnice": "střelnice Lazce Olomouc",
+      "pocet": "1",
+      "proZbran": "",
+      "cena": "1000"
+    },
+    {
+      "id": "be263b2f-060d-4ce9-8f89-910f28c20940",
+      "datum": "2023-07-15",
+      "kategorie": "Střelnice",
+      "nazev": "střelnice Lazce Olomouc",
+      "strelnice": "střelnice Lazce Olomouc",
+      "pocet": "1",
+      "proZbran": "",
+      "cena": "1400"
+    },
+    {
+      "id": "4adf7e40-3f10-47e6-aca6-ba38134e3f57",
+      "datum": "2023-06-24",
+      "kategorie": "Střelnice",
+      "nazev": "střelnice Lazce Olomouc",
+      "strelnice": "střelnice Lazce Olomouc",
+      "pocet": "1",
+      "proZbran": "",
+      "cena": "1100"
+    },
+    {
+      "id": "c407ad2e-8f7a-42d6-88ee-665824af9e13",
+      "datum": "2023-06-16",
+      "kategorie": "Náboje 9 mm Luger",
+      "nazev": "Náboje 9 mm Luger",
+      "strelnice": "",
+      "pocet": "1000",
+      "proZbran": "",
+      "cena": "6500"
+    },
+    {
+      "id": "49d2d33d-3496-4f92-9726-245ebe70379c",
+      "datum": "2023-06-09",
+      "kategorie": "Zásobník",
+      "nazev": "Zásobník",
+      "strelnice": "",
+      "pocet": "3",
+      "proZbran": "CZ Scorpion EVO 3 9 mm luger",
+      "cena": "870"
+    },
+    {
+      "id": "803f457e-d1eb-4044-9e15-d71aed53eed6",
+      "datum": "2023-06-09",
+      "kategorie": "Ostatní doplňky",
+      "nazev": "Ostatní doplňky",
+      "strelnice": "",
+      "pocet": "1",
+      "proZbran": "CZ Scorpion EVO 3 9 mm luger",
+      "cena": "325"
+    },
+    {
+      "id": "aad20238-1474-4b71-a1fe-1cd08c91677e",
+      "datum": "2023-06-08",
+      "kategorie": "Zbraň",
+      "nazev": "Zbraň",
+      "strelnice": "",
+      "pocet": "1",
+      "proZbran": "CZ Scorpion EVO 3 9 mm luger",
+      "cena": "24990"
+    },
+    {
+      "id": "0b5dc7a5-30ef-4566-96f8-f9ccba6f93e4",
+      "datum": "2023-06-08",
+      "kategorie": "Ostatní",
+      "nazev": "Ostatní",
+      "strelnice": "",
+      "pocet": "1",
+      "proZbran": "CZ Shadow 2 (konfigurátor) 9 mm Luger",
+      "cena": "590"
+    },
+    {
+      "id": "47651763-f1d1-4819-a8c7-a69f03c5b550",
+      "datum": "2023-06-06",
+      "kategorie": "Náboje 9 mm Luger",
+      "nazev": "Náboje 9 mm Luger",
+      "strelnice": "",
+      "pocet": "500",
+      "proZbran": "",
+      "cena": "3250"
+    },
+    {
+      "id": "194889d8-440d-41e9-a318-3fd21220269f",
+      "datum": "2023-06-06",
+      "kategorie": "Náboje .223 REM",
+      "nazev": "Náboje .223 REM",
+      "strelnice": "",
+      "pocet": "300",
+      "proZbran": "",
+      "cena": "3900"
+    },
+    {
+      "id": "d66d6dd5-c6ab-4034-91c6-2ece0d6b2ae8",
+      "datum": "2023-05-06",
+      "kategorie": "Náboje 9 mm Luger",
+      "nazev": "Náboje 9 mm Luger",
+      "strelnice": "",
+      "pocet": "600",
+      "proZbran": "",
+      "cena": "4140"
+    },
+    {
+      "id": "fbb4b047-a9d8-4077-9113-ead47620d357",
+      "datum": "2023-03-26",
+      "kategorie": "Střelnice",
+      "nazev": "střelnice Polárka FM",
+      "strelnice": "střelnice Polárka FM",
+      "pocet": "1",
+      "proZbran": "",
+      "cena": "300"
+    },
+    {
+      "id": "3630b625-5683-4cbf-8694-a86afab1602d",
+      "datum": "2023-03-14",
+      "kategorie": "Náboje 9 mm Luger",
+      "nazev": "Náboje 9 mm Luger",
+      "strelnice": "",
+      "pocet": "300",
+      "proZbran": "",
+      "cena": "1400"
+    },
+    {
+      "id": "67df105a-28c8-4151-81a7-8d77f326def6",
+      "datum": "2023-03-04",
+      "kategorie": "Optika",
+      "nazev": "Streamlight TLR-8 A G - Pistolová Svítilna se Zeleným Laserem - 500 lm",
+      "strelnice": "",
+      "pocet": "1",
+      "proZbran": "Walther Q4 SF OR 9 mm Luger",
+      "cena": "12340"
+    },
+    {
+      "id": "41e7bb67-0e85-404e-afad-e2ae1729f669",
+      "datum": "2023-02-15",
+      "kategorie": "Oblečení",
+      "nazev": "Oblečení",
+      "strelnice": "",
+      "pocet": "1",
+      "proZbran": "",
+      "cena": "6 490,00 Kč"
+    },
+    {
+      "id": "48aca3c1-2b4c-421e-8121-e1180bd0dfba",
+      "datum": "2023-02-12",
+      "kategorie": "Pouzdra",
+      "nazev": "Pouzdra",
+      "strelnice": "",
+      "pocet": "1",
+      "proZbran": "",
+      "cena": "1 590,00 Kč"
+    },
+    {
+      "id": "df08be69-623c-4e28-a711-4d6de00c7c79",
+      "datum": "2023-02-06",
+      "kategorie": "Pouzdro na zbraň",
+      "nazev": "Pouzdro na zbraň",
+      "strelnice": "",
+      "pocet": "1",
+      "proZbran": "Springfield Armory Hellcat 9 mm Luger",
+      "cena": "5700"
+    },
+    {
+      "id": "e7295d19-4a54-49ab-8b07-63557eceed7c",
+      "datum": "2023-02-05",
+      "kategorie": "Zbraň",
+      "nazev": "Zbraň",
+      "strelnice": "",
+      "pocet": "1",
+      "proZbran": "Springfield Armory Hellcat 9 mm Luger",
+      "cena": "33400"
+    },
+    {
+      "id": "865e1bd9-a2bc-4b4d-b1f9-6d2b2e9ab846",
+      "datum": "2023-01-29",
+      "kategorie": "Pouzdro na zbraň",
+      "nazev": "Pouzdro na zbraň",
+      "strelnice": "",
+      "pocet": "1",
+      "proZbran": "Walther Q4 SF OR 9 mm Luger",
+      "cena": "2100"
+    },
+    {
+      "id": "2496c6dc-6670-490d-ae41-c37910a4ea94",
+      "datum": "2023-01-29",
+      "kategorie": "Střelnice",
+      "nazev": "střelnice Polárka FM",
+      "strelnice": "střelnice Polárka FM",
+      "pocet": "1",
+      "proZbran": "",
+      "cena": "270"
+    },
+    {
+      "id": "af7e1803-beba-49f4-a744-f6aea906ee5b",
+      "datum": "2023-01-15",
+      "kategorie": "Střelnice",
+      "nazev": "střelnice Polárka FM",
+      "strelnice": "střelnice Polárka FM",
+      "pocet": "1",
+      "proZbran": "",
+      "cena": "270"
+    },
+    {
+      "id": "d3c088b1-9fae-4ff8-9a50-e69b70b93cb0",
+      "datum": "2023-01-15",
+      "kategorie": "Náboje 9 mm Luger",
+      "nazev": "Náboje 9 mm Luger",
+      "strelnice": "",
+      "pocet": "150",
+      "proZbran": "",
+      "cena": "1050"
+    },
+    {
+      "id": "7c97d8af-1938-4893-9bee-92a9adc67e84",
+      "datum": "2022-12-27",
+      "kategorie": "Střelnice",
+      "nazev": "střelnice Polárka FM",
+      "strelnice": "střelnice Polárka FM",
+      "pocet": "1",
+      "proZbran": "",
+      "cena": "480"
+    },
+    {
+      "id": "ae669a62-7976-49b6-9ea3-1917e91833c0",
+      "datum": "2022-12-27",
+      "kategorie": "Střelnice",
+      "nazev": "střelnice Polárka FM",
+      "strelnice": "střelnice Polárka FM",
+      "pocet": "1",
+      "proZbran": "",
+      "cena": "320"
+    },
+    {
+      "id": "d8cac107-2290-4603-ae6f-70582c787714",
+      "datum": "2022-12-22",
+      "kategorie": "Náboje 9 mm Luger",
+      "nazev": "Náboje 9 mm Luger",
+      "strelnice": "",
+      "pocet": "300",
+      "proZbran": "",
+      "cena": "1800"
+    },
+    {
+      "id": "224c66b0-32a6-4332-a8a4-5b5037dd6ad8",
+      "datum": "2022-12-22",
+      "kategorie": "Čištění",
+      "nazev": "Čištění",
+      "strelnice": "",
+      "pocet": "1",
+      "proZbran": "",
+      "cena": "4 900,00 Kč"
+    },
+    {
+      "id": "98abb88d-6b15-4d03-a7c5-3707df4ef6ea",
+      "datum": "2022-12-15",
+      "kategorie": "Zbraň",
+      "nazev": "Zbraň",
+      "strelnice": "",
+      "pocet": "1",
+      "proZbran": "Beretta 92x Performance 9 mm Luger",
+      "cena": "40000"
+    },
+    {
+      "id": "5dae305e-6a19-4683-9792-cd0bddc38ca0",
+      "datum": "2022-12-15",
+      "kategorie": "Zásobník",
+      "nazev": "Zásobník",
+      "strelnice": "",
+      "pocet": "2",
+      "proZbran": "Beretta 92x Performance 9 mm Luger",
+      "cena": "2100"
+    },
+    {
+      "id": "55a869da-15e5-4c90-8c67-37921c723914",
+      "datum": "2022-12-10",
+      "kategorie": "Náboje 9 mm Luger",
+      "nazev": "Náboje 9 mm Luger",
+      "strelnice": "",
+      "pocet": "500",
+      "proZbran": "",
+      "cena": "3200"
+    },
+    {
+      "id": "ff3f3563-78c2-4666-b477-123e27811791",
+      "datum": "2022-12-10",
+      "kategorie": "Střelnice",
+      "nazev": "střelnice Polárka FM",
+      "strelnice": "střelnice Polárka FM",
+      "pocet": "1",
+      "proZbran": "",
+      "cena": "270"
+    },
+    {
+      "id": "8ba1fa39-c266-4270-8322-e16e0a4e1062",
+      "datum": "2022-11-19",
+      "kategorie": "Náboje 9 mm Luger",
+      "nazev": "Náboje 9 mm Luger",
+      "strelnice": "",
+      "pocet": "250",
+      "proZbran": "",
+      "cena": "1550"
+    },
+    {
+      "id": "6f096caa-a4a8-466d-b669-4d058347ac2d",
+      "datum": "2022-11-19",
+      "kategorie": "Střelnice",
+      "nazev": "střelnice Polárka FM",
+      "strelnice": "střelnice Polárka FM",
+      "pocet": "1",
+      "proZbran": "",
+      "cena": "415"
+    },
+    {
+      "id": "5a9f1925-c9f7-4705-ab45-7ca1d6349ae5",
+      "datum": "2022-11-19",
+      "kategorie": "Střelnice",
+      "nazev": "střelnice Polárka FM",
+      "strelnice": "střelnice Polárka FM",
+      "pocet": "1",
+      "proZbran": "",
+      "cena": "1050"
+    },
+    {
+      "id": "ecfeff56-8ef7-45b7-951a-d593faee5961",
+      "datum": "2022-11-12",
+      "kategorie": "Střelnice",
+      "nazev": "střelnice Lazce Olomouc",
+      "strelnice": "střelnice Lazce Olomouc",
+      "pocet": "1",
+      "proZbran": "",
+      "cena": "800"
+    },
+    {
+      "id": "1192b737-c73e-46b2-ad92-b1a8d94ee411",
+      "datum": "2022-11-12",
+      "kategorie": "Střelnice",
+      "nazev": "střelnice Polárka FM",
+      "strelnice": "střelnice Polárka FM",
+      "pocet": "1",
+      "proZbran": "",
+      "cena": "320"
+    },
+    {
+      "id": "8909d9d8-eee0-4c0b-8dc7-e7b30cd55b32",
+      "datum": "2022-11-12",
+      "kategorie": "Střelnice",
+      "nazev": "střelnice Lazce Olomouc",
+      "strelnice": "střelnice Lazce Olomouc",
+      "pocet": "1",
+      "proZbran": "",
+      "cena": "880"
+    },
+    {
+      "id": "0d149eaa-40f6-4b0d-8d0a-a36ea34fc949",
+      "datum": "2022-11-12",
+      "kategorie": "Oblečení",
+      "nazev": "Oblečení",
+      "strelnice": "",
+      "pocet": "1",
+      "proZbran": "",
+      "cena": "4 490,00 Kč"
+    },
+    {
+      "id": "47c8f863-d5f8-43ce-967a-308a32dbdd34",
+      "datum": "2022-11-08",
+      "kategorie": "Střelnice",
+      "nazev": "střelnice Corrado Ostrava",
+      "strelnice": "střelnice Corrado Ostrava",
+      "pocet": "1",
+      "proZbran": "",
+      "cena": "230"
+    },
+    {
+      "id": "984341ae-dfb4-4b61-9c80-d1394a8787f5",
+      "datum": "2022-11-08",
+      "kategorie": "Oblečení",
+      "nazev": "Oblečení",
+      "strelnice": "",
+      "pocet": "1",
+      "proZbran": "",
+      "cena": "5 490,00 Kč"
+    },
+    {
+      "id": "a156a23e-146f-4103-942d-ec1a4224522a",
+      "datum": "2022-10-01",
+      "kategorie": "Střelnice",
+      "nazev": "střelnice Lazce Olomouc",
+      "strelnice": "střelnice Lazce Olomouc",
+      "pocet": "1",
+      "proZbran": "",
+      "cena": "800"
+    },
+    {
+      "id": "327e468f-203a-4867-b888-c38ee17f2a60",
+      "datum": "2022-10-01",
+      "kategorie": "Střelnice",
+      "nazev": "střelnice Lazce Olomouc",
+      "strelnice": "střelnice Lazce Olomouc",
+      "pocet": "1",
+      "proZbran": "",
+      "cena": "320"
+    },
+    {
+      "id": "46061f99-bcba-42bc-b57d-2a4fc8666315",
+      "datum": "2022-10-01",
+      "kategorie": "Střelnice",
+      "nazev": "střelnice Lazce Olomouc",
+      "strelnice": "střelnice Lazce Olomouc",
+      "pocet": "1",
+      "proZbran": "",
+      "cena": "800"
+    },
+    {
+      "id": "d39f2098-28fa-4561-adb0-1c8e53b3fd31",
+      "datum": "2022-10-01",
+      "kategorie": "Oblečení",
+      "nazev": "Oblečení",
+      "strelnice": "",
+      "pocet": "1",
+      "proZbran": "",
+      "cena": "8 290,00 Kč"
+    },
+    {
+      "id": "d4c4316b-1b4a-4bcc-b8b5-98e2b6d255f5",
+      "datum": "2022-09-28",
+      "kategorie": "Střelnice",
+      "nazev": "střelnice Třinec",
+      "strelnice": "střelnice Třinec",
+      "pocet": "1",
+      "proZbran": "",
+      "cena": "480"
+    },
+    {
+      "id": "57c396e1-9e79-459e-9615-b04ac497d9eb",
+      "datum": "2022-09-18",
+      "kategorie": "Náboje 9 mm Luger",
+      "nazev": "Náboje 9 mm Luger",
+      "strelnice": "",
+      "pocet": "800",
+      "proZbran": "",
+      "cena": "5264"
+    },
+    {
+      "id": "db526b5c-e558-4f54-8b89-0b02cda3162c",
+      "datum": "2022-09-18",
+      "kategorie": "Náboje .223 REM",
+      "nazev": "Náboje .223 REM",
+      "strelnice": "",
+      "pocet": "400",
+      "proZbran": "",
+      "cena": "4956"
+    },
+    {
+      "id": "d8176b8f-5f8b-45d3-9926-72c552fdf600",
+      "datum": "2022-09-18",
+      "kategorie": "Ostatní",
+      "nazev": "Ostatní",
+      "strelnice": "",
+      "pocet": "1",
+      "proZbran": "",
+      "cena": "3 600,00 Kč"
+    },
+    {
+      "id": "13432fe9-bf67-4c8a-ae37-71060d076779",
+      "datum": "2022-08-27",
+      "kategorie": "Střelnice",
+      "nazev": "střelnice Uherský Brod",
+      "strelnice": "střelnice Uherský Brod",
+      "pocet": "1",
+      "proZbran": "",
+      "cena": "0"
+    },
+    {
+      "id": "514bf61a-c5d9-4fd8-b19a-0e2f639554a3",
+      "datum": "2022-08-24",
+      "kategorie": "Střelnice",
+      "nazev": "střelnice Polárka FM",
+      "strelnice": "střelnice Polárka FM",
+      "pocet": "1",
+      "proZbran": "",
+      "cena": "260"
+    },
+    {
+      "id": "ae7211d7-0729-4e1b-8adc-00646b55d8a7",
+      "datum": "2022-08-14",
+      "kategorie": "Střelnice",
+      "nazev": "střelnice Břidličná",
+      "strelnice": "střelnice Břidličná",
+      "pocet": "1",
+      "proZbran": "",
+      "cena": "0"
+    },
+    {
+      "id": "bbd916d4-7725-4423-a0fc-5a097124c7df",
+      "datum": "2022-08-06",
+      "kategorie": "Střelnice",
+      "nazev": "střelnice Lazce Olomouc",
+      "strelnice": "střelnice Lazce Olomouc",
+      "pocet": "1",
+      "proZbran": "",
+      "cena": "1000"
+    },
+    {
+      "id": "c065fb5d-a3f8-4c8f-abfb-be52252e098f",
+      "datum": "2022-07-25",
+      "kategorie": "Náboje 9 mm Luger",
+      "nazev": "Náboje 9 mm Luger",
+      "strelnice": "",
+      "pocet": "500",
+      "proZbran": "",
+      "cena": "3290"
+    },
+    {
+      "id": "158c1208-6066-4984-ab2d-818ce618e52b",
+      "datum": "2022-07-24",
+      "kategorie": "Náboje 9 mm Luger",
+      "nazev": "Náboje 9 mm Luger",
+      "strelnice": "",
+      "pocet": "500",
+      "proZbran": "",
+      "cena": "3290"
+    },
+    {
+      "id": "5e1680a9-614e-4f24-880c-616cc9029c0b",
+      "datum": "2022-07-24",
+      "kategorie": "Střelnice",
+      "nazev": "střelnice Polárka FM",
+      "strelnice": "střelnice Polárka FM",
+      "pocet": "1",
+      "proZbran": "",
+      "cena": "270"
+    },
+    {
+      "id": "c5d490ec-b141-418b-beb7-d318731ddae9",
+      "datum": "2022-07-24",
+      "kategorie": "Střelnice",
+      "nazev": "střelnice Polárka FM",
+      "strelnice": "střelnice Polárka FM",
+      "pocet": "1",
+      "proZbran": "",
+      "cena": "270"
+    },
+    {
+      "id": "49e0700d-e7f8-479e-ad76-fe37fde103c0",
+      "datum": "2022-07-24",
+      "kategorie": "Čištění",
+      "nazev": "Čištění",
+      "strelnice": "",
+      "pocet": "1",
+      "proZbran": "",
+      "cena": "520"
+    },
+    {
+      "id": "af143ff3-1b01-454d-9bc6-b189035641a9",
+      "datum": "2022-07-17",
+      "kategorie": "Kolimátor",
+      "nazev": "Trijicon SRO",
+      "strelnice": "",
+      "pocet": "1",
+      "proZbran": "CZ Shadow 2 (konfigurátor) 9 mm Luger",
+      "cena": "23990"
+    },
+    {
+      "id": "f6ee6d92-b144-4aa5-a357-618a48b3e2c5",
+      "datum": "2022-07-17",
+      "kategorie": "Střelnice",
+      "nazev": "střelnice Polárka FM",
+      "strelnice": "střelnice Polárka FM",
+      "pocet": "1",
+      "proZbran": "",
+      "cena": "520"
+    },
+    {
+      "id": "f28fb9c6-d515-4a47-ba37-c48c704d4d14",
+      "datum": "2022-07-10",
+      "kategorie": "Střelnice",
+      "nazev": "střelnice Krnov",
+      "strelnice": "střelnice Krnov",
+      "pocet": "1",
+      "proZbran": "",
+      "cena": "440"
+    },
+    {
+      "id": "a178e00a-6579-43b1-b79d-9425cb43bc51",
+      "datum": "2022-07-05",
+      "kategorie": "Zbraň",
+      "nazev": "Zbraň",
+      "strelnice": "",
+      "pocet": "1",
+      "proZbran": "CZ Shadow 2 (konfigurátor) 9 mm Luger",
+      "cena": "62400"
+    },
+    {
+      "id": "a144f9c5-d5a0-4f94-945c-701d5ac8ac88",
+      "datum": "2022-07-05",
+      "kategorie": "Střelnice",
+      "nazev": "střelnice Polárka FM",
+      "strelnice": "střelnice Polárka FM",
+      "pocet": "1",
+      "proZbran": "",
+      "cena": "280"
+    },
+    {
+      "id": "81bacc86-98c6-4abb-b5c9-565aa32a1a7b",
+      "datum": "2022-07-05",
+      "kategorie": "Nářadí",
+      "nazev": "Nářadí",
+      "strelnice": "",
+      "pocet": "1",
+      "proZbran": "",
+      "cena": "400"
+    },
+    {
+      "id": "17cbc741-ed97-46de-89a1-a43ec00aa54b",
+      "datum": "2022-06-26",
+      "kategorie": "Střenky",
+      "nazev": "Střenky",
+      "strelnice": "",
+      "pocet": "1",
+      "proZbran": "Walther Q4 SF OR 9 mm Luger",
+      "cena": "4200"
+    },
+    {
+      "id": "c2b657d5-e89b-46ab-ae6f-b69d3e924cb5",
+      "datum": "2022-06-26",
+      "kategorie": "Střelnice",
+      "nazev": "střelnice Polárka FM",
+      "strelnice": "střelnice Polárka FM",
+      "pocet": "1",
+      "proZbran": "",
+      "cena": "270"
+    },
+    {
+      "id": "67b9dd62-e74b-44e7-ad7c-3c91a7deff20",
+      "datum": "2022-06-26",
+      "kategorie": "Střelnice",
+      "nazev": "střelnice Polárka FM",
+      "strelnice": "střelnice Polárka FM",
+      "pocet": "1",
+      "proZbran": "",
+      "cena": "270"
+    },
+    {
+      "id": "a12e82ff-9556-44bb-befa-e1a4c79eaceb",
+      "datum": "2022-06-26",
+      "kategorie": "Kufr na zbraň",
+      "nazev": "Kufr na zbraň",
+      "strelnice": "",
+      "pocet": "1",
+      "proZbran": "CZ Shadow 2 (konfigurátor) 9 mm Luger",
+      "cena": "3800"
+    },
+    {
+      "id": "7d651e70-7358-4ca1-8422-2ea48470b884",
+      "datum": "2022-06-10",
+      "kategorie": "Střelnice",
+      "nazev": "střelnice Lazce Olomouc",
+      "strelnice": "střelnice Lazce Olomouc",
+      "pocet": "1",
+      "proZbran": "",
+      "cena": "650"
+    },
+    {
+      "id": "eca0d321-0aa8-4a49-8872-953533e1b552",
+      "datum": "2022-06-08",
+      "kategorie": "Náboje 9 mm Luger",
+      "nazev": "Náboje 9 mm Luger",
+      "strelnice": "",
+      "pocet": "500",
+      "proZbran": "",
+      "cena": "3290"
+    },
+    {
+      "id": "8cdd298f-2f1e-4794-85f3-d4562d65a8b3",
+      "datum": "2022-06-08",
+      "kategorie": "Náboje .223 REM",
+      "nazev": "Náboje .223 REM",
+      "strelnice": "",
+      "pocet": "300",
+      "proZbran": "",
+      "cena": "3588"
+    },
+    {
+      "id": "5dd6fccb-ff61-42bc-8908-4c37e359d3fc",
+      "datum": "2022-06-08",
+      "kategorie": "Opasky",
+      "nazev": "Opasky",
+      "strelnice": "",
+      "pocet": "1",
+      "proZbran": "",
+      "cena": "3 600,00 Kč"
+    },
+    {
+      "id": "35bf3dbb-0425-45ca-9600-08ee60114ff7",
+      "datum": "2022-06-04",
+      "kategorie": "Střelnice",
+      "nazev": "střelnice Polárka FM",
+      "strelnice": "střelnice Polárka FM",
+      "pocet": "1",
+      "proZbran": "",
+      "cena": "270"
+    },
+    {
+      "id": "53037738-b36e-402c-a99d-dd99fa373e02",
+      "datum": "2022-06-04",
+      "kategorie": "Opasky",
+      "nazev": "Opasky",
+      "strelnice": "",
+      "pocet": "1",
+      "proZbran": "",
+      "cena": "6 600,00 Kč"
+    },
+    {
+      "id": "4e92a9ee-9540-4600-85a0-d2525ebcb454",
+      "datum": "2022-06-03",
+      "kategorie": "Optika",
+      "nazev": "Vortex Razor HD GEN II-E VMR-2 MRAD 1-6x24",
+      "strelnice": "",
+      "pocet": "1",
+      "proZbran": "Daniel Defense DDM4V7 MilSpec + .223 REM",
+      "cena": "49627"
+    },
+    {
+      "id": "c0043a6a-418f-48cd-8066-e6157add7685",
+      "datum": "2022-06-03",
+      "kategorie": "Opasky",
+      "nazev": "Popruh MS4® QDM Sling Magpul®",
+      "strelnice": "",
+      "pocet": "1",
+      "proZbran": "Daniel Defense DDM4V7 MilSpec + .223 REM",
+      "cena": "2745"
+    },
+    {
+      "id": "45a5790e-99a0-41f6-9b14-af35c7deca44",
+      "datum": "2022-06-03",
+      "kategorie": "Batoh",
+      "nazev": "Na pušku",
+      "strelnice": "",
+      "pocet": "1",
+      "proZbran": "",
+      "cena": "4800"
+    },
+    {
+      "id": "73657f52-b226-4030-9bab-f7ae2367288c",
+      "datum": "2022-06-03",
+      "kategorie": "Batoh",
+      "nazev": "Taktický",
+      "strelnice": "",
+      "pocet": "1",
+      "proZbran": "",
+      "cena": "4600"
+    },
+    {
+      "id": "963c69ce-b12d-4c90-a787-b1faa32c872a",
+      "datum": "2022-05-14",
+      "kategorie": "Střelnice",
+      "nazev": "střelnice Lazce Olomouc",
+      "strelnice": "střelnice Lazce Olomouc",
+      "pocet": "1",
+      "proZbran": "",
+      "cena": "500"
+    },
+    {
+      "id": "fdacd327-34f2-42d1-a246-c73371c710e4",
+      "datum": "2022-05-08",
+      "kategorie": "Náboje .223 REM",
+      "nazev": "Náboje .223 REM",
+      "strelnice": "",
+      "pocet": "200",
+      "proZbran": "",
+      "cena": "2392"
+    },
+    {
+      "id": "351d6b89-c104-4e35-b3dd-41f4a56c4ba6",
+      "datum": "2022-05-08",
+      "kategorie": "Zbraň",
+      "nazev": "Zbraň",
+      "strelnice": "",
+      "pocet": "1",
+      "proZbran": "Daniel Defense DDM4V7 MilSpec + .223 REM",
+      "cena": "59900"
+    },
+    {
+      "id": "1e11399c-4c86-4802-b4c3-f614c05c8faa",
+      "datum": "2022-05-08",
+      "kategorie": "Ostatní",
+      "nazev": "Mířidla AR-15",
+      "strelnice": "",
+      "pocet": "1",
+      "proZbran": "Daniel Defense DDM4V7 MilSpec + .223 REM",
+      "cena": "3500"
+    },
+    {
+      "id": "342fdc5c-e328-4cdc-a29a-0c68351072f4",
+      "datum": "2022-05-08",
+      "kategorie": "Zásobník",
+      "nazev": "32 ran",
+      "strelnice": "",
+      "pocet": "3",
+      "proZbran": "Daniel Defense DDM4V7 MilSpec + .223 REM",
+      "cena": "2400"
+    },
+    {
+      "id": "fb412b00-0678-42cc-8dbf-6b542ba320c3",
+      "datum": "2022-05-08",
+      "kategorie": "Zásobník",
+      "nazev": "10 ran",
+      "strelnice": "",
+      "pocet": "1",
+      "proZbran": "Daniel Defense DDM4V7 MilSpec + .223 REM",
+      "cena": "950"
+    },
+    {
+      "id": "54c7eec5-001b-43d3-8764-65e101d7d8c9",
+      "datum": "2022-04-15",
+      "kategorie": "Náboje 9 mm Luger",
+      "nazev": "Náboje 9 mm Luger",
+      "strelnice": "",
+      "pocet": "100",
+      "proZbran": "",
+      "cena": "570"
+    },
+    {
+      "id": "0e8177e9-da82-4254-ab1e-de66169a3831",
+      "datum": "2022-04-15",
+      "kategorie": "Pouzdro na zbraň",
+      "nazev": "Taktické",
+      "strelnice": "",
+      "pocet": "1",
+      "proZbran": "Walther Q4 SF OR 9 mm Luger",
+      "cena": "4500"
+    },
+    {
+      "id": "9614fbec-d293-4cbd-8b22-6e9694abbe03",
+      "datum": "2022-04-15",
+      "kategorie": "Střelnice",
+      "nazev": "střelnice Polárka FM",
+      "strelnice": "střelnice Polárka FM",
+      "pocet": "1",
+      "proZbran": "",
+      "cena": "270"
+    },
+    {
+      "id": "5e893340-4239-4fc1-8fa4-c00eb37b9224",
+      "datum": "2022-04-15",
+      "kategorie": "Střelnice",
+      "nazev": "střelnice Polárka FM",
+      "strelnice": "střelnice Polárka FM",
+      "pocet": "1",
+      "proZbran": "",
+      "cena": "270"
+    },
+    {
+      "id": "f8cb19a7-0142-47ff-b404-31be270a6139",
+      "datum": "2022-04-15",
+      "kategorie": "Kufr na zbraň",
+      "nazev": "Kufr na zbraň",
+      "strelnice": "",
+      "pocet": "1",
+      "proZbran": "Daniel Defense DDM4V7 MilSpec + .223 REM",
+      "cena": "4990"
+    },
+    {
+      "id": "08bc7537-8f81-44f8-9f0a-91b5d5c6f000",
+      "datum": "2022-04-08",
+      "kategorie": "Náboje 9 mm Luger",
+      "nazev": "Náboje 9 mm Luger",
+      "strelnice": "",
+      "pocet": "100",
+      "proZbran": "",
+      "cena": "580"
+    },
+    {
+      "id": "526501e7-4757-412a-828f-bcc9e2c47a70",
+      "datum": "2022-04-08",
+      "kategorie": "Nářadí",
+      "nazev": "Nářadí",
+      "strelnice": "",
+      "pocet": "1",
+      "proZbran": "",
+      "cena": "4000"
+    },
+    {
+      "id": "10d0abb4-8769-45ea-a908-95202fc9d302",
+      "datum": "2022-04-08",
+      "kategorie": "Střelnice",
+      "nazev": "střelnice Corrado Ostrava",
+      "strelnice": "střelnice Corrado Ostrava",
+      "pocet": "1",
+      "proZbran": "",
+      "cena": "210"
+    },
+    {
+      "id": "d1121a19-005a-479f-b629-076bf9bede5f",
+      "datum": "2022-04-08",
+      "kategorie": "Nářadí",
+      "nazev": "Nářadí",
+      "strelnice": "",
+      "pocet": "1",
+      "proZbran": "",
+      "cena": "6 990,00 Kč"
+    },
+    {
+      "id": "f1940ec6-e5ee-4bcb-a233-d8cb307eb19a",
+      "datum": "2022-03-19",
+      "kategorie": "Střelnice",
+      "nazev": "střelnice Corrado Ostrava",
+      "strelnice": "střelnice Corrado Ostrava",
+      "pocet": "1",
+      "proZbran": "",
+      "cena": "210"
+    },
+    {
+      "id": "883c1f4d-a772-4be1-bee7-12fcb896a21c",
+      "datum": "2022-03-19",
+      "kategorie": "Střelnice",
+      "nazev": "střelnice Corrado Ostrava",
+      "strelnice": "střelnice Corrado Ostrava",
+      "pocet": "1",
+      "proZbran": "",
+      "cena": "210"
+    },
+    {
+      "id": "20433578-cacb-4919-a239-2131d7cf2f74",
+      "datum": "2022-03-19",
+      "kategorie": "Čištění",
+      "nazev": "Čištění",
+      "strelnice": "",
+      "pocet": "1",
+      "proZbran": "",
+      "cena": "5 000,00 Kč"
+    },
+    {
+      "id": "fa313721-ea8f-4250-b45b-38830ff4b7ce",
+      "datum": "2022-03-13",
+      "kategorie": "Náboje 9 mm Luger",
+      "nazev": "Náboje 9 mm Luger",
+      "strelnice": "",
+      "pocet": "100",
+      "proZbran": "",
+      "cena": "570"
+    },
+    {
+      "id": "1923879f-016f-40f1-a325-f525b605ef60",
+      "datum": "2022-03-13",
+      "kategorie": "Kolimátor",
+      "nazev": "Trijicon RMR 2",
+      "strelnice": "",
+      "pocet": "1",
+      "proZbran": "Walther Q4 SF OR 9 mm Luger",
+      "cena": "22400"
+    },
+    {
+      "id": "a3e7ec65-a3f3-479c-90fa-cfafbd224250",
+      "datum": "2022-03-13",
+      "kategorie": "Střelnice",
+      "nazev": "střelnice Corrado Ostrava",
+      "strelnice": "střelnice Corrado Ostrava",
+      "pocet": "1",
+      "proZbran": "",
+      "cena": "200"
+    },
+    {
+      "id": "52a086d1-4f5b-4010-9280-55178a87843b",
+      "datum": "2022-02-18",
+      "kategorie": "Střelnice",
+      "nazev": "střelnice Corrado Ostrava",
+      "strelnice": "střelnice Corrado Ostrava",
+      "pocet": "1",
+      "proZbran": "",
+      "cena": "200"
+    },
+    {
+      "id": "c4d8071b-a9d9-47b6-b31c-9ba089a41879",
+      "datum": "2022-02-10",
+      "kategorie": "Náboje 9 mm Luger",
+      "nazev": "Náboje 9 mm Luger",
+      "strelnice": "",
+      "pocet": "500",
+      "proZbran": "",
+      "cena": "3200"
+    },
+    {
+      "id": "9551424c-ba4f-4d18-b89c-dbd898325ab9",
+      "datum": "2022-02-10",
+      "kategorie": "Střelnice",
+      "nazev": "střelnice Corrado Ostrava",
+      "strelnice": "střelnice Corrado Ostrava",
+      "pocet": "1",
+      "proZbran": "",
+      "cena": "200"
+    },
+    {
+      "id": "35fc6af3-171d-4e70-83a7-3563ae7b2b34",
+      "datum": "2022-02-09",
+      "kategorie": "Náboje 9 mm Luger",
+      "nazev": "Náboje 9 mm Luger",
+      "strelnice": "",
+      "pocet": "500",
+      "proZbran": "",
+      "cena": "3100"
+    },
+    {
+      "id": "1e0f0fb0-59a1-4adf-995b-d77488f91d4b",
+      "datum": "2022-02-09",
+      "kategorie": "Spoušť",
+      "nazev": "Spoušť",
+      "strelnice": "",
+      "pocet": "1",
+      "proZbran": "Walther Q4 SF OR 9 mm Luger",
+      "cena": "7900"
+    },
+    {
+      "id": "089075a7-e21a-4fa5-acc1-2d36e04babcc",
+      "datum": "2022-02-06",
+      "kategorie": "Spoušť",
+      "nazev": "Spoušť",
+      "strelnice": "",
+      "pocet": "1",
+      "proZbran": "Springfield Armory Hellcat 9 mm Luger",
+      "cena": "5200"
+    },
+    {
+      "id": "e0b616a5-fe9f-471d-8a3b-385b1e512aba",
+      "datum": "2022-02-06",
+      "kategorie": "Zásobník",
+      "nazev": "Zásobník",
+      "strelnice": "",
+      "pocet": "1",
+      "proZbran": "Springfield Armory Hellcat 9 mm Luger",
+      "cena": "720"
+    },
+    {
+      "id": "2c0169a5-3b03-45b0-b74a-a25849652c2d",
+      "datum": "2022-01-30",
+      "kategorie": "Náboje 9 mm Luger",
+      "nazev": "Náboje 9 mm Luger",
+      "strelnice": "",
+      "pocet": "150",
+      "proZbran": "",
+      "cena": "900"
+    },
+    {
+      "id": "580f629a-e815-4b9c-9a78-b92ae510f81d",
+      "datum": "2022-01-30",
+      "kategorie": "Zbraň",
+      "nazev": "Zbraň",
+      "strelnice": "",
+      "pocet": "1",
+      "proZbran": "Walther Q4 SF OR 9 mm Luger",
+      "cena": "41000"
+    },
+    {
+      "id": "63fafcf9-becb-4e54-b924-9e577118dc11",
+      "datum": "2022-01-30",
+      "kategorie": "Střelnice",
+      "nazev": "střelnice Corrado Ostrava",
+      "strelnice": "střelnice Corrado Ostrava",
+      "pocet": "1",
+      "proZbran": "",
+      "cena": "400"
+    },
+    {
+      "id": "7295f0d0-752d-4b3b-bf33-1cf8ceb1c55a",
+      "datum": "2022-01-17",
+      "kategorie": "Náboje 9 mm Luger",
+      "nazev": "Náboje 9 mm Luger",
+      "strelnice": "",
+      "pocet": "500",
+      "proZbran": "",
+      "cena": "3100"
+    },
+    {
+      "id": "1825506e-bb62-4cf7-8754-32e6ba15f229",
+      "datum": "2022-01-16",
+      "kategorie": "Náboje 9 mm Luger",
+      "nazev": "Náboje 9 mm Luger",
+      "strelnice": "",
+      "pocet": "100",
+      "proZbran": "",
+      "cena": "560"
+    },
+    {
+      "id": "af80fc28-fdb4-4135-9928-e710ac3c1cfa",
+      "datum": "2022-01-15",
+      "kategorie": "Náboje 9 mm Luger",
+      "nazev": "Náboje 9 mm Luger",
+      "strelnice": "",
+      "pocet": "150",
+      "proZbran": "",
+      "cena": "1050"
+    },
+    {
+      "id": "2b019c15-b025-4ba2-b506-46737f1ecddd",
+      "datum": "2022-01-15",
+      "kategorie": "Střelnice",
+      "nazev": "střelnice Corrado Ostrava",
+      "strelnice": "střelnice Corrado Ostrava",
+      "pocet": "1",
+      "proZbran": "",
+      "cena": "210"
+    },
+    {
+      "id": "26047fee-8353-41b6-ba25-632a7e8481c7",
+      "datum": "2022-01-09",
+      "kategorie": "Náboje 9 mm Luger",
+      "nazev": "Náboje 9 mm Luger",
+      "strelnice": "",
+      "pocet": "100",
+      "proZbran": "",
+      "cena": "560"
+    },
+    {
+      "id": "55fe52f7-a17c-4410-ba7e-89c506c1163c",
+      "datum": "2022-01-09",
+      "kategorie": "Pouzdro na zbraň",
+      "nazev": "Pouzdro na zbraň",
+      "strelnice": "",
+      "pocet": "1",
+      "proZbran": "Beretta 92x Performance 9 mm Luger",
+      "cena": "3200"
+    },
+    {
+      "id": "f55f36ae-4bc6-4e13-b98a-92b38cd85626",
+      "datum": "2022-01-09",
+      "kategorie": "Střelnice",
+      "nazev": "střelnice Corrado Ostrava",
+      "strelnice": "střelnice Corrado Ostrava",
+      "pocet": "1",
+      "proZbran": "",
+      "cena": "200"
+    },
+    {
+      "id": "b47ac942-8b19-4df9-b782-b71d66f40703",
+      "datum": "2021-12-30",
+      "kategorie": "Střelnice",
+      "nazev": "střelnice Polárka FM",
+      "strelnice": "střelnice Polárka FM",
+      "pocet": "1",
+      "proZbran": "",
+      "cena": "200"
+    },
+    {
+      "id": "af5478e5-e414-439b-a6f3-5d349569ef23",
+      "datum": "2021-12-28",
+      "kategorie": "Střelnice",
+      "nazev": "střelnice Corrado Ostrava",
+      "strelnice": "střelnice Corrado Ostrava",
+      "pocet": "1",
+      "proZbran": "",
+      "cena": "200"
+    },
+    {
+      "id": "47e44c90-02b0-4221-972e-f862d8ef574f",
+      "datum": "2021-12-15",
+      "kategorie": "Ostatní",
+      "nazev": "Ostatní",
+      "strelnice": "",
+      "pocet": "1",
+      "proZbran": "",
+      "cena": "2 990,00 Kč"
+    },
+    {
+      "id": "60213d1a-71c9-4bfa-9359-ad62d8bf72eb",
+      "datum": "2021-12-15",
+      "kategorie": "Taška",
+      "nazev": "Taška",
+      "strelnice": "",
+      "pocet": "1",
+      "proZbran": "",
+      "cena": "3 400,00 Kč"
+    }
+  ]
+}
