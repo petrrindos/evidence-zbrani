@@ -176,7 +176,7 @@
       flex-wrap: wrap;
       gap: 0.35rem;
       align-items: center;
-      max-width: 22rem;
+      max-width: 36rem;
     }
     .team-users-panel .team-user-role-group {
       display: flex;
@@ -196,9 +196,15 @@
       border-color: #60a5fa;
       color: #bfdbfe;
     }
+    .team-users-panel .team-user-role-btn.is-member-role {
+      background: rgba(34, 197, 94, 0.22);
+      border-color: #22c55e;
+      color: #bbf7d0;
+    }
     .team-users-panel .team-user-actions select {
       font-size: 0.75rem;
-      max-width: 9rem;
+      max-width: 14rem;
+      min-width: 10rem;
     }
     .team-users-panel .danger {
       background: var(--danger-bg);
@@ -3128,21 +3134,14 @@
       </div>
       <div id="teamMembershipsPanel" class="team-users-panel" hidden>
         <p id="teamMembershipsAllSummary" class="team-memberships-hint" style="margin:0 0 0.45rem;font-size:0.82rem;color:var(--muted);"></p>
-        <div class="team-memberships-toolbar" style="display:flex;flex-wrap:wrap;gap:0.5rem;align-items:center;margin:0 0 0.55rem;">
-          <label for="teamMembershipsTeamSelect" style="margin:0;font-size:0.86rem;">Tým</label>
-          <select id="teamMembershipsTeamSelect" aria-label="Vybrat tým pro výpis členů" style="min-width:12rem;font-size:0.86rem;">
-            <option value="">— vyberte tým —</option>
-          </select>
-        </div>
-        <p class="team-memberships-hint" style="margin:0 0 0.5rem;font-size:0.78rem;color:var(--muted);">
-          Po výběru týmu se zobrazí uživatelé v něm — úprava rolí, přidání do jiného týmu, odebrání.
+        <p class="team-memberships-hint" style="margin:0 0 0.55rem;font-size:0.78rem;color:var(--muted);">
+          U každého uživatele vyberte tým — zeleně se zvýrazní jeho role (owner / admin / viewer). Kliknutím na roli roli nastavíte nebo uživatele do týmu přidáte.
         </p>
-        <table aria-label="Členové vybraného týmu">
+        <table aria-label="Členství uživatelů v týmech">
           <thead>
             <tr>
               <th>E-mail</th>
-              <th>Role</th>
-              <th class="actions">Akce</th>
+              <th class="actions">Tým a role</th>
             </tr>
           </thead>
           <tbody id="teamMembershipsTbody"></tbody>
@@ -7325,7 +7324,6 @@
       var teamUsersTbody = document.getElementById("teamUsersTbody");
       var teamMembershipsPanel = document.getElementById("teamMembershipsPanel");
       var teamMembershipsAllSummary = document.getElementById("teamMembershipsAllSummary");
-      var teamMembershipsTeamSelect = document.getElementById("teamMembershipsTeamSelect");
       var teamMembershipsTbody = document.getElementById("teamMembershipsTbody");
       var adminMembershipsCache = null;
       var teamTeamsPanel = document.getElementById("teamTeamsPanel");
@@ -7478,120 +7476,152 @@
           users.length +
           " členství (" +
           nUsers +
-          " uživatelů, " +
+          " uživatelů v řádcích, " +
           teams.length +
-          " týmů). Vyberte tým pro výpis jeho členů.";
+          " týmů v nabídce).";
       }
 
-      function fillTeamMembershipsTeamSelect(teams, preserveTeamId) {
-        if (!teamMembershipsTeamSelect) return;
-        var prev = preserveTeamId != null ? String(preserveTeamId) : String(teamMembershipsTeamSelect.value || "");
+      function buildAllTeamsSelectHtml(teams) {
         var rows = Array.isArray(teams) ? teams : [];
-        var opts = ["<option value=\"\">— vyberte tým —</option>"];
+        var opts = ["<option value=\"\">— tým —</option>"];
         rows.forEach(function (t) {
           var id = String(t.team_id != null ? t.team_id : "");
           if (!id) return;
           opts.push("<option value=\"" + escapeHtmlLite(id) + "\">" + escapeHtmlLite(t.team_name || ("Tým #" + id)) + "</option>");
         });
-        teamMembershipsTeamSelect.innerHTML = opts.join("");
-        if (prev && rows.some(function (t) { return String(t.team_id) === prev; })) {
-          teamMembershipsTeamSelect.value = prev;
-        } else {
-          teamMembershipsTeamSelect.value = "";
-        }
+        return opts.join("");
       }
 
-      function renderMembershipsTableForTeam() {
-        if (!teamMembershipsPanel || !teamMembershipsTbody) return;
+      function getMembershipFromCache(userId, teamId) {
         var payload = adminMembershipsCache;
-        if (!payload) {
-          teamMembershipsTbody.innerHTML = "<tr><td colspan=\"3\">Načtěte znovu (chybí data).</td></tr>";
-          return;
+        var rows = payload && Array.isArray(payload.users) ? payload.users : [];
+        var uid = Number(userId);
+        var tid = Number(teamId);
+        for (var i = 0; i < rows.length; i++) {
+          var u = rows[i];
+          if (Number(u.user_id) === uid && Number(u.team_id) === tid) {
+            return {
+              membership_id: u.membership_id,
+              role: String(u.role || "").toLowerCase()
+            };
+          }
         }
-        var teamsAll = Array.isArray(payload.teams) ? payload.teams : [];
-        var allUsers = Array.isArray(payload.users) ? payload.users : [];
-        var sel = teamMembershipsTeamSelect ? String(teamMembershipsTeamSelect.value || "").trim() : "";
-        if (!sel) {
-          teamMembershipsTbody.innerHTML = "<tr><td colspan=\"3\">Vyberte tým výše — zobrazí se členové tohoto týmu.</td></tr>";
-          teamMembershipsPanel.hidden = false;
-          return;
-        }
-        var selNum = Number(sel);
-        var users = allUsers.filter(function (u) {
-          return Number(u.team_id) === selNum;
+        return null;
+      }
+
+      function updateRowMembershipRoleHighlight(tr) {
+        if (!tr) return;
+        var sel = tr.querySelector("select[data-user-row-team]");
+        var teamId = sel && sel.value ? String(sel.value).trim() : "";
+        var buttons = tr.querySelectorAll("button[data-mem-role-set]");
+        buttons.forEach(function (b) {
+          b.classList.remove("is-member-role");
         });
-        if (!users.length) {
-          teamMembershipsTbody.innerHTML = "<tr><td colspan=\"3\">V tomto týmu zatím není žádný člen.</td></tr>";
+        if (!teamId) return;
+        var uid = tr.getAttribute("data-user-id");
+        var rec = getMembershipFromCache(uid, teamId);
+        if (!rec) return;
+        var r = rec.role;
+        if (r !== "owner" && r !== "admin" && r !== "viewer") return;
+        tr.querySelectorAll("button[data-mem-role-set]").forEach(function (b) {
+          if (String(b.getAttribute("data-role") || "").toLowerCase() === r) {
+            b.classList.add("is-member-role");
+          }
+        });
+      }
+
+      function collectMembershipRowTeamSelections() {
+        var map = {};
+        if (!teamMembershipsTbody) return map;
+        teamMembershipsTbody.querySelectorAll("tr[data-user-id]").forEach(function (tr) {
+          var uid = String(tr.getAttribute("data-user-id") || "").trim();
+          var s = tr.querySelector("select[data-user-row-team]");
+          if (uid && s && s.value) map[uid] = String(s.value);
+        });
+        return map;
+      }
+
+      function uniqueUsersFromMembershipPayload(payload) {
+        var rows = payload && Array.isArray(payload.users) ? payload.users : [];
+        var map = {};
+        rows.forEach(function (u) {
+          var uid = u.user_id != null ? String(u.user_id) : "";
+          if (!uid) return;
+          if (!map[uid]) {
+            map[uid] = { user_id: Number(u.user_id), email: u.email || "" };
+          }
+        });
+        return Object.keys(map)
+          .map(function (k) {
+            return map[k];
+          })
+          .sort(function (a, b) {
+            return String(a.email || "").localeCompare(String(b.email || ""), "cs");
+          });
+      }
+
+      function renderAdminMembershipsUniqueUsersPanel(payload, preservedTeamByUser) {
+        if (!teamMembershipsPanel || !teamMembershipsTbody) return;
+        adminMembershipsCache = payload;
+        var teams = payload && Array.isArray(payload.teams) ? payload.teams : [];
+        var list = uniqueUsersFromMembershipPayload(payload);
+        if (!list.length) {
+          teamMembershipsTbody.innerHTML = "<tr><td colspan=\"2\">Žádní uživatelé s členstvím.</td></tr>";
           teamMembershipsPanel.hidden = false;
           return;
         }
-        teamMembershipsTbody.innerHTML = users.map(function (u) {
-          var mid = escapeHtmlLite(String(u.membership_id || ""));
-          var uid = escapeHtmlLite(String(u.user_id || ""));
-          var tid = Number(u.team_id);
-          var otherTeams = teamsAll.filter(function (t) {
-            return Number(t.team_id) !== tid;
-          });
-          var teamOpts = otherTeams.map(function (t) {
+        var teamSelectHtml = buildAllTeamsSelectHtml(teams);
+        var pres = preservedTeamByUser && typeof preservedTeamByUser === "object" ? preservedTeamByUser : {};
+        teamMembershipsTbody.innerHTML = list
+          .map(function (u) {
+            var uid = escapeHtmlLite(String(u.user_id));
             return (
-              "<option value=\"" + escapeHtmlLite(String(t.team_id)) + "\">" +
-              escapeHtmlLite(t.team_name || "") + "</option>"
+              "<tr data-user-id=\"" + uid + "\">" +
+                "<td>" + escapeHtmlLite(u.email || "") + "</td>" +
+                "<td class=\"actions\">" +
+                  "<div class=\"team-user-actions\">" +
+                    "<span class=\"team-user-role-group\">" +
+                      "<button type=\"button\" class=\"team-user-role-btn\" data-mem-role-set data-role=\"owner\">owner</button>" +
+                      "<button type=\"button\" class=\"team-user-role-btn\" data-mem-role-set data-role=\"admin\">admin</button>" +
+                      "<button type=\"button\" class=\"team-user-role-btn\" data-mem-role-set data-role=\"viewer\">viewer</button>" +
+                    "</span>" +
+                    "<select data-user-row-team aria-label=\"Tým\">" +
+                      teamSelectHtml +
+                    "</select>" +
+                  "</div>" +
+                "</td>" +
+              "</tr>"
             );
-          }).join("");
-          if (!teamOpts) {
-            teamOpts = "<option value=\"\">(žádný jiný tým)</option>";
+          })
+          .join("");
+        teamMembershipsTbody.querySelectorAll("tr[data-user-id]").forEach(function (tr) {
+          var uid = String(tr.getAttribute("data-user-id") || "").trim();
+          var want = uid && pres[uid] ? String(pres[uid]) : "";
+          var s = tr.querySelector("select[data-user-row-team]");
+          if (s && want && teams.some(function (t) { return String(t.team_id) === want; })) {
+            s.value = want;
           }
-          var r = String(u.role || "").toLowerCase();
-          function roleBtn(label) {
-            var cur = r === label ? " is-current" : "";
-            return (
-              "<button type=\"button\" class=\"team-user-role-btn" + cur + "\" data-team-user-role data-membership-id=\"" +
-              mid + "\" data-role=\"" + label + "\">" + label + "</button>"
-            );
-          }
-          return (
-            "<tr data-user-id=\"" + uid + "\">" +
-              "<td>" + escapeHtmlLite(u.email || "") + "</td>" +
-              "<td>" + escapeHtmlLite(u.role || "") + "</td>" +
-              "<td class=\"actions\">" +
-                "<div class=\"team-user-actions\">" +
-                  "<span class=\"team-user-role-group\" title=\"Role v tomto týmu\">" +
-                    roleBtn("owner") + roleBtn("admin") + roleBtn("viewer") +
-                  "</span>" +
-                  "<select data-team-user-add-team aria-label=\"Přidat do jiného týmu\">" + teamOpts + "</select>" +
-                  "<span class=\"team-user-role-group\" title=\"Přidat do týmu jako role\">" +
-                    "<button type=\"button\" class=\"team-user-role-btn\" data-team-user-add-role-btn data-role=\"owner\">Přidat owner</button>" +
-                    "<button type=\"button\" class=\"team-user-role-btn\" data-team-user-add-role-btn data-role=\"admin\">Přidat admin</button>" +
-                    "<button type=\"button\" class=\"team-user-role-btn\" data-team-user-add-role-btn data-role=\"viewer\">Přidat viewer</button>" +
-                  "</span>" +
-                  "<button type=\"button\" class=\"danger\" data-team-user-del=\"" + mid + "\">Odebrat</button>" +
-                "</div>" +
-              "</td>" +
-            "</tr>"
-          );
-        }).join("");
+          updateRowMembershipRoleHighlight(tr);
+        });
         teamMembershipsPanel.hidden = false;
       }
 
       function setupAdminMembershipsPanel(data) {
         adminMembershipsCache = data;
         updateTeamMembershipsGlobalSummary(data);
-        fillTeamMembershipsTeamSelect(data && data.teams ? data.teams : [], null);
-        renderMembershipsTableForTeam();
+        renderAdminMembershipsUniqueUsersPanel(data, {});
         teamMembershipsPanel.hidden = false;
       }
 
       async function refreshAdminUserViewsAfterMutation() {
+        var preserved = collectMembershipRowTeamSelections();
         var data = await apiRequest("/admin/users-list");
         if (teamUsersPanel && !teamUsersPanel.hidden) {
           renderAdminUsersSimple(data);
         }
         if (teamMembershipsPanel && !teamMembershipsPanel.hidden) {
-          var keepTeam = teamMembershipsTeamSelect ? teamMembershipsTeamSelect.value : "";
-          adminMembershipsCache = data;
           updateTeamMembershipsGlobalSummary(data);
-          fillTeamMembershipsTeamSelect(data && data.teams ? data.teams : [], keepTeam);
-          renderMembershipsTableForTeam();
+          renderAdminMembershipsUniqueUsersPanel(data, preserved);
         }
       }
 
@@ -8612,7 +8642,7 @@
             if (teamUsersPanel) teamUsersPanel.hidden = true;
             var data = await apiRequest("/admin/users-list");
             setupAdminMembershipsPanel(data);
-            setTeamStatus("Členství v týmech načteno — vyberte tým.", "ok");
+            setTeamStatus("Členství v týmech načteno.", "ok");
           } catch (err) {
             setTeamStatus("Načtení členství selhalo: " + (err && err.message ? err.message : String(err)), "err");
           }
@@ -8634,69 +8664,48 @@
           }
         });
       }
-      if (teamMembershipsTeamSelect) {
-        teamMembershipsTeamSelect.addEventListener("change", function () {
-          renderMembershipsTableForTeam();
-        });
-      }
       if (teamMembershipsTbody) {
+        teamMembershipsTbody.addEventListener("change", function (e) {
+          var sel = e.target && e.target.closest ? e.target.closest("select[data-user-row-team]") : null;
+          if (!sel) return;
+          var tr = sel.closest ? sel.closest("tr") : null;
+          updateRowMembershipRoleHighlight(tr);
+        });
         teamMembershipsTbody.addEventListener("click", async function (e) {
-          var roleBtn = e.target && e.target.closest ? e.target.closest("button[data-team-user-role]") : null;
-          if (roleBtn) {
-            var membershipId = String(roleBtn.getAttribute("data-membership-id") || "").trim();
-            var newRole = String(roleBtn.getAttribute("data-role") || "").trim();
-            if (!membershipId || !newRole) return;
-            try {
-              await apiRequest("/admin/members/" + encodeURIComponent(membershipId) + "/role", {
-                method: "PATCH",
-                body: JSON.stringify({ role: newRole })
-              });
-              await refreshAdminUserViewsAfterMutation();
-              setTeamStatus("Role byla změněna na „" + newRole + "“.", "ok");
-            } catch (err) {
-              setTeamStatus("Změna role selhala: " + (err && err.message ? err.message : String(err)), "err");
-            }
+          var roleBtn = e.target && e.target.closest ? e.target.closest("button[data-mem-role-set]") : null;
+          if (!roleBtn) return;
+          var tr = roleBtn.closest ? roleBtn.closest("tr") : null;
+          if (!tr) return;
+          var userId = String(tr.getAttribute("data-user-id") || "").trim();
+          var teamSel = tr.querySelector("select[data-user-row-team]");
+          var teamId = teamSel && teamSel.value ? String(teamSel.value).trim() : "";
+          var targetRole = String(roleBtn.getAttribute("data-role") || "").trim().toLowerCase();
+          if (!userId || !targetRole) return;
+          if (!teamId) {
+            alert("Nejdřív vyberte tým v řádku uživatele.");
             return;
           }
-          var addBtn = e.target && e.target.closest ? e.target.closest("button[data-team-user-add-role-btn]") : null;
-          if (addBtn) {
-            var tr = addBtn.closest ? addBtn.closest("tr") : null;
-            if (!tr) return;
-            var userId = String(tr.getAttribute("data-user-id") || "").trim();
-            var selTeam = tr.querySelector("select[data-team-user-add-team]");
-            var orgId = selTeam && selTeam.value ? String(selTeam.value).trim() : "";
-            var addRole = String(addBtn.getAttribute("data-role") || "viewer").trim().toLowerCase();
-            if (!userId || !orgId) {
-              alert("Vyberte tým, do kterého chcete uživatele přidat.");
-              return;
-            }
-            try {
+          var existing = getMembershipFromCache(userId, teamId);
+          try {
+            if (existing && existing.membership_id != null) {
+              await apiRequest("/admin/members/" + encodeURIComponent(String(existing.membership_id)) + "/role", {
+                method: "PATCH",
+                body: JSON.stringify({ role: targetRole })
+              });
+            } else {
               await apiRequest("/admin/members", {
                 method: "POST",
                 body: JSON.stringify({
                   user_id: Number(userId),
-                  organization_id: Number(orgId),
-                  role: addRole
+                  organization_id: Number(teamId),
+                  role: targetRole
                 })
               });
-              await refreshAdminUserViewsAfterMutation();
-              setTeamStatus("Uživatel byl přidán do vybraného týmu.", "ok");
-            } catch (err) {
-              setTeamStatus("Přidání do týmu selhalo: " + (err && err.message ? err.message : String(err)), "err");
             }
-            return;
-          }
-          var btn = e.target && e.target.closest ? e.target.closest("button[data-team-user-del]") : null;
-          if (!btn) return;
-          var membershipId = String(btn.getAttribute("data-team-user-del") || "").trim();
-          if (!membershipId) return;
-          if (!confirm("Odebrat tohoto uživatele z týmu?")) return;
-          try {
-            await apiRequest("/admin/members/" + encodeURIComponent(membershipId), { method: "DELETE" });
             await refreshAdminUserViewsAfterMutation();
-            setTeamStatus("Uživatel byl odebrán.", "ok");
+            setTeamStatus("Role v týmu nastavena: " + targetRole + ".", "ok");
           } catch (err) {
-            setTeamStatus("Odebrání uživatele selhalo: " + (err && err.message ? err.message : String(err)), "err");
+            setTeamStatus("Úprava členství selhala: " + (err && err.message ? err.message : String(err)), "err");
           }
         });
       }
@@ -8746,10 +8755,6 @@
           if (teamUsersTbody) teamUsersTbody.innerHTML = "";
           if (teamMembershipsPanel) teamMembershipsPanel.hidden = true;
           if (teamMembershipsTbody) teamMembershipsTbody.innerHTML = "";
-          if (teamMembershipsTeamSelect) {
-            teamMembershipsTeamSelect.innerHTML = "<option value=\"\">— vyberte tým —</option>";
-            teamMembershipsTeamSelect.value = "";
-          }
           if (teamMembershipsAllSummary) teamMembershipsAllSummary.textContent = "";
           adminMembershipsCache = null;
           if (teamTeamsPanel) teamTeamsPanel.hidden = true;
