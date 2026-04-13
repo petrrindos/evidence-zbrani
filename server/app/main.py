@@ -323,6 +323,10 @@ class AdminGenerateIn(BaseModel):
     users_per_team: int = Field(default=3, ge=1, le=30)
 
 
+class AdminAddTeamIn(BaseModel):
+    organization_name: str = Field(min_length=2, max_length=255)
+
+
 def ensure_allowed_owner_email(ctx: AuthContext) -> None:
     actor_email = str(ctx.user.email or "").strip().lower()
     if actor_email != ALLOWED_OWNER_EMAIL:
@@ -430,6 +434,44 @@ def me(ctx: AuthContext = Depends(require_role(ROLE_VIEWER))) -> MeOut:
         organization_id=ctx.organization_id,
         role=ctx.role,
     )
+
+
+@app.post("/api/admin/teams")
+def admin_add_team(
+    payload: AdminAddTeamIn,
+    ctx: AuthContext = Depends(require_role(ROLE_VIEWER)),
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    ensure_allowed_owner_email(ctx)
+
+    team_name = payload.organization_name.strip()
+    if not team_name:
+        raise HTTPException(status_code=400, detail="Název týmu je povinný.")
+
+    org = Organization(name=team_name)
+    db.add(org)
+    db.flush()
+
+    db.add(Membership(organization_id=org.id, user_id=ctx.user.id, role=ROLE_OWNER))
+    db.add(
+        OrganizationState(
+            organization_id=org.id,
+            data_json=normalize_state({}),
+            updated_by_user_id=ctx.user.id,
+            updated_at=utc_now(),
+        )
+    )
+    log_audit(
+        db,
+        organization_id=org.id,
+        actor_user_id=ctx.user.id,
+        action="admin.team.create",
+        entity="organization",
+        entity_id=str(org.id),
+        after={"organization_name": org.name, "created_by": ctx.user.email},
+    )
+    db.commit()
+    return {"organization_id": org.id, "organization_name": org.name}
 
 
 @app.get("/api/org/members", response_model=list[MemberOut])

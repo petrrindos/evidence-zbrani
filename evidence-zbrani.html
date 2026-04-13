@@ -8214,21 +8214,17 @@
         btnTeamRegisterOwner.addEventListener("click", async function () {
           var orgName = askPromptRequired("Název nového týmu:", "");
           if (!orgName) return;
-          var ownerPassword = askPromptRequired("Heslo pro owner účet (" + TEAM_OWNER_EMAIL + "):", "");
-          if (!ownerPassword) return;
           try {
-            setTeamStatus("Registruji tým...", "");
-            var out = await apiRequest("/auth/register-owner", {
+            setTeamStatus("Přidávám tým...", "");
+            var out = await apiRequest("/admin/teams", {
               method: "POST",
               body: JSON.stringify({
-                organization_name: orgName,
-                email: TEAM_OWNER_EMAIL,
-                password: ownerPassword
+                organization_name: orgName
               })
             });
-            await loginAndLoadSharedState(out, "Tým vytvořen a přihlášení hotové");
+            setTeamStatus("Tým přidán: " + (out.organization_name || orgName), "ok");
           } catch (err) {
-            setTeamStatus("Registrace selhala: " + (err && err.message ? err.message : String(err)), "err");
+            setTeamStatus("Přidání týmu selhalo: " + (err && err.message ? err.message : String(err)), "err");
           }
         });
       }
