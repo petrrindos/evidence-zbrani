@@ -3060,6 +3060,12 @@
           <label for="teamPassword">Heslo</label>
           <input type="password" id="teamPassword" autocomplete="current-password" />
         </div>
+        <div id="teamLoginOrgWrap" hidden>
+          <label for="teamLoginOrg">Tým (pro přihlášení)</label>
+          <select id="teamLoginOrg">
+            <option value="">Vyberte tým...</option>
+          </select>
+        </div>
         <div>
           <label for="teamMemberRole">Role nového člena</label>
           <select id="teamMemberRole">
@@ -3541,8 +3547,14 @@
           try { data = JSON.parse(text); } catch (_e) { data = { detail: text }; }
         }
         if (!res.ok) {
-          var msg = data && data.detail ? data.detail : "API chyba " + res.status;
-          throw new Error(msg);
+          var detail = data && data.detail ? data.detail : null;
+          var msg = "API chyba " + res.status;
+          if (typeof detail === "string" && detail) msg = detail;
+          if (detail && typeof detail === "object" && typeof detail.message === "string" && detail.message) msg = detail.message;
+          var err = new Error(msg);
+          err.status = res.status;
+          err.data = data;
+          throw err;
         }
         return data;
       }
@@ -7244,6 +7256,7 @@
       var teamOrgNameInput = document.getElementById("teamOrgName");
       var teamEmailInput = document.getElementById("teamEmail");
       var teamPasswordInput = document.getElementById("teamPassword");
+      var teamLoginOrgInput = document.getElementById("teamLoginOrg");
       var teamMemberRoleInput = document.getElementById("teamMemberRole");
       var btnTeamRegisterOwner = document.getElementById("btnTeamRegisterOwner");
       var btnTeamLogin = document.getElementById("btnTeamLogin");
@@ -7265,6 +7278,7 @@
       var teamOrgWrap = teamOrgNameInput ? teamOrgNameInput.closest("div") : null;
       var teamEmailWrap = teamEmailInput ? teamEmailInput.closest("div") : null;
       var teamPasswordWrap = teamPasswordInput ? teamPasswordInput.closest("div") : null;
+      var teamLoginOrgWrap = teamLoginOrgInput ? teamLoginOrgInput.closest("div") : null;
       var teamRoleWrap = teamMemberRoleInput ? teamMemberRoleInput.closest("div") : null;
 
       function updateTeamAuthVisibility() {
@@ -7283,6 +7297,7 @@
         if (teamOrgWrap) teamOrgWrap.style.display = "none";
         if (teamEmailWrap) teamEmailWrap.style.display = loggedIn ? "none" : "";
         if (teamPasswordWrap) teamPasswordWrap.style.display = loggedIn ? "none" : "";
+        if (teamLoginOrgWrap) teamLoginOrgWrap.style.display = (!loggedIn && teamLoginOrgInput && teamLoginOrgInput.options.length > 1) ? "" : "none";
         if (teamRoleWrap) teamRoleWrap.style.display = "none";
         if (teamAuthToolbar) teamAuthToolbar.style.display = "";
         if (btnTeamRegisterOwner) btnTeamRegisterOwner.hidden = !ownerAllowed;
@@ -7297,13 +7312,43 @@
       }
 
       function getAuthFormData() {
+        var selectedOrg = null;
+        if (teamLoginOrgInput && teamLoginOrgInput.value) {
+          var parsedOrgId = Number(teamLoginOrgInput.value);
+          if (Number.isFinite(parsedOrgId) && parsedOrgId > 0) selectedOrg = parsedOrgId;
+        }
         return {
           apiBase: (teamApiBaseInput && teamApiBaseInput.value ? teamApiBaseInput.value : "").trim() || TEAM_API_DEFAULT,
           orgName: (teamOrgNameInput && teamOrgNameInput.value ? teamOrgNameInput.value : "").trim(),
           email: (teamEmailInput && teamEmailInput.value ? teamEmailInput.value : "").trim(),
           password: (teamPasswordInput && teamPasswordInput.value ? teamPasswordInput.value : "").trim(),
-          memberRole: (teamMemberRoleInput && teamMemberRoleInput.value ? teamMemberRoleInput.value : "viewer").trim()
+          memberRole: (teamMemberRoleInput && teamMemberRoleInput.value ? teamMemberRoleInput.value : "viewer").trim(),
+          loginOrganizationId: selectedOrg
         };
+      }
+
+      function clearTeamLoginOrgChoices() {
+        if (!teamLoginOrgInput) return;
+        teamLoginOrgInput.innerHTML = "<option value=\"\">Vyberte tým...</option>";
+        teamLoginOrgInput.value = "";
+        updateTeamAuthVisibility();
+      }
+
+      function setTeamLoginOrgChoices(orgs) {
+        if (!teamLoginOrgInput) return;
+        var rows = Array.isArray(orgs) ? orgs : [];
+        var options = ["<option value=\"\">Vyberte tým...</option>"];
+        rows.forEach(function (org) {
+          var orgId = Number(org && org.organization_id);
+          if (!Number.isFinite(orgId) || orgId <= 0) return;
+          var orgName = String(org && org.organization_name ? org.organization_name : ("Tým #" + orgId));
+          var role = String(org && org.role ? org.role : "");
+          var label = role ? (orgName + " (" + role + ")") : orgName;
+          options.push("<option value=\"" + orgId + "\">" + escapeHtmlLite(label) + "</option>");
+        });
+        teamLoginOrgInput.innerHTML = options.join("");
+        teamLoginOrgInput.value = "";
+        updateTeamAuthVisibility();
       }
 
       function askPromptRequired(label, initialValue) {
@@ -7401,6 +7446,7 @@
         renderStreleby();
         renderNakupy();
         bindTeamSession(teamSession);
+        clearTeamLoginOrgChoices();
         setTeamStatus(successText + " (role: " + teamSession.role + ")", "ok");
       }
 
@@ -8249,6 +8295,12 @@
       if (teamApiBaseInput) {
         teamApiBaseInput.value = TEAM_API_DEFAULT;
       }
+      if (teamEmailInput) {
+        teamEmailInput.addEventListener("input", clearTeamLoginOrgChoices);
+      }
+      if (teamPasswordInput) {
+        teamPasswordInput.addEventListener("input", clearTeamLoginOrgChoices);
+      }
       if (btnTeamRegisterOwner) {
         btnTeamRegisterOwner.addEventListener("click", async function () {
           var orgName = askPromptRequired("Název nového týmu:", "");
@@ -8277,11 +8329,18 @@
               method: "POST",
               body: JSON.stringify({
                 email: a.email,
-                password: a.password
+                password: a.password,
+                organization_id: a.loginOrganizationId
               })
             });
             await loginAndLoadSharedState(out, "Přihlášení úspěšné");
           } catch (err) {
+            var detail = err && err.data ? err.data.detail : null;
+            if (err && err.status === 409 && detail && typeof detail === "object" && Array.isArray(detail.organizations)) {
+              setTeamLoginOrgChoices(detail.organizations);
+              setTeamStatus(detail.message || "Vyberte tým a klikněte znovu na Přihlásit.", "err");
+              return;
+            }
             setTeamStatus("Přihlášení selhalo: " + (err && err.message ? err.message : String(err)), "err");
           }
         });
@@ -8404,6 +8463,7 @@
       if (btnTeamLogout) {
         btnTeamLogout.addEventListener("click", function () {
           bindTeamSession(null);
+          clearTeamLoginOrgChoices();
           remoteStateCache = null;
           saveRemoteTimer = 0;
           if (teamUsersPanel) teamUsersPanel.hidden = true;

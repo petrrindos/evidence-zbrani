@@ -419,7 +419,29 @@ def login(payload: LoginIn, db: Session = Depends(get_db)) -> TokenOut:
         if not membership:
             raise HTTPException(status_code=403, detail="Uživatel není členem vybrané organizace.")
     else:
-        membership = memberships[0]
+        if len(memberships) == 1:
+            membership = memberships[0]
+        else:
+            org_ids = [m.organization_id for m in memberships]
+            orgs = db.scalars(select(Organization).where(Organization.id.in_(org_ids))).all()
+            org_name_by_id = {o.id: o.name for o in orgs}
+            options: list[dict[str, Any]] = []
+            for m in memberships:
+                options.append(
+                    {
+                        "organization_id": m.organization_id,
+                        "organization_name": org_name_by_id.get(m.organization_id) or f"Tým #{m.organization_id}",
+                        "role": m.role,
+                    }
+                )
+            options.sort(key=lambda x: str(x.get("organization_name") or "").lower())
+            raise HTTPException(
+                status_code=409,
+                detail={
+                    "message": "Uživatel je členem více týmů. Vyberte tým a přihlaste se znovu.",
+                    "organizations": options,
+                },
+            )
 
     token = create_token(user_id=user.id, organization_id=membership.organization_id, role=membership.role)
     return TokenOut(access_token=token, role=membership.role, organization_id=membership.organization_id)
