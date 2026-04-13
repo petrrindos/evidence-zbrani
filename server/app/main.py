@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import secrets
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from typing import Any
@@ -300,6 +301,11 @@ class AuditOut(BaseModel):
     created_at: datetime
 
 
+class AdminGenerateIn(BaseModel):
+    teams_count: int = Field(default=1, ge=1, le=30)
+    users_per_team: int = Field(default=3, ge=1, le=30)
+
+
 app = FastAPI(title="Evidence zbraní API", version="1.0.0")
 
 app.add_middleware(
@@ -557,3 +563,65 @@ def get_audit_logs(
         )
         for r in rows
     ]
+
+
+@app.post("/api/admin/generate-teams-users")
+def admin_generate_teams_users(
+    payload: AdminGenerateIn,
+    ctx: AuthContext = Depends(require_role(ROLE_VIEWER)),
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    actor_email = str(ctx.user.email or "").strip().lower()
+    if actor_email != ALLOWED_OWNER_EMAIL:
+        raise HTTPException(status_code=403, detail="Tato operace je povolena jen pro autorizovaný e-mail.")
+
+    created: list[dict[str, Any]] = []
+    stamp = datetime.now(UTC).strftime("%Y%m%d%H%M")
+
+    for t_idx in range(1, payload.teams_count + 1):
+        org_name = f"Team {stamp}-{t_idx}"
+        org = Organization(name=org_name)
+        db.add(org)
+        db.flush()
+
+        team_users: list[dict[str, Any]] = []
+        for u_idx in range(1, payload.users_per_team + 1):
+            local = f"team{stamp}{t_idx:02d}u{u_idx:02d}_{secrets.token_hex(2)}"
+            email = f"{local}@example.local"
+            password = "Pw_" + secrets.token_urlsafe(10)
+            role = ROLE_ADMIN if u_idx == 1 else ROLE_EDITOR
+            user = User(
+                email=email,
+                password_hash=hash_password(password),
+                full_name=f"User {t_idx}-{u_idx}",
+            )
+            db.add(user)
+            db.flush()
+            db.add(Membership(organization_id=org.id, user_id=user.id, role=role))
+            team_users.append({"email": email, "password": password, "role": role})
+
+        db.add(
+            OrganizationState(
+                organization_id=org.id,
+                data_json=normalize_state({}),
+                updated_by_user_id=ctx.user.id,
+            )
+        )
+        log_audit(
+            db,
+            organization_id=org.id,
+            actor_user_id=ctx.user.id,
+            action="admin.seed.generate",
+            entity="organization",
+            entity_id=str(org.id),
+            after={"organization_name": org_name, "users_count": len(team_users)},
+            meta={"generated_by": actor_email},
+        )
+        created.append({"organization_id": org.id, "organization_name": org_name, "users": team_users})
+
+    db.commit()
+    return {
+        "created_teams": created,
+        "generated_at": datetime.now(UTC).isoformat(),
+        "generated_by": actor_email,
+    }

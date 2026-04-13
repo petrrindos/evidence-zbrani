@@ -27,3 +27,4 @@ uvicorn app.main:app --reload --port 8000
 - `GET /api/org/members` - list members (admin+)
 - `POST /api/org/members` - add member (admin+/owner)
 - `GET /api/audit` - audit log (admin+)
+- `POST /api/admin/generate-teams-users` - generate teams/users (allowed owner email only)
