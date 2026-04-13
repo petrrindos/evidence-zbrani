@@ -3152,7 +3152,7 @@
       <div id="teamMembershipsPanel" class="team-users-panel" hidden>
         <p id="teamMembershipsAllSummary" class="team-memberships-hint" style="margin:0 0 0.45rem;font-size:0.82rem;color:var(--muted);"></p>
         <p class="team-memberships-hint" style="margin:0 0 0.55rem;font-size:0.78rem;color:var(--muted);">
-          U každého uživatele vyberte tým — zeleně se zvýrazní jeho role (owner / admin / viewer). Kliknutím na roli roli nastavíte nebo uživatele do týmu přidáte.
+          U každého uživatele vyberte tým — zeleně se zvýrazní jeho role (owner / admin / viewer). Klik na nezelenou roli ji nastaví nebo uživatele do týmu přidá; klik na zelenou roli uživatele z týmu odebere.
         </p>
         <table aria-label="Členství uživatelů v týmech">
           <thead>
@@ -8704,6 +8704,19 @@
           }
           var existing = getMembershipFromCache(userId, teamId);
           try {
+            if (
+              existing &&
+              existing.membership_id != null &&
+              String(existing.role || "").toLowerCase() === targetRole &&
+              (targetRole === "owner" || targetRole === "admin" || targetRole === "viewer")
+            ) {
+              await apiRequest("/admin/members/" + encodeURIComponent(String(existing.membership_id)), {
+                method: "DELETE"
+              });
+              await refreshAdminUserViewsAfterMutation();
+              setTeamStatus("Uživatel byl odebrán z vybraného týmu.", "ok");
+              return;
+            }
             if (existing && existing.membership_id != null) {
               await apiRequest("/admin/members/" + encodeURIComponent(String(existing.membership_id)) + "/role", {
                 method: "PATCH",
