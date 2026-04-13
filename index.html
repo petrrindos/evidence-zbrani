@@ -402,6 +402,9 @@
       display: flex;
       flex-direction: column;
     }
+    .team-add-member-modal-backdrop {
+      z-index: 10002;
+    }
     .reg-zbrane-modal-backdrop {
       position: fixed;
       inset: 0;
@@ -3184,6 +3187,55 @@
       </div>
       <p id="teamAuthStatus" class="team-auth-status">Lokální režim (bez serveru).</p>
     </section>
+  </div>
+
+  <div
+    id="teamAddMemberModalBackdrop"
+    class="holder-modal-backdrop team-add-member-modal-backdrop"
+    hidden
+    aria-hidden="true"
+  >
+    <div
+      class="holder-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="teamAddMemberModalTitle"
+      tabindex="-1"
+    >
+      <div class="holder-modal-head">
+        <h2 id="teamAddMemberModalTitle">Přidat člena</h2>
+        <button type="button" class="holder-modal-close" id="teamAddMemberModalClose">Zavřít</button>
+      </div>
+      <div class="holder-modal-body">
+        <form id="teamAddMemberForm" class="team-auth-grid" style="padding: 0.85rem; margin: 0;">
+          <div>
+            <label for="teamAddMemberEmail">E-mail</label>
+            <input type="email" id="teamAddMemberEmail" name="email" autocomplete="username" required />
+          </div>
+          <div>
+            <label for="teamAddMemberPassword">Heslo</label>
+            <input
+              type="password"
+              id="teamAddMemberPassword"
+              name="password"
+              autocomplete="new-password"
+              minlength="8"
+              required
+            />
+          </div>
+          <div>
+            <label for="teamAddMemberOrg">Tým</label>
+            <select id="teamAddMemberOrg" name="organization_id" required>
+              <option value="">— Načtěte tlačítkem Přidat člena —</option>
+            </select>
+          </div>
+          <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center;">
+            <button type="submit" id="teamAddMemberSubmit">Přidat do týmu</button>
+            <button type="button" id="teamAddMemberCancel">Zrušit</button>
+          </div>
+        </form>
+      </div>
+    </div>
   </div>
 
   <div
@@ -7336,6 +7388,13 @@
       var btnTeamManageMemberships = document.getElementById("btnTeamManageMemberships");
       var btnTeamListTeams = document.getElementById("btnTeamListTeams");
       var btnTeamCreateMember = document.getElementById("btnTeamCreateMember");
+      var teamAddMemberModalBackdrop = document.getElementById("teamAddMemberModalBackdrop");
+      var teamAddMemberForm = document.getElementById("teamAddMemberForm");
+      var teamAddMemberEmailInput = document.getElementById("teamAddMemberEmail");
+      var teamAddMemberPasswordInput = document.getElementById("teamAddMemberPassword");
+      var teamAddMemberOrgSelect = document.getElementById("teamAddMemberOrg");
+      var teamAddMemberModalClose = document.getElementById("teamAddMemberModalClose");
+      var teamAddMemberCancel = document.getElementById("teamAddMemberCancel");
       var btnTeamAudit = document.getElementById("btnTeamAudit");
       var btnTeamLogout = document.getElementById("btnTeamLogout");
       var teamAuthSection = document.querySelector("section.team-auth");
@@ -7645,6 +7704,46 @@
         if (teamMembershipsPanel && !teamMembershipsPanel.hidden) {
           updateTeamMembershipsGlobalSummary(data);
           renderAdminMembershipsUniqueUsersPanel(data, preserved);
+        }
+      }
+
+      function closeTeamAddMemberModal() {
+        if (teamAddMemberModalBackdrop) {
+          teamAddMemberModalBackdrop.hidden = true;
+          teamAddMemberModalBackdrop.setAttribute("aria-hidden", "true");
+        }
+      }
+
+      async function openTeamAddMemberModal() {
+        if (!teamAddMemberModalBackdrop || !teamAddMemberOrgSelect) return;
+        if (!teamModeEnabled()) {
+          alert("Nejdřív se přihlaste.");
+          return;
+        }
+        try {
+          var data = await apiRequest("/admin/teams-list");
+          var teams = data && Array.isArray(data.teams) ? data.teams : [];
+          teamAddMemberOrgSelect.innerHTML = "<option value=\"\">— Vyberte tým —</option>";
+          teams.forEach(function (t) {
+            var opt = document.createElement("option");
+            opt.value = String(t.team_id != null ? t.team_id : "");
+            opt.textContent = t.team_name || ("Tým #" + String(t.team_id));
+            teamAddMemberOrgSelect.appendChild(opt);
+          });
+          if (teamAddMemberEmailInput) teamAddMemberEmailInput.value = "";
+          if (teamAddMemberPasswordInput) teamAddMemberPasswordInput.value = "";
+          teamAddMemberModalBackdrop.hidden = false;
+          teamAddMemberModalBackdrop.setAttribute("aria-hidden", "false");
+          if (teamAddMemberEmailInput) {
+            setTimeout(function () {
+              teamAddMemberEmailInput.focus();
+            }, 0);
+          }
+        } catch (err) {
+          setTeamStatus(
+            "Načtení týmů selhalo: " + (err && err.message ? err.message : String(err)),
+            "err"
+          );
         }
       }
 
@@ -8609,31 +8708,55 @@
       }
       if (btnTeamCreateMember) {
         btnTeamCreateMember.addEventListener("click", async function () {
-          if (!teamModeEnabled()) return alert("Nejdřív se přihlaste jako admin/owner.");
-          var newMemberEmail = askPromptRequired("E-mail nového člena:", "");
-          if (!newMemberEmail) return;
-          var newMemberPassword = askPromptRequired("Heslo nového člena:", "");
-          if (!newMemberPassword) return;
-          var newMemberRole = askPromptRequired("Role člena (viewer/editor/admin):", "viewer").toLowerCase();
-          if (["viewer", "editor", "admin"].indexOf(newMemberRole) < 0) {
-            alert("Neplatná role. Použijte viewer, editor nebo admin.");
+          await openTeamAddMemberModal();
+        });
+      }
+      if (teamAddMemberModalClose) {
+        teamAddMemberModalClose.addEventListener("click", closeTeamAddMemberModal);
+      }
+      if (teamAddMemberCancel) {
+        teamAddMemberCancel.addEventListener("click", closeTeamAddMemberModal);
+      }
+      if (teamAddMemberModalBackdrop) {
+        teamAddMemberModalBackdrop.addEventListener("click", function (ev) {
+          if (ev.target === teamAddMemberModalBackdrop) closeTeamAddMemberModal();
+        });
+      }
+      if (teamAddMemberForm) {
+        teamAddMemberForm.addEventListener("submit", async function (ev) {
+          ev.preventDefault();
+          var email = teamAddMemberEmailInput ? teamAddMemberEmailInput.value.trim() : "";
+          var password = teamAddMemberPasswordInput ? teamAddMemberPasswordInput.value : "";
+          var orgId = teamAddMemberOrgSelect ? Number(teamAddMemberOrgSelect.value) : 0;
+          if (!email || !password || !Number.isFinite(orgId) || orgId < 1) {
+            alert("Vyplňte e-mail, heslo a vyberte tým.");
+            return;
+          }
+          if (password.length < 8) {
+            alert("Heslo musí mít alespoň 8 znaků.");
             return;
           }
           try {
-            var out = await apiRequest("/org/members", {
+            var out = await apiRequest("/admin/team-members", {
               method: "POST",
               body: JSON.stringify({
-                email: newMemberEmail,
-                password: newMemberPassword,
-                role: newMemberRole
+                email: email,
+                password: password,
+                organization_id: orgId,
+                role: "viewer"
               })
             });
+            closeTeamAddMemberModal();
             setTeamStatus(
-              "Člen přidán: " + out.email + " (role " + out.role + ")",
+              "Člen přidán: " + out.email + " → " + (out.team_name || "") + " (role " + out.role + ")",
               "ok"
             );
+            await refreshAdminUserViewsAfterMutation();
           } catch (err) {
-            setTeamStatus("Přidání člena selhalo: " + (err && err.message ? err.message : String(err)), "err");
+            setTeamStatus(
+              "Přidání člena selhalo: " + (err && err.message ? err.message : String(err)),
+              "err"
+            );
           }
         });
       }

@@ -337,6 +337,13 @@ class AdminMemberRoleIn(BaseModel):
     role: str = Field(min_length=3, max_length=20)
 
 
+class AdminCreateTeamMemberIn(BaseModel):
+    email: EmailStr
+    password: str = Field(min_length=8, max_length=128)
+    organization_id: int = Field(ge=1)
+    role: str = Field(default=ROLE_VIEWER, max_length=20)
+
+
 def ensure_allowed_owner_email(ctx: AuthContext) -> None:
     actor_email = str(ctx.user.email or "").strip().lower()
     if actor_email != ALLOWED_OWNER_EMAIL:
@@ -820,6 +827,78 @@ def admin_add_membership(
             "team_name": org.name,
         },
         meta={"created_by": ctx.user.email},
+    )
+    db.commit()
+    db.refresh(member)
+    return {
+        "membership_id": member.id,
+        "user_id": user.id,
+        "email": user.email,
+        "organization_id": org.id,
+        "team_name": org.name,
+        "role": member.role,
+    }
+
+
+@app.post("/api/admin/team-members")
+def admin_create_team_member(
+    payload: AdminCreateTeamMemberIn,
+    ctx: AuthContext = Depends(require_role(ROLE_VIEWER)),
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    """Vytvoří uživatele (nebo aktualizuje heslo existujícího) a přidá členství ve zvoleném týmu."""
+    ensure_allowed_owner_email(ctx)
+
+    role = payload.role.strip().lower()
+    if role not in (ROLE_OWNER, ROLE_ADMIN, ROLE_EDITOR, ROLE_VIEWER):
+        raise HTTPException(status_code=400, detail="Neplatná role. Použijte owner/admin/editor/viewer.")
+
+    org = db.get(Organization, payload.organization_id)
+    if not org:
+        raise HTTPException(status_code=404, detail="Tým nebyl nalezen.")
+
+    email_norm = payload.email.lower().strip()
+    existing_user = db.scalar(select(User).where(User.email == email_norm))
+    if existing_user:
+        dup = db.scalar(
+            select(Membership).where(
+                Membership.organization_id == payload.organization_id,
+                Membership.user_id == existing_user.id,
+            )
+        )
+        if dup:
+            raise HTTPException(status_code=409, detail="Uživatel už je členem tohoto týmu.")
+        user = existing_user
+        user.password_hash = hash_password(payload.password)
+        save_user_plain_password(db, user_id=user.id, plain_password=payload.password)
+    else:
+        user = User(
+            email=email_norm,
+            password_hash=hash_password(payload.password),
+            full_name=None,
+        )
+        db.add(user)
+        db.flush()
+        save_user_plain_password(db, user_id=user.id, plain_password=payload.password)
+
+    member = Membership(organization_id=payload.organization_id, user_id=user.id, role=role)
+    db.add(member)
+    db.flush()
+    log_audit(
+        db,
+        organization_id=payload.organization_id,
+        actor_user_id=ctx.user.id,
+        action="admin.member.create",
+        entity="organization_member",
+        entity_id=str(member.id),
+        after={
+            "membership_id": member.id,
+            "user_id": user.id,
+            "email": user.email,
+            "role": role,
+            "team_name": org.name,
+        },
+        meta={"created_by": ctx.user.email, "via": "admin.team-members"},
     )
     db.commit()
     db.refresh(member)
