@@ -3072,7 +3072,6 @@
       <div class="toolbar" style="margin:0;">
         <button type="button" class="primary" id="btnTeamRegisterOwner">Registrovat tým + owner</button>
         <button type="button" id="btnTeamLogin">Přihlásit</button>
-        <button type="button" id="btnTeamGenerateSeed">Generovat týmy + uživatele</button>
         <button type="button" id="btnTeamListUsers">Vypsat uživatele</button>
         <button type="button" id="btnTeamCreateMember">Přidat člena</button>
         <button type="button" id="btnTeamAudit">Stáhnout audit JSON</button>
@@ -7234,7 +7233,6 @@
       var teamMemberRoleInput = document.getElementById("teamMemberRole");
       var btnTeamRegisterOwner = document.getElementById("btnTeamRegisterOwner");
       var btnTeamLogin = document.getElementById("btnTeamLogin");
-      var btnTeamGenerateSeed = document.getElementById("btnTeamGenerateSeed");
       var btnTeamListUsers = document.getElementById("btnTeamListUsers");
       var btnTeamCreateMember = document.getElementById("btnTeamCreateMember");
       var btnTeamAudit = document.getElementById("btnTeamAudit");
@@ -7272,7 +7270,6 @@
         if (teamAuthToolbar) teamAuthToolbar.style.display = "";
         if (btnTeamRegisterOwner) btnTeamRegisterOwner.hidden = !ownerAllowed;
         if (btnTeamLogin) btnTeamLogin.hidden = loggedIn;
-        if (btnTeamGenerateSeed) btnTeamGenerateSeed.hidden = !ownerAllowed;
         if (btnTeamListUsers) btnTeamListUsers.hidden = !ownerAllowed;
         if (btnTeamCreateMember) btnTeamCreateMember.hidden = !ownerAllowed;
         if (btnTeamAudit) btnTeamAudit.hidden = !ownerAllowed;
@@ -8279,35 +8276,6 @@
             );
           } catch (err) {
             setTeamStatus("Přidání člena selhalo: " + (err && err.message ? err.message : String(err)), "err");
-          }
-        });
-      }
-      if (btnTeamGenerateSeed) {
-        btnTeamGenerateSeed.addEventListener("click", async function () {
-          if (!teamModeEnabled()) return alert("Nejdřív se přihlaste.");
-          var countTeams = parseInt(askPromptRequired("Kolik týmů vygenerovat? (1-30)", "1"), 10);
-          if (!(countTeams >= 1 && countTeams <= 30)) return alert("Počet týmů musí být 1 až 30.");
-          var usersPerTeam = parseInt(askPromptRequired("Kolik uživatelů na tým? (1-30)", "3"), 10);
-          if (!(usersPerTeam >= 1 && usersPerTeam <= 30)) return alert("Počet uživatelů musí být 1 až 30.");
-          try {
-            var generated = await apiRequest("/admin/generate-teams-users", {
-              method: "POST",
-              body: JSON.stringify({
-                teams_count: countTeams,
-                users_per_team: usersPerTeam
-              })
-            });
-            var blob = new Blob([JSON.stringify(generated, null, 2)], { type: "application/json" });
-            var dl = document.createElement("a");
-            dl.href = URL.createObjectURL(blob);
-            dl.download = "vygenerovane-tymy-a-uzivatele.json";
-            document.body.appendChild(dl);
-            dl.click();
-            dl.remove();
-            URL.revokeObjectURL(dl.href);
-            setTeamStatus("Vygenerováno: " + countTeams + " týmů, export stažen.", "ok");
-          } catch (err) {
-            setTeamStatus("Generování selhalo: " + (err && err.message ? err.message : String(err)), "err");
           }
         });
       }
