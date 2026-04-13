@@ -7438,12 +7438,11 @@
                     roleBtn("owner") + roleBtn("admin") + roleBtn("viewer") +
                   "</span>" +
                   "<select data-team-user-add-team aria-label=\"Přidat do týmu\">" + teamOpts + "</select>" +
-                  "<select data-team-user-add-role aria-label=\"Role při přidání\">" +
-                    "<option value=\"owner\">owner</option>" +
-                    "<option value=\"admin\">admin</option>" +
-                    "<option value=\"viewer\" selected>viewer</option>" +
-                  "</select>" +
-                  "<button type=\"button\" data-team-user-add>Přidat</button>" +
+                  "<span class=\"team-user-role-group\" title=\"Přidat do týmu jako role\">" +
+                    "<button type=\"button\" class=\"team-user-role-btn\" data-team-user-add-role-btn data-role=\"owner\">Přidat owner</button>" +
+                    "<button type=\"button\" class=\"team-user-role-btn\" data-team-user-add-role-btn data-role=\"admin\">Přidat admin</button>" +
+                    "<button type=\"button\" class=\"team-user-role-btn\" data-team-user-add-role-btn data-role=\"viewer\">Přidat viewer</button>" +
+                  "</span>" +
                   "<button type=\"button\" class=\"danger\" data-team-user-del=\"" + mid + "\">Odebrat</button>" +
                 "</div>" +
               "</td>" +
@@ -8494,15 +8493,14 @@
             }
             return;
           }
-          var addBtn = e.target && e.target.closest ? e.target.closest("button[data-team-user-add]") : null;
+          var addBtn = e.target && e.target.closest ? e.target.closest("button[data-team-user-add-role-btn]") : null;
           if (addBtn) {
             var tr = addBtn.closest ? addBtn.closest("tr") : null;
             if (!tr) return;
             var userId = String(tr.getAttribute("data-user-id") || "").trim();
             var selTeam = tr.querySelector("select[data-team-user-add-team]");
-            var selRole = tr.querySelector("select[data-team-user-add-role]");
             var orgId = selTeam && selTeam.value ? String(selTeam.value).trim() : "";
-            var addRole = selRole && selRole.value ? String(selRole.value).trim() : "viewer";
+            var addRole = String(addBtn.getAttribute("data-role") || "viewer").trim().toLowerCase();
             if (!userId || !orgId) {
               alert("Vyberte tým, do kterého chcete uživatele přidat.");
               return;
