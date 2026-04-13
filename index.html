@@ -7783,9 +7783,20 @@
           .map(function (m) {
             var mid = m.membership_id != null ? String(m.membership_id) : "";
             var uid = m.user_id != null ? Number(m.user_id) : NaN;
-            var isSelf = Number.isFinite(myUid) && Number.isFinite(uid) && uid === myUid;
-            var removeCell = isSelf
-              ? "<span title=\"Vlastní účet z týmu neodebereš tímto tlačítkem.\">—</span>"
+            var rowTeamNum = Number(tid);
+            var activeOrgNum =
+              teamSession && teamSession.organizationId != null
+                ? Number(teamSession.organizationId)
+                : NaN;
+            var blockSelfFromActiveTeam =
+              Number.isFinite(myUid) &&
+              Number.isFinite(uid) &&
+              uid === myUid &&
+              Number.isFinite(rowTeamNum) &&
+              Number.isFinite(activeOrgNum) &&
+              rowTeamNum === activeOrgNum;
+            var removeCell = blockSelfFromActiveTeam
+              ? "<span title=\"Z aktivního týmu (ve kterém jste přihlášeni) se tímto neodeberete — nejdřív přepněte tým nebo se odhlaste.\">—</span>"
               : "<button type=\"button\" class=\"danger\" data-member-remove=\"" +
                 escapeHtmlLite(mid) +
                 "\" data-member-team=\"" +
@@ -8959,7 +8970,10 @@
               existing &&
               existing.membership_id != null &&
               String(existing.role || "").toLowerCase() === targetRole &&
-              (targetRole === "owner" || targetRole === "admin" || targetRole === "viewer")
+              (targetRole === "owner" ||
+                targetRole === "admin" ||
+                targetRole === "editor" ||
+                targetRole === "viewer")
             ) {
               await apiRequest("/admin/members/" + encodeURIComponent(String(existing.membership_id)), {
                 method: "DELETE"

@@ -736,8 +736,11 @@ def admin_remove_member(
     membership = db.get(Membership, membership_id)
     if not membership:
         raise HTTPException(status_code=404, detail="Členství nebylo nalezeno.")
-    if membership.user_id == ctx.user.id:
-        raise HTTPException(status_code=400, detail="Nelze odebrat právě přihlášeného uživatele.")
+    if membership.user_id == ctx.user.id and membership.organization_id == ctx.organization_id:
+        raise HTTPException(
+            status_code=400,
+            detail="Nelze odebrat sebe z týmu, ve kterém jste právě přihlášeni. Nejdřív se přihlaste do jiného týmu nebo se odhlaste.",
+        )
 
     user = db.get(User, membership.user_id)
     org = db.get(Organization, membership.organization_id)
