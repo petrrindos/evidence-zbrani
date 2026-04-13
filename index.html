@@ -3005,7 +3005,7 @@
       <div class="team-auth-grid">
         <div>
           <label for="teamApiBase">API URL</label>
-          <input type="text" id="teamApiBase" placeholder="http://127.0.0.1:8000/api" />
+          <input type="text" id="teamApiBase" value="https://evidence-zbrani.onrender.com/api" placeholder="https://evidence-zbrani.onrender.com/api" />
         </div>
         <div>
           <label for="teamOrgName">Název týmu (jen při registraci)</label>
@@ -3388,6 +3388,7 @@
       var strelebyPdfPreviewRevealed = false;
       var strelebyPdfZbranSelectInitialized = false;
       var SESSION_KEY = "cz.app.evidenceZbrani.teamSession.v1";
+      var TEAM_API_DEFAULT = "https://evidence-zbrani.onrender.com/api";
       var teamSession = null;
       var remoteStateCache = null;
       var saveRemoteTimer = 0;
@@ -3400,7 +3401,7 @@
       function getTeamApiBase() {
         var el = document.getElementById("teamApiBase");
         var s = el ? String(el.value || "").trim() : "";
-        if (!s) s = "http://127.0.0.1:8000/api";
+        if (!s) s = TEAM_API_DEFAULT;
         return s.replace(/\/+$/, "");
       }
 
@@ -7182,7 +7183,7 @@
 
       function getAuthFormData() {
         return {
-          apiBase: (teamApiBaseInput && teamApiBaseInput.value ? teamApiBaseInput.value : "").trim() || "http://127.0.0.1:8000/api",
+          apiBase: (teamApiBaseInput && teamApiBaseInput.value ? teamApiBaseInput.value : "").trim() || TEAM_API_DEFAULT,
           orgName: (teamOrgNameInput && teamOrgNameInput.value ? teamOrgNameInput.value : "").trim(),
           email: (teamEmailInput && teamEmailInput.value ? teamEmailInput.value : "").trim(),
           password: (teamPasswordInput && teamPasswordInput.value ? teamPasswordInput.value : "").trim(),
@@ -7236,7 +7237,7 @@
           bindTeamSession(null);
           return;
         }
-        if (teamApiBaseInput && !teamApiBaseInput.value && s.apiBase) teamApiBaseInput.value = s.apiBase;
+        if (teamApiBaseInput) teamApiBaseInput.value = TEAM_API_DEFAULT;
         teamSession = s;
         try {
           var me = await apiRequest("/auth/me");
@@ -8073,8 +8074,7 @@
       }
 
       if (teamApiBaseInput) {
-        var restoredSession = loadTeamSession();
-        teamApiBaseInput.value = (restoredSession && restoredSession.apiBase) || "http://127.0.0.1:8000/api";
+        teamApiBaseInput.value = TEAM_API_DEFAULT;
       }
       if (btnTeamRegisterOwner) {
         btnTeamRegisterOwner.addEventListener("click", async function () {
