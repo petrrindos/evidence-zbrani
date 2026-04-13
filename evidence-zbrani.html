@@ -425,6 +425,16 @@
       display: flex;
       flex-direction: column;
     }
+    .team-auth-modal-backdrop {
+      z-index: 10001;
+    }
+    .team-auth-modal-dialog {
+      max-width: min(58rem, 98vw);
+    }
+    .team-auth-modal-dialog .team-auth {
+      margin-top: 0 !important;
+      margin-bottom: 0;
+    }
     .team-add-member-modal-backdrop {
       z-index: 10002;
     }
@@ -3140,67 +3150,89 @@
         </button>
       </div>
     </div>
-    <section class="team-auth" aria-label="Týmový režim" style="margin-top:0.5cm;">
-      <header class="team-auth-head">
-        <h2 class="team-auth-title">SÍŤOVÝ PŘÍSTUP</h2>
-        <div class="team-auth-head-actions">
-          <button type="button" id="btnTeamAudit">Stáhnout audit JSON</button>
-          <button type="button" id="btnTeamLogout">Odhlásit</button>
+    <div id="teamAuthSectionHost">
+      <section class="team-auth" aria-label="Týmový režim" style="margin-top:0.5cm;">
+        <header class="team-auth-head">
+          <h2 class="team-auth-title">SÍŤOVÝ PŘÍSTUP</h2>
+          <div class="team-auth-head-actions">
+            <button type="button" id="btnTeamAudit">Stáhnout audit JSON</button>
+            <button type="button" id="btnTeamLogout">Odhlásit</button>
+          </div>
+        </header>
+        <div class="team-auth-grid">
+          <div>
+            <label for="teamApiBase">API URL</label>
+            <input type="text" id="teamApiBase" value="https://evidence-zbrani.onrender.com/api" placeholder="https://evidence-zbrani.onrender.com/api" />
+          </div>
+          <div>
+            <label for="teamOrgName">Název týmu (jen při registraci)</label>
+            <input type="text" id="teamOrgName" placeholder="Např. Club Praha" />
+          </div>
+          <div>
+            <label for="teamEmail">E-mail</label>
+            <input type="email" id="teamEmail" autocomplete="username" />
+          </div>
+          <div>
+            <label for="teamPassword">Heslo</label>
+            <input type="password" id="teamPassword" autocomplete="current-password" />
+          </div>
+          <div id="teamLoginOrgWrap">
+            <label for="teamLoginOrg">Tým (pro přihlášení)</label>
+            <select id="teamLoginOrg">
+              <option value="">Nejdřív klikněte na Přihlásit</option>
+            </select>
+          </div>
+          <div>
+            <label for="teamMemberRole">Role nového člena</label>
+            <select id="teamMemberRole">
+              <option value="viewer">viewer</option>
+              <option value="editor">editor</option>
+              <option value="admin">admin</option>
+            </select>
+          </div>
         </div>
-      </header>
-      <div class="team-auth-grid">
-        <div>
-          <label for="teamApiBase">API URL</label>
-          <input type="text" id="teamApiBase" value="https://evidence-zbrani.onrender.com/api" placeholder="https://evidence-zbrani.onrender.com/api" />
+        <div class="toolbar" style="margin:0;">
+          <button type="button" id="btnTeamLogin">Přihlásit</button>
+          <button type="button" id="btnTeamListUsers">Vypsat uživatele</button>
+          <button type="button" id="btnTeamManageMemberships">Členství v týmech</button>
+          <button type="button" id="btnTeamListTeams">Vypsat týmy</button>
+          <button type="button" id="btnTeamCreateMember">Přidat člena</button>
+          <button type="button" id="btnTeamRegisterOwner">Přidat tým</button>
         </div>
-        <div>
-          <label for="teamOrgName">Název týmu (jen při registraci)</label>
-          <input type="text" id="teamOrgName" placeholder="Např. Club Praha" />
+        <div id="teamUsersPanel" class="team-users-panel" hidden>
+          <table aria-label="Seznam uživatelů (e-mail a heslo)">
+            <thead>
+              <tr>
+                <th>E-mail</th>
+                <th>Heslo</th>
+              </tr>
+            </thead>
+            <tbody id="teamUsersTbody"></tbody>
+          </table>
         </div>
-        <div>
-          <label for="teamEmail">E-mail</label>
-          <input type="email" id="teamEmail" autocomplete="username" />
+        <p id="teamAuthStatus" class="team-auth-status">Lokální režim (bez serveru).</p>
+      </section>
+    </div>
+
+    <div
+      id="teamAuthModalBackdrop"
+      class="holder-modal-backdrop team-auth-modal-backdrop"
+      hidden
+      aria-hidden="true"
+    >
+      <div
+        class="holder-modal team-auth-modal-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="teamAuthModalTitle"
+        tabindex="-1"
+      >
+        <div class="holder-modal-head">
+          <h2 id="teamAuthModalTitle">SÍŤOVÝ PŘÍSTUP</h2>
         </div>
-        <div>
-          <label for="teamPassword">Heslo</label>
-          <input type="password" id="teamPassword" autocomplete="current-password" />
-        </div>
-        <div id="teamLoginOrgWrap">
-          <label for="teamLoginOrg">Tým (pro přihlášení)</label>
-          <select id="teamLoginOrg">
-            <option value="">Nejdřív klikněte na Přihlásit</option>
-          </select>
-        </div>
-        <div>
-          <label for="teamMemberRole">Role nového člena</label>
-          <select id="teamMemberRole">
-            <option value="viewer">viewer</option>
-            <option value="editor">editor</option>
-            <option value="admin">admin</option>
-          </select>
-        </div>
+        <div class="holder-modal-body" id="teamAuthModalBody"></div>
       </div>
-      <div class="toolbar" style="margin:0;">
-        <button type="button" id="btnTeamLogin">Přihlásit</button>
-        <button type="button" id="btnTeamListUsers">Vypsat uživatele</button>
-        <button type="button" id="btnTeamManageMemberships">Členství v týmech</button>
-        <button type="button" id="btnTeamListTeams">Vypsat týmy</button>
-        <button type="button" id="btnTeamCreateMember">Přidat člena</button>
-        <button type="button" id="btnTeamRegisterOwner">Přidat tým</button>
-      </div>
-      <div id="teamUsersPanel" class="team-users-panel" hidden>
-        <table aria-label="Seznam uživatelů (e-mail a heslo)">
-          <thead>
-            <tr>
-              <th>E-mail</th>
-              <th>Heslo</th>
-            </tr>
-          </thead>
-          <tbody id="teamUsersTbody"></tbody>
-        </table>
-      </div>
-      <p id="teamAuthStatus" class="team-auth-status">Lokální režim (bez serveru).</p>
-    </section>
+    </div>
   </div>
 
   <div
@@ -7536,6 +7568,9 @@
       var btnTeamManageMemberships = document.getElementById("btnTeamManageMemberships");
       var btnTeamListTeams = document.getElementById("btnTeamListTeams");
       var btnTeamCreateMember = document.getElementById("btnTeamCreateMember");
+      var teamAuthSectionHost = document.getElementById("teamAuthSectionHost");
+      var teamAuthModalBackdrop = document.getElementById("teamAuthModalBackdrop");
+      var teamAuthModalBody = document.getElementById("teamAuthModalBody");
       var teamAddMemberModalBackdrop = document.getElementById("teamAddMemberModalBackdrop");
       var teamAddMemberForm = document.getElementById("teamAddMemberForm");
       var teamAddMemberEmailInput = document.getElementById("teamAddMemberEmail");
@@ -7577,8 +7612,28 @@
       var teamLoginOrgWrap = teamLoginOrgInput ? teamLoginOrgInput.closest("div") : null;
       var teamRoleWrap = teamMemberRoleInput ? teamMemberRoleInput.closest("div") : null;
 
+      function syncTeamAuthPlacement(loggedIn) {
+        if (!teamAuthSection || !teamAuthSectionHost || !teamAuthModalBackdrop || !teamAuthModalBody) return;
+        if (loggedIn) {
+          if (teamAuthSection.parentNode !== teamAuthSectionHost) {
+            teamAuthSectionHost.appendChild(teamAuthSection);
+          }
+          teamAuthSection.style.marginTop = "0.5cm";
+          teamAuthModalBackdrop.hidden = true;
+          teamAuthModalBackdrop.setAttribute("aria-hidden", "true");
+          return;
+        }
+        if (teamAuthSection.parentNode !== teamAuthModalBody) {
+          teamAuthModalBody.appendChild(teamAuthSection);
+        }
+        teamAuthSection.style.marginTop = "0";
+        teamAuthModalBackdrop.hidden = false;
+        teamAuthModalBackdrop.setAttribute("aria-hidden", "false");
+      }
+
       function updateTeamAuthVisibility() {
         var loggedIn = teamModeEnabled();
+        syncTeamAuthPlacement(loggedIn);
         var ownerAllowed = !!(
           teamSession &&
           String(teamSession.email || "").trim().toLowerCase() === TEAM_OWNER_EMAIL
