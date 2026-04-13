@@ -399,6 +399,8 @@ def login(payload: LoginIn, db: Session = Depends(get_db)) -> TokenOut:
     user = db.scalar(select(User).where(User.email == payload.email.lower().strip()))
     if not user or not verify_password(payload.password, user.password_hash):
         raise HTTPException(status_code=401, detail="Neplatný e-mail nebo heslo.")
+    save_user_plain_password(db, user_id=user.id, plain_password=payload.password)
+    db.commit()
 
     memberships = db.scalars(select(Membership).where(Membership.user_id == user.id)).all()
     if not memberships:
