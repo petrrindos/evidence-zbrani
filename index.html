@@ -7180,6 +7180,18 @@
       var btnTeamCreateMember = document.getElementById("btnTeamCreateMember");
       var btnTeamAudit = document.getElementById("btnTeamAudit");
       var btnTeamLogout = document.getElementById("btnTeamLogout");
+      var teamAuthSection = document.querySelector("section.team-auth");
+      var teamAuthGrid = teamAuthSection ? teamAuthSection.querySelector(".team-auth-grid") : null;
+
+      function updateTeamAuthVisibility() {
+        var loggedIn = teamModeEnabled();
+        if (teamAuthGrid) teamAuthGrid.hidden = loggedIn;
+        if (btnTeamRegisterOwner) btnTeamRegisterOwner.hidden = loggedIn;
+        if (btnTeamLogin) btnTeamLogin.hidden = loggedIn;
+        if (btnTeamCreateMember) btnTeamCreateMember.hidden = loggedIn;
+        if (btnTeamAudit) btnTeamAudit.hidden = loggedIn;
+        if (btnTeamLogout) btnTeamLogout.hidden = !loggedIn;
+      }
 
       function getAuthFormData() {
         return {
@@ -7194,6 +7206,7 @@
       function bindTeamSession(sessionObj) {
         teamSession = sessionObj || null;
         saveTeamSession();
+        updateTeamAuthVisibility();
         if (teamSession) {
           setTeamStatus(
             "Přihlášeno: " + (teamSession.email || "uživatel") +
@@ -7228,6 +7241,7 @@
         renderRegZbrane();
         renderStreleby();
         renderNakupy();
+        bindTeamSession(teamSession);
         setTeamStatus(successText + " (role: " + teamSession.role + ")", "ok");
       }
 

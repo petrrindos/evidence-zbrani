@@ -3005,7 +3005,7 @@
       <div class="team-auth-grid">
         <div>
           <label for="teamApiBase">API URL</label>
-          <input type="text" id="teamApiBase" placeholder="http://127.0.0.1:8000/api" />
+          <input type="text" id="teamApiBase" value="https://evidence-zbrani.onrender.com/api" placeholder="https://evidence-zbrani.onrender.com/api" />
         </div>
         <div>
           <label for="teamOrgName">Název týmu (jen při registraci)</label>
@@ -3388,6 +3388,7 @@
       var strelebyPdfPreviewRevealed = false;
       var strelebyPdfZbranSelectInitialized = false;
       var SESSION_KEY = "cz.app.evidenceZbrani.teamSession.v1";
+      var TEAM_API_DEFAULT = "https://evidence-zbrani.onrender.com/api";
       var teamSession = null;
       var remoteStateCache = null;
       var saveRemoteTimer = 0;
@@ -3400,7 +3401,7 @@
       function getTeamApiBase() {
         var el = document.getElementById("teamApiBase");
         var s = el ? String(el.value || "").trim() : "";
-        if (!s) s = "http://127.0.0.1:8000/api";
+        if (!s) s = TEAM_API_DEFAULT;
         return s.replace(/\/+$/, "");
       }
 
@@ -3435,11 +3436,15 @@
       }
 
       function saveTeamSession() {
-        if (!teamSession) {
-          localStorage.removeItem(SESSION_KEY);
-          return;
+        try {
+          if (!teamSession) {
+            localStorage.removeItem(SESSION_KEY);
+            return;
+          }
+          localStorage.setItem(SESSION_KEY, JSON.stringify(teamSession));
+        } catch (_e) {
+          /* Local/session storage může být blokované (private mode, file sandbox). */
         }
-        localStorage.setItem(SESSION_KEY, JSON.stringify(teamSession));
       }
 
       function loadTeamSession() {
@@ -7175,10 +7180,22 @@
       var btnTeamCreateMember = document.getElementById("btnTeamCreateMember");
       var btnTeamAudit = document.getElementById("btnTeamAudit");
       var btnTeamLogout = document.getElementById("btnTeamLogout");
+      var teamAuthSection = document.querySelector("section.team-auth");
+      var teamAuthGrid = teamAuthSection ? teamAuthSection.querySelector(".team-auth-grid") : null;
+
+      function updateTeamAuthVisibility() {
+        var loggedIn = teamModeEnabled();
+        if (teamAuthGrid) teamAuthGrid.hidden = loggedIn;
+        if (btnTeamRegisterOwner) btnTeamRegisterOwner.hidden = loggedIn;
+        if (btnTeamLogin) btnTeamLogin.hidden = loggedIn;
+        if (btnTeamCreateMember) btnTeamCreateMember.hidden = loggedIn;
+        if (btnTeamAudit) btnTeamAudit.hidden = loggedIn;
+        if (btnTeamLogout) btnTeamLogout.hidden = !loggedIn;
+      }
 
       function getAuthFormData() {
         return {
-          apiBase: (teamApiBaseInput && teamApiBaseInput.value ? teamApiBaseInput.value : "").trim() || "http://127.0.0.1:8000/api",
+          apiBase: (teamApiBaseInput && teamApiBaseInput.value ? teamApiBaseInput.value : "").trim() || TEAM_API_DEFAULT,
           orgName: (teamOrgNameInput && teamOrgNameInput.value ? teamOrgNameInput.value : "").trim(),
           email: (teamEmailInput && teamEmailInput.value ? teamEmailInput.value : "").trim(),
           password: (teamPasswordInput && teamPasswordInput.value ? teamPasswordInput.value : "").trim(),
@@ -7189,6 +7206,7 @@
       function bindTeamSession(sessionObj) {
         teamSession = sessionObj || null;
         saveTeamSession();
+        updateTeamAuthVisibility();
         if (teamSession) {
           setTeamStatus(
             "Přihlášeno: " + (teamSession.email || "uživatel") +
@@ -7223,6 +7241,7 @@
         renderRegZbrane();
         renderStreleby();
         renderNakupy();
+        bindTeamSession(teamSession);
         setTeamStatus(successText + " (role: " + teamSession.role + ")", "ok");
       }
 
@@ -7232,7 +7251,7 @@
           bindTeamSession(null);
           return;
         }
-        if (teamApiBaseInput && !teamApiBaseInput.value && s.apiBase) teamApiBaseInput.value = s.apiBase;
+        if (teamApiBaseInput) teamApiBaseInput.value = TEAM_API_DEFAULT;
         teamSession = s;
         try {
           var me = await apiRequest("/auth/me");
@@ -8069,8 +8088,7 @@
       }
 
       if (teamApiBaseInput) {
-        var restoredSession = loadTeamSession();
-        teamApiBaseInput.value = (restoredSession && restoredSession.apiBase) || "http://127.0.0.1:8000/api";
+        teamApiBaseInput.value = TEAM_API_DEFAULT;
       }
       if (btnTeamRegisterOwner) {
         btnTeamRegisterOwner.addEventListener("click", async function () {
@@ -8324,7 +8342,14 @@
       });
 
       (async function startApp() {
-        await restoreTeamSessionOnStart();
+        try {
+          await restoreTeamSessionOnStart();
+        } catch (err) {
+          setTeamStatus(
+            "Týmový režim se nepodařilo inicializovat: " + (err && err.message ? err.message : String(err)),
+            "err"
+          );
+        }
         applyHolderToForm(loadState().holder);
         renderVyjimky();
         renderAprobace();
