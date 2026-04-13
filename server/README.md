@@ -31,3 +31,5 @@ uvicorn app.main:app --reload --port 8000
 - `POST /api/admin/generate-teams-users` - generate teams/users (allowed owner email only)
 - `GET /api/admin/users-list` - list all users + teams (allowed owner email only)
 - `DELETE /api/admin/members/{membership_id}` - remove user membership (allowed owner email only)
+- `GET /api/admin/teams-list` - list teams (allowed owner email only)
+- `DELETE /api/admin/teams/{team_id}` - delete team (allowed owner email only)

@@ -588,6 +588,70 @@ def admin_list_users(
     return {"teams": teams, "users": users}
 
 
+@app.get("/api/admin/teams-list")
+def admin_list_teams(
+    ctx: AuthContext = Depends(require_role(ROLE_VIEWER)),
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    ensure_allowed_owner_email(ctx)
+
+    orgs = db.scalars(select(Organization).order_by(Organization.name.asc())).all()
+    rows: list[dict[str, Any]] = []
+    for org in orgs:
+        members_total = db.scalars(select(Membership).where(Membership.organization_id == org.id)).all()
+        rows.append(
+            {
+                "team_id": org.id,
+                "team_name": org.name,
+                "members_count": len(members_total),
+                "created_at": org.created_at.isoformat() if org.created_at else None,
+            }
+        )
+    return {"teams": rows}
+
+
+@app.delete("/api/admin/teams/{team_id}")
+def admin_delete_team(
+    team_id: int,
+    ctx: AuthContext = Depends(require_role(ROLE_VIEWER)),
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    ensure_allowed_owner_email(ctx)
+    if team_id == ctx.organization_id:
+        raise HTTPException(status_code=400, detail="Nelze vymazat právě aktivní tým.")
+
+    org = db.get(Organization, team_id)
+    if not org:
+        raise HTTPException(status_code=404, detail="Tým nebyl nalezen.")
+
+    members = db.scalars(select(Membership).where(Membership.organization_id == team_id)).all()
+    member_user_ids = [m.user_id for m in members]
+    for m in members:
+        db.delete(m)
+    state = db.get(OrganizationState, team_id)
+    if state:
+        db.delete(state)
+    logs = db.scalars(select(AuditLog).where(AuditLog.organization_id == team_id)).all()
+    for lg in logs:
+        db.delete(lg)
+
+    for user_id in member_user_ids:
+        has_other = db.scalar(select(Membership).where(Membership.user_id == user_id).limit(1))
+        if has_other:
+            continue
+        cred = db.get(UserCredential, user_id)
+        if cred:
+            db.delete(cred)
+        user = db.get(User, user_id)
+        if user:
+            db.delete(user)
+
+    removed = {"team_id": org.id, "team_name": org.name}
+    db.delete(org)
+    db.commit()
+    return {"removed": removed}
+
+
 @app.delete("/api/admin/members/{membership_id}")
 def admin_remove_member(
     membership_id: int,

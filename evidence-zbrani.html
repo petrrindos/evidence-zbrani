@@ -3072,6 +3072,7 @@
       <div class="toolbar" style="margin:0;">
         <button type="button" id="btnTeamLogin">Přihlásit</button>
         <button type="button" id="btnTeamListUsers">Vypsat uživatele</button>
+        <button type="button" id="btnTeamListTeams">Vypsat Tými</button>
         <button type="button" id="btnTeamCreateMember">Přidat člena</button>
         <button type="button" class="primary" id="btnTeamRegisterOwner">Přidat tým</button>
         <button type="button" id="btnTeamAudit">Stáhnout audit JSON</button>
@@ -3089,6 +3090,18 @@
             </tr>
           </thead>
           <tbody id="teamUsersTbody"></tbody>
+        </table>
+      </div>
+      <div id="teamTeamsPanel" class="team-users-panel" hidden>
+        <table aria-label="Seznam týmů">
+          <thead>
+            <tr>
+              <th>Tým</th>
+              <th>Počet členů</th>
+              <th class="actions">Akce</th>
+            </tr>
+          </thead>
+          <tbody id="teamTeamsTbody"></tbody>
         </table>
       </div>
       <p id="teamAuthStatus" class="team-auth-status">Lokální režim (bez serveru).</p>
@@ -7235,6 +7248,7 @@
       var btnTeamRegisterOwner = document.getElementById("btnTeamRegisterOwner");
       var btnTeamLogin = document.getElementById("btnTeamLogin");
       var btnTeamListUsers = document.getElementById("btnTeamListUsers");
+      var btnTeamListTeams = document.getElementById("btnTeamListTeams");
       var btnTeamCreateMember = document.getElementById("btnTeamCreateMember");
       var btnTeamAudit = document.getElementById("btnTeamAudit");
       var btnTeamLogout = document.getElementById("btnTeamLogout");
@@ -7245,6 +7259,8 @@
       var teamAuthStatusEl = document.getElementById("teamAuthStatus");
       var teamUsersPanel = document.getElementById("teamUsersPanel");
       var teamUsersTbody = document.getElementById("teamUsersTbody");
+      var teamTeamsPanel = document.getElementById("teamTeamsPanel");
+      var teamTeamsTbody = document.getElementById("teamTeamsTbody");
       var teamApiWrap = teamApiBaseInput ? teamApiBaseInput.closest("div") : null;
       var teamOrgWrap = teamOrgNameInput ? teamOrgNameInput.closest("div") : null;
       var teamEmailWrap = teamEmailInput ? teamEmailInput.closest("div") : null;
@@ -7272,10 +7288,12 @@
         if (btnTeamRegisterOwner) btnTeamRegisterOwner.hidden = !ownerAllowed;
         if (btnTeamLogin) btnTeamLogin.hidden = loggedIn;
         if (btnTeamListUsers) btnTeamListUsers.hidden = !ownerAllowed;
+        if (btnTeamListTeams) btnTeamListTeams.hidden = !ownerAllowed;
         if (btnTeamCreateMember) btnTeamCreateMember.hidden = !ownerAllowed;
         if (btnTeamAudit) btnTeamAudit.hidden = !ownerAllowed;
         if (btnTeamLogout) btnTeamLogout.hidden = !loggedIn;
         if (!ownerAllowed && teamUsersPanel) teamUsersPanel.hidden = true;
+        if (!ownerAllowed && teamTeamsPanel) teamTeamsPanel.hidden = true;
       }
 
       function getAuthFormData() {
@@ -7321,6 +7339,27 @@
           );
         }).join("");
         teamUsersPanel.hidden = false;
+      }
+
+      function renderAdminTeamsList(payload) {
+        if (!teamTeamsPanel || !teamTeamsTbody) return;
+        var teams = payload && Array.isArray(payload.teams) ? payload.teams : [];
+        if (!teams.length) {
+          teamTeamsTbody.innerHTML = "<tr><td colspan=\"3\">Žádné týmy.</td></tr>";
+          teamTeamsPanel.hidden = false;
+          return;
+        }
+        teamTeamsTbody.innerHTML = teams.map(function (t) {
+          return (
+            "<tr>" +
+              "<td>" + escapeHtmlLite(t.team_name || "") + "</td>" +
+              "<td>" + escapeHtmlLite(String(t.members_count != null ? t.members_count : "")) + "</td>" +
+              "<td class=\"actions\"><button type=\"button\" class=\"danger\" data-team-del=\"" +
+                escapeHtmlLite(String(t.team_id || "")) + "\">Vymazat</button></td>" +
+            "</tr>"
+          );
+        }).join("");
+        teamTeamsPanel.hidden = false;
       }
 
       function bindTeamSession(sessionObj) {
@@ -8289,6 +8328,18 @@
           }
         });
       }
+      if (btnTeamListTeams) {
+        btnTeamListTeams.addEventListener("click", async function () {
+          if (!teamModeEnabled()) return alert("Nejdřív se přihlaste.");
+          try {
+            var data = await apiRequest("/admin/teams-list");
+            renderAdminTeamsList(data);
+            setTeamStatus("Seznam týmů načten.", "ok");
+          } catch (err) {
+            setTeamStatus("Načtení týmů selhalo: " + (err && err.message ? err.message : String(err)), "err");
+          }
+        });
+      }
       if (teamUsersTbody) {
         teamUsersTbody.addEventListener("click", async function (e) {
           var btn = e.target && e.target.closest ? e.target.closest("button[data-team-user-del]") : null;
@@ -8303,6 +8354,23 @@
             setTeamStatus("Uživatel byl odebrán.", "ok");
           } catch (err) {
             setTeamStatus("Odebrání uživatele selhalo: " + (err && err.message ? err.message : String(err)), "err");
+          }
+        });
+      }
+      if (teamTeamsTbody) {
+        teamTeamsTbody.addEventListener("click", async function (e) {
+          var btn = e.target && e.target.closest ? e.target.closest("button[data-team-del]") : null;
+          if (!btn) return;
+          var teamId = String(btn.getAttribute("data-team-del") || "").trim();
+          if (!teamId) return;
+          if (!confirm("Vymazat tento tým?")) return;
+          try {
+            await apiRequest("/admin/teams/" + encodeURIComponent(teamId), { method: "DELETE" });
+            var data = await apiRequest("/admin/teams-list");
+            renderAdminTeamsList(data);
+            setTeamStatus("Tým byl vymazán.", "ok");
+          } catch (err) {
+            setTeamStatus("Vymazání týmu selhalo: " + (err && err.message ? err.message : String(err)), "err");
           }
         });
       }
@@ -8332,6 +8400,8 @@
           saveRemoteTimer = 0;
           if (teamUsersPanel) teamUsersPanel.hidden = true;
           if (teamUsersTbody) teamUsersTbody.innerHTML = "";
+          if (teamTeamsPanel) teamTeamsPanel.hidden = true;
+          if (teamTeamsTbody) teamTeamsTbody.innerHTML = "";
         });
       }
 
