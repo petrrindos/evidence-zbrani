@@ -110,7 +110,11 @@
       flex: 1;
       min-width: 0;
     }
-    .team-auth-head #btnTeamLogout {
+    .team-auth-head-actions {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.35rem 0.5rem;
       margin-left: auto;
       flex-shrink: 0;
     }
@@ -3095,7 +3099,10 @@
     <section class="team-auth" aria-label="Týmový režim" style="margin-top:0.5cm;">
       <header class="team-auth-head">
         <h2 class="team-auth-title">Týmový režim (DB + role + audit)</h2>
-        <button type="button" id="btnTeamLogout">Odhlásit</button>
+        <div class="team-auth-head-actions">
+          <button type="button" id="btnTeamAudit">Stáhnout audit JSON</button>
+          <button type="button" id="btnTeamLogout">Odhlásit</button>
+        </div>
       </header>
       <div class="team-auth-grid">
         <div>
@@ -3136,7 +3143,6 @@
         <button type="button" id="btnTeamListTeams">Vypsat týmy</button>
         <button type="button" id="btnTeamCreateMember">Přidat člena</button>
         <button type="button" class="primary" id="btnTeamRegisterOwner">Přidat tým</button>
-        <button type="button" id="btnTeamAudit">Stáhnout audit JSON</button>
       </div>
       <div id="teamUsersPanel" class="team-users-panel" hidden>
         <table aria-label="Seznam uživatelů (e-mail a heslo)">
