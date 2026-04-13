@@ -26,7 +26,9 @@ from passlib.context import CryptContext
 
 DATABASE_URL = os.getenv("EVIDENCE_DB_URL", "sqlite:///./evidence_zbrani.db")
 if DATABASE_URL.startswith("postgres://"):
-    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql+psycopg://", 1)
+elif DATABASE_URL.startswith("postgresql://") and not DATABASE_URL.startswith("postgresql+"):
+    DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+psycopg://", 1)
 JWT_SECRET = os.getenv("EVIDENCE_JWT_SECRET", "change-me-in-production")
 JWT_ALG = "HS256"
 ACCESS_TTL_MIN = int(os.getenv("EVIDENCE_ACCESS_TTL_MIN", "120"))
