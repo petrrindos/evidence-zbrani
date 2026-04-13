@@ -428,6 +428,9 @@
     .team-add-member-modal-backdrop {
       z-index: 10002;
     }
+    .team-users-list-modal-backdrop {
+      z-index: 10003;
+    }
     .reg-zbrane-modal-backdrop {
       position: fixed;
       inset: 0;
@@ -3257,6 +3260,37 @@
             <button type="button" id="teamAddMemberCancel">Zrušit</button>
           </div>
         </form>
+      </div>
+    </div>
+  </div>
+
+  <div
+    id="teamUsersListModalBackdrop"
+    class="holder-modal-backdrop team-users-list-modal-backdrop"
+    hidden
+    aria-hidden="true"
+  >
+    <div
+      class="holder-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="teamUsersListModalTitle"
+      tabindex="-1"
+    >
+      <div class="holder-modal-head">
+        <h2 id="teamUsersListModalTitle">Seznam uživatelů</h2>
+        <button type="button" class="holder-modal-close" id="teamUsersListModalClose">Zavřít</button>
+      </div>
+      <div class="holder-modal-body" style="padding: 0.65rem">
+        <table class="team-users-panel" style="margin: 0" aria-label="Uživatelé (e-mail a heslo)">
+          <thead>
+            <tr>
+              <th>E-mail</th>
+              <th>Heslo</th>
+            </tr>
+          </thead>
+          <tbody id="teamUsersModalTbody"></tbody>
+        </table>
       </div>
     </div>
   </div>
@@ -7418,6 +7452,9 @@
       var teamAddMemberOrgSelect = document.getElementById("teamAddMemberOrg");
       var teamAddMemberModalClose = document.getElementById("teamAddMemberModalClose");
       var teamAddMemberCancel = document.getElementById("teamAddMemberCancel");
+      var teamUsersListModalBackdrop = document.getElementById("teamUsersListModalBackdrop");
+      var teamUsersListModalClose = document.getElementById("teamUsersListModalClose");
+      var teamUsersModalTbody = document.getElementById("teamUsersModalTbody");
       var btnTeamAudit = document.getElementById("btnTeamAudit");
       var btnTeamLogout = document.getElementById("btnTeamLogout");
       var teamAuthSection = document.querySelector("section.team-auth");
@@ -7524,8 +7561,8 @@
         return d.innerHTML;
       }
 
-      function renderAdminUsersSimple(payload) {
-        if (!teamUsersPanel || !teamUsersTbody) return;
+      function fillAdminUsersTableBody(tbody, payload) {
+        if (!tbody) return;
         var rows = payload && Array.isArray(payload.users) ? payload.users : [];
         var byKey = {};
         rows.forEach(function (u) {
@@ -7549,11 +7586,10 @@
           return String(a.email || "").localeCompare(String(b.email || ""), "cs");
         });
         if (!list.length) {
-          teamUsersTbody.innerHTML = "<tr><td colspan=\"2\">Žádní uživatelé.</td></tr>";
-          teamUsersPanel.hidden = false;
+          tbody.innerHTML = "<tr><td colspan=\"2\">Žádní uživatelé.</td></tr>";
           return;
         }
-        teamUsersTbody.innerHTML = list.map(function (row) {
+        tbody.innerHTML = list.map(function (row) {
           return (
             "<tr>" +
               "<td>" + escapeHtmlLite(row.email || "") + "</td>" +
@@ -7561,7 +7597,26 @@
             "</tr>"
           );
         }).join("");
+      }
+
+      function renderAdminUsersSimple(payload) {
+        if (!teamUsersPanel || !teamUsersTbody) return;
+        fillAdminUsersTableBody(teamUsersTbody, payload);
         teamUsersPanel.hidden = false;
+      }
+
+      function closeTeamUsersListModal() {
+        if (teamUsersListModalBackdrop) {
+          teamUsersListModalBackdrop.hidden = true;
+          teamUsersListModalBackdrop.setAttribute("aria-hidden", "true");
+        }
+      }
+
+      function openTeamUsersListModal(payload) {
+        if (!teamUsersListModalBackdrop || !teamUsersModalTbody) return;
+        fillAdminUsersTableBody(teamUsersModalTbody, payload);
+        teamUsersListModalBackdrop.hidden = false;
+        teamUsersListModalBackdrop.setAttribute("aria-hidden", "false");
       }
 
       function updateTeamMembershipsGlobalSummary(payload) {
@@ -7721,6 +7776,9 @@
       async function refreshAdminUserViewsAfterMutation() {
         var preserved = collectMembershipRowTeamSelections();
         var data = await apiRequest("/admin/users-list");
+        if (teamUsersListModalBackdrop && !teamUsersListModalBackdrop.hidden && teamUsersModalTbody) {
+          fillAdminUsersTableBody(teamUsersModalTbody, data);
+        }
         if (teamUsersPanel && !teamUsersPanel.hidden) {
           renderAdminUsersSimple(data);
         }
@@ -8896,18 +8954,23 @@
       if (btnTeamListUsers) {
         btnTeamListUsers.addEventListener("click", async function () {
           if (!teamModeEnabled()) return alert("Nejdřív se přihlaste.");
-          if (teamUsersPanel && !teamUsersPanel.hidden) {
-            teamUsersPanel.hidden = true;
-            return;
-          }
           try {
             if (teamMembershipsPanel) teamMembershipsPanel.hidden = true;
+            if (teamUsersPanel) teamUsersPanel.hidden = true;
             var data = await apiRequest("/admin/users-list");
-            renderAdminUsersSimple(data);
+            openTeamUsersListModal(data);
             setTeamStatus("Seznam uživatelů načten.", "ok");
           } catch (err) {
             setTeamStatus("Načtení uživatelů selhalo: " + (err && err.message ? err.message : String(err)), "err");
           }
+        });
+      }
+      if (teamUsersListModalClose) {
+        teamUsersListModalClose.addEventListener("click", closeTeamUsersListModal);
+      }
+      if (teamUsersListModalBackdrop) {
+        teamUsersListModalBackdrop.addEventListener("click", function (ev) {
+          if (ev.target === teamUsersListModalBackdrop) closeTeamUsersListModal();
         });
       }
       if (btnTeamManageMemberships) {
@@ -9097,6 +9160,8 @@
           saveRemoteTimer = 0;
           if (teamUsersPanel) teamUsersPanel.hidden = true;
           if (teamUsersTbody) teamUsersTbody.innerHTML = "";
+          closeTeamUsersListModal();
+          if (teamUsersModalTbody) teamUsersModalTbody.innerHTML = "";
           if (teamMembershipsPanel) teamMembershipsPanel.hidden = true;
           if (teamMembershipsTbody) teamMembershipsTbody.innerHTML = "";
           if (teamMembershipsAllSummary) teamMembershipsAllSummary.textContent = "";
