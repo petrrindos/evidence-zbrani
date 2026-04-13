@@ -3084,6 +3084,7 @@
               <th>E-mail</th>
               <th>Tým</th>
               <th>Role</th>
+              <th>Heslo</th>
               <th class="actions">Akce</th>
             </tr>
           </thead>
@@ -7313,6 +7314,7 @@
               "<td>" + escapeHtmlLite(u.email || "") + "</td>" +
               "<td>" + escapeHtmlLite(u.team_name || "") + "</td>" +
               "<td>" + escapeHtmlLite(u.role || "") + "</td>" +
+              "<td>" + escapeHtmlLite(u.password || "není uloženo") + "</td>" +
               "<td class=\"actions\"><button type=\"button\" class=\"danger\" data-team-user-del=\"" +
                 escapeHtmlLite(String(u.membership_id || "")) + "\">Odebrat</button></td>" +
             "</tr>"

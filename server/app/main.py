@@ -60,6 +60,13 @@ class User(Base):
     memberships: Mapped[list["Membership"]] = relationship(back_populates="user")
 
 
+class UserCredential(Base):
+    __tablename__ = "user_credentials"
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), primary_key=True)
+    plain_password: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(UTC))
+
+
 class Organization(Base):
     __tablename__ = "organizations"
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
@@ -123,6 +130,16 @@ def hash_password(password: str) -> str:
 
 def verify_password(password: str, password_hash: str) -> bool:
     return pwd_ctx.verify(password, password_hash)
+
+
+def save_user_plain_password(db: Session, *, user_id: int, plain_password: str) -> None:
+    rec = db.get(UserCredential, user_id)
+    if not rec:
+        rec = UserCredential(user_id=user_id, plain_password=plain_password, updated_at=utc_now())
+        db.add(rec)
+        return
+    rec.plain_password = plain_password
+    rec.updated_at = utc_now()
 
 
 def normalize_state(data: dict[str, Any] | None) -> dict[str, Any]:
@@ -357,6 +374,7 @@ def register_owner(payload: RegisterOwnerIn, db: Session = Depends(get_db)) -> T
     )
     db.add(user)
     db.flush()
+    save_user_plain_password(db, user_id=user.id, plain_password=payload.password)
 
     membership = Membership(organization_id=org.id, user_id=user.id, role=ROLE_OWNER)
     db.add(membership)
@@ -457,6 +475,8 @@ def create_member(
         if already:
             raise HTTPException(status_code=409, detail="Uživatel už je členem organizace.")
         user = existing_user
+        user.password_hash = hash_password(payload.password)
+        save_user_plain_password(db, user_id=user.id, plain_password=payload.password)
     else:
         user = User(
             email=payload.email.lower().strip(),
@@ -465,6 +485,7 @@ def create_member(
         )
         db.add(user)
         db.flush()
+        save_user_plain_password(db, user_id=user.id, plain_password=payload.password)
 
     member = Membership(organization_id=ctx.organization_id, user_id=user.id, role=role)
     db.add(member)
@@ -504,11 +525,13 @@ def admin_list_users(
         org = org_map.get(m.organization_id)
         if not user or not org:
             continue
+        cred = db.get(UserCredential, user.id)
         users.append(
             {
                 "membership_id": m.id,
                 "user_id": user.id,
                 "email": user.email,
+                "password": cred.plain_password if cred else None,
                 "full_name": user.full_name,
                 "team_id": org.id,
                 "team_name": org.name,
@@ -685,6 +708,7 @@ def admin_generate_teams_users(
             )
             db.add(user)
             db.flush()
+            save_user_plain_password(db, user_id=user.id, plain_password=password)
             db.add(Membership(organization_id=org.id, user_id=user.id, role=role))
             team_users.append({"email": email, "password": password, "role": role})
 
