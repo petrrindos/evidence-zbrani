@@ -3063,7 +3063,7 @@
         <div id="teamLoginOrgWrap" hidden>
           <label for="teamLoginOrg">Tým (pro přihlášení)</label>
           <select id="teamLoginOrg">
-            <option value="">Vyberte tým...</option>
+            <option value="">Nejdřív klikněte na Přihlásit</option>
           </select>
         </div>
         <div>
@@ -7297,7 +7297,7 @@
         if (teamOrgWrap) teamOrgWrap.style.display = "none";
         if (teamEmailWrap) teamEmailWrap.style.display = loggedIn ? "none" : "";
         if (teamPasswordWrap) teamPasswordWrap.style.display = loggedIn ? "none" : "";
-        if (teamLoginOrgWrap) teamLoginOrgWrap.style.display = (!loggedIn && teamLoginOrgInput && teamLoginOrgInput.options.length > 1) ? "" : "none";
+        if (teamLoginOrgWrap) teamLoginOrgWrap.style.display = loggedIn ? "none" : "";
         if (teamRoleWrap) teamRoleWrap.style.display = "none";
         if (teamAuthToolbar) teamAuthToolbar.style.display = "";
         if (btnTeamRegisterOwner) btnTeamRegisterOwner.hidden = !ownerAllowed;
@@ -7329,7 +7329,7 @@
 
       function clearTeamLoginOrgChoices() {
         if (!teamLoginOrgInput) return;
-        teamLoginOrgInput.innerHTML = "<option value=\"\">Vyberte tým...</option>";
+        teamLoginOrgInput.innerHTML = "<option value=\"\">Nejdřív klikněte na Přihlásit</option>";
         teamLoginOrgInput.value = "";
         updateTeamAuthVisibility();
       }
