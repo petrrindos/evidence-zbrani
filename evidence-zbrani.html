@@ -7192,18 +7192,29 @@
       var btnTeamLogout = document.getElementById("btnTeamLogout");
       var teamAuthSection = document.querySelector("section.team-auth");
       var teamAuthGrid = teamAuthSection ? teamAuthSection.querySelector(".team-auth-grid") : null;
+      var teamAuthTitle = teamAuthSection ? teamAuthSection.querySelector(".team-auth-title") : null;
+      var teamAuthToolbar = teamAuthSection ? teamAuthSection.querySelector(".toolbar") : null;
+      var teamAuthStatusEl = document.getElementById("teamAuthStatus");
 
       function updateTeamAuthVisibility() {
         var loggedIn = teamModeEnabled();
         if (teamAuthSection) {
           teamAuthSection.classList.toggle("team-auth-logged-in", loggedIn);
         }
+        if (teamAuthTitle) teamAuthTitle.style.display = loggedIn ? "none" : "";
         if (teamAuthGrid) teamAuthGrid.hidden = loggedIn;
+        if (teamAuthStatusEl) teamAuthStatusEl.style.display = loggedIn ? "none" : "";
+        if (teamAuthToolbar) teamAuthToolbar.style.display = "";
         if (btnTeamRegisterOwner) btnTeamRegisterOwner.hidden = loggedIn;
         if (btnTeamLogin) btnTeamLogin.hidden = loggedIn;
         if (btnTeamCreateMember) btnTeamCreateMember.hidden = loggedIn;
         if (btnTeamAudit) btnTeamAudit.hidden = loggedIn;
         if (btnTeamLogout) btnTeamLogout.hidden = !loggedIn;
+        if (teamAuthSection) {
+          teamAuthSection.style.border = loggedIn ? "none" : "";
+          teamAuthSection.style.background = loggedIn ? "transparent" : "";
+          teamAuthSection.style.padding = loggedIn ? "0" : "";
+        }
       }
 
       function getAuthFormData() {
