@@ -8319,6 +8319,10 @@
       if (btnTeamListUsers) {
         btnTeamListUsers.addEventListener("click", async function () {
           if (!teamModeEnabled()) return alert("Nejdřív se přihlaste.");
+          if (teamUsersPanel && !teamUsersPanel.hidden) {
+            teamUsersPanel.hidden = true;
+            return;
+          }
           try {
             var data = await apiRequest("/admin/users-list");
             renderAdminUsersList(data);
@@ -8331,6 +8335,10 @@
       if (btnTeamListTeams) {
         btnTeamListTeams.addEventListener("click", async function () {
           if (!teamModeEnabled()) return alert("Nejdřív se přihlaste.");
+          if (teamTeamsPanel && !teamTeamsPanel.hidden) {
+            teamTeamsPanel.hidden = true;
+            return;
+          }
           try {
             var data = await apiRequest("/admin/teams-list");
             renderAdminTeamsList(data);
