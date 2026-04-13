@@ -7821,7 +7821,9 @@
         var expand = document.getElementById("teamMembersExpand-" + tid);
         var subTbody = document.getElementById("teamMembersSubTbody-" + tid);
         if (!expand || !subTbody) return;
-        var mdata = await apiRequest("/admin/teams/" + encodeURIComponent(tid) + "/members");
+        var mdata = await apiRequest(
+          "/admin/team-members?organization_id=" + encodeURIComponent(tid)
+        );
         renderTeamMembersSubRows(subTbody, mdata.members || [], tid);
         expand.hidden = false;
       }
@@ -9024,7 +9026,9 @@
               return;
             }
             try {
-              var mdata = await apiRequest("/admin/teams/" + encodeURIComponent(listTeamId) + "/members");
+              var mdata = await apiRequest(
+                "/admin/team-members?organization_id=" + encodeURIComponent(listTeamId)
+              );
               renderTeamMembersSubRows(subTbody, mdata.members || [], listTeamId);
               expand.hidden = false;
               setTeamStatus("Členové týmu načteni.", "ok");

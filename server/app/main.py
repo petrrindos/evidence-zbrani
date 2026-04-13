@@ -648,13 +648,7 @@ def admin_list_teams(
     return {"teams": rows}
 
 
-@app.get("/api/admin/teams/{team_id}/members")
-def admin_list_team_members(
-    team_id: int,
-    ctx: AuthContext = Depends(require_role(ROLE_VIEWER)),
-    db: Session = Depends(get_db),
-) -> dict[str, Any]:
-    ensure_allowed_owner_email(ctx)
+def _admin_team_members_list_payload(team_id: int, db: Session) -> dict[str, Any]:
     org = db.get(Organization, team_id)
     if not org:
         raise HTTPException(status_code=404, detail="Tým nebyl nalezen.")
@@ -677,6 +671,16 @@ def admin_list_team_members(
             }
         )
     return {"team_id": org.id, "team_name": org.name, "members": members}
+
+
+@app.get("/api/admin/teams/{team_id}/members")
+def admin_list_team_members(
+    team_id: int,
+    ctx: AuthContext = Depends(require_role(ROLE_VIEWER)),
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    ensure_allowed_owner_email(ctx)
+    return _admin_team_members_list_payload(team_id, db)
 
 
 @app.delete("/api/admin/teams/{team_id}")
@@ -941,6 +945,17 @@ def admin_create_team_member(
         "team_name": org.name,
         "role": member.role,
     }
+
+
+@app.get("/api/admin/team-members")
+def admin_list_team_members_query(
+    organization_id: int = Query(..., ge=1, description="ID týmu (organizace)."),
+    ctx: AuthContext = Depends(require_role(ROLE_VIEWER)),
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    """Stejná data jako GET /api/admin/teams/{id}/members — vhodné pro klienty / proxy, kde vnořená cesta vrací 404."""
+    ensure_allowed_owner_email(ctx)
+    return _admin_team_members_list_payload(organization_id, db)
 
 
 @app.get("/api/state", response_model=StateOut)
