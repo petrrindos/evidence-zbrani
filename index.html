@@ -437,6 +437,15 @@
     .team-memberships-modal-dialog {
       max-width: min(46rem, 96vw);
     }
+    .team-teams-list-modal-backdrop {
+      z-index: 10005;
+    }
+    .team-teams-list-modal-dialog {
+      max-width: min(44rem, 96vw);
+    }
+    .team-add-team-modal-backdrop {
+      z-index: 10006;
+    }
     .reg-zbrane-modal-backdrop {
       position: fixed;
       inset: 0;
@@ -3190,18 +3199,6 @@
           <tbody id="teamUsersTbody"></tbody>
         </table>
       </div>
-      <div id="teamTeamsPanel" class="team-users-panel" hidden>
-        <table aria-label="Seznam týmů">
-          <thead>
-            <tr>
-              <th>Tým</th>
-              <th>Počet členů</th>
-              <th class="actions">Akce</th>
-            </tr>
-          </thead>
-          <tbody id="teamTeamsTbody"></tbody>
-        </table>
-      </div>
       <p id="teamAuthStatus" class="team-auth-status">Lokální režim (bez serveru).</p>
     </section>
   </div>
@@ -3319,6 +3316,72 @@
             <tbody id="teamMembershipsTbody"></tbody>
           </table>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <div
+    id="teamTeamsListModalBackdrop"
+    class="holder-modal-backdrop team-teams-list-modal-backdrop"
+    hidden
+    aria-hidden="true"
+  >
+    <div
+      class="holder-modal team-teams-list-modal-dialog"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="teamTeamsListModalTitle"
+      tabindex="-1"
+    >
+      <div class="holder-modal-head">
+        <h2 id="teamTeamsListModalTitle">Seznam týmů</h2>
+        <button type="button" class="holder-modal-close" id="teamTeamsListModalClose">Zavřít</button>
+      </div>
+      <div class="holder-modal-body" style="padding: 0.65rem">
+        <div id="teamTeamsPanel" class="team-users-panel" style="margin: 0">
+          <table aria-label="Seznam týmů">
+            <thead>
+              <tr>
+                <th>Tým</th>
+                <th>Počet členů</th>
+                <th class="actions">Akce</th>
+              </tr>
+            </thead>
+            <tbody id="teamTeamsTbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div
+    id="teamAddTeamModalBackdrop"
+    class="holder-modal-backdrop team-add-team-modal-backdrop"
+    hidden
+    aria-hidden="true"
+  >
+    <div
+      class="holder-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="teamAddTeamModalTitle"
+      tabindex="-1"
+    >
+      <div class="holder-modal-head">
+        <h2 id="teamAddTeamModalTitle">Přidat tým</h2>
+        <button type="button" class="holder-modal-close" id="teamAddTeamModalClose">Zavřít</button>
+      </div>
+      <div class="holder-modal-body" style="padding: 0.85rem">
+        <form id="teamAddTeamForm" class="team-auth-grid" style="margin: 0">
+          <div>
+            <label for="teamAddTeamNameInput">Název týmu</label>
+            <input type="text" id="teamAddTeamNameInput" name="organization_name" autocomplete="organization" required minlength="2" maxlength="255" />
+          </div>
+          <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center">
+            <button type="submit" id="teamAddTeamSubmit">Vytvořit tým</button>
+            <button type="button" id="teamAddTeamCancel">Zrušit</button>
+          </div>
+        </form>
       </div>
     </div>
   </div>
@@ -7500,6 +7563,13 @@
       var adminMembershipsCache = null;
       var teamTeamsPanel = document.getElementById("teamTeamsPanel");
       var teamTeamsTbody = document.getElementById("teamTeamsTbody");
+      var teamTeamsListModalBackdrop = document.getElementById("teamTeamsListModalBackdrop");
+      var teamTeamsListModalClose = document.getElementById("teamTeamsListModalClose");
+      var teamAddTeamModalBackdrop = document.getElementById("teamAddTeamModalBackdrop");
+      var teamAddTeamModalClose = document.getElementById("teamAddTeamModalClose");
+      var teamAddTeamForm = document.getElementById("teamAddTeamForm");
+      var teamAddTeamNameInput = document.getElementById("teamAddTeamNameInput");
+      var teamAddTeamCancel = document.getElementById("teamAddTeamCancel");
       var teamApiWrap = teamApiBaseInput ? teamApiBaseInput.closest("div") : null;
       var teamOrgWrap = teamOrgNameInput ? teamOrgNameInput.closest("div") : null;
       var teamEmailWrap = teamEmailInput ? teamEmailInput.closest("div") : null;
@@ -7536,7 +7606,8 @@
         if (btnTeamLogout) btnTeamLogout.hidden = !loggedIn;
         if (!ownerAllowed && teamUsersPanel) teamUsersPanel.hidden = true;
         if (!ownerAllowed) closeTeamMembershipsModal();
-        if (!ownerAllowed && teamTeamsPanel) teamTeamsPanel.hidden = true;
+        if (!ownerAllowed) closeTeamTeamsListModal();
+        if (!ownerAllowed) closeTeamAddTeamModal();
       }
 
       function getAuthFormData() {
@@ -7645,6 +7716,9 @@
       function openTeamUsersListModal(payload) {
         if (!teamUsersListModalBackdrop || !teamUsersModalTbody) return;
         closeTeamMembershipsModal();
+        closeTeamTeamsListModal();
+        closeTeamAddMemberModal();
+        closeTeamAddTeamModal();
         fillAdminUsersTableBody(teamUsersModalTbody, payload);
         teamUsersListModalBackdrop.hidden = false;
         teamUsersListModalBackdrop.setAttribute("aria-hidden", "false");
@@ -7659,8 +7733,50 @@
 
       function openTeamMembershipsModal() {
         if (!teamMembershipsModalBackdrop) return;
+        closeTeamTeamsListModal();
+        closeTeamAddMemberModal();
+        closeTeamAddTeamModal();
         teamMembershipsModalBackdrop.hidden = false;
         teamMembershipsModalBackdrop.setAttribute("aria-hidden", "false");
+      }
+
+      function closeTeamTeamsListModal() {
+        if (teamTeamsListModalBackdrop) {
+          teamTeamsListModalBackdrop.hidden = true;
+          teamTeamsListModalBackdrop.setAttribute("aria-hidden", "true");
+        }
+      }
+
+      function openTeamTeamsListModal() {
+        if (!teamTeamsListModalBackdrop) return;
+        closeTeamMembershipsModal();
+        closeTeamAddMemberModal();
+        closeTeamAddTeamModal();
+        teamTeamsListModalBackdrop.hidden = false;
+        teamTeamsListModalBackdrop.setAttribute("aria-hidden", "false");
+      }
+
+      function closeTeamAddTeamModal() {
+        if (teamAddTeamModalBackdrop) {
+          teamAddTeamModalBackdrop.hidden = true;
+          teamAddTeamModalBackdrop.setAttribute("aria-hidden", "true");
+        }
+      }
+
+      function openTeamAddTeamModal() {
+        if (!teamAddTeamModalBackdrop) return;
+        closeTeamUsersListModal();
+        closeTeamMembershipsModal();
+        closeTeamAddMemberModal();
+        closeTeamTeamsListModal();
+        if (teamAddTeamNameInput) teamAddTeamNameInput.value = "";
+        teamAddTeamModalBackdrop.hidden = false;
+        teamAddTeamModalBackdrop.setAttribute("aria-hidden", "false");
+        if (teamAddTeamNameInput) {
+          setTimeout(function () {
+            teamAddTeamNameInput.focus();
+          }, 0);
+        }
       }
 
       function updateTeamMembershipsGlobalSummary(payload) {
@@ -7843,6 +7959,8 @@
       async function openTeamAddMemberModal() {
         if (!teamAddMemberModalBackdrop || !teamAddMemberOrgSelect) return;
         closeTeamMembershipsModal();
+        closeTeamTeamsListModal();
+        closeTeamAddTeamModal();
         if (!teamModeEnabled()) {
           alert("Nejdřív se přihlaste.");
           return;
@@ -7931,7 +8049,7 @@
       async function refreshTeamsTableAndKeepMembersOpen(expandedTeamId) {
         var tid = expandedTeamId != null ? String(expandedTeamId).trim() : "";
         var data = await apiRequest("/admin/teams-list");
-        renderAdminTeamsList(data);
+        renderAdminTeamsList(data, { openAfter: false });
         if (!tid) return;
         var expand = document.getElementById("teamMembersExpand-" + tid);
         var subTbody = document.getElementById("teamMembersSubTbody-" + tid);
@@ -7943,12 +8061,14 @@
         expand.hidden = false;
       }
 
-      function renderAdminTeamsList(payload) {
+      function renderAdminTeamsList(payload, opts) {
+        opts = opts || {};
+        var openAfter = opts.openAfter !== false;
         if (!teamTeamsPanel || !teamTeamsTbody) return;
         var teams = payload && Array.isArray(payload.teams) ? payload.teams : [];
         if (!teams.length) {
           teamTeamsTbody.innerHTML = "<tr><td colspan=\"3\">Žádné týmy.</td></tr>";
-          teamTeamsPanel.hidden = false;
+          if (openAfter) openTeamTeamsListModal();
           return;
         }
         var rowHtml = teams
@@ -7996,11 +8116,11 @@
           .join("");
         if (!rowHtml) {
           teamTeamsTbody.innerHTML = "<tr><td colspan=\"3\">Žádné týmy.</td></tr>";
-          teamTeamsPanel.hidden = false;
+          if (openAfter) openTeamTeamsListModal();
           return;
         }
         teamTeamsTbody.innerHTML = rowHtml;
-        teamTeamsPanel.hidden = false;
+        if (openAfter) openTeamTeamsListModal();
       }
 
       function bindTeamSession(sessionObj) {
@@ -8900,21 +9020,8 @@
         teamPasswordInput.addEventListener("input", clearTeamLoginOrgChoices);
       }
       if (btnTeamRegisterOwner) {
-        btnTeamRegisterOwner.addEventListener("click", async function () {
-          var orgName = askPromptRequired("Název nového týmu:", "");
-          if (!orgName) return;
-          try {
-            setTeamStatus("Přidávám tým...", "");
-            var out = await apiRequest("/admin/teams", {
-              method: "POST",
-              body: JSON.stringify({
-                organization_name: orgName
-              })
-            });
-            setTeamStatus("Tým přidán: " + (out.organization_name || orgName) + " (jste v něm automaticky nepřidáni — členy nastavte ve výpisu uživatelů).", "ok");
-          } catch (err) {
-            setTeamStatus("Přidání týmu selhalo: " + (err && err.message ? err.message : String(err)), "err");
-          }
+        btnTeamRegisterOwner.addEventListener("click", function () {
+          openTeamAddTeamModal();
         });
       }
       if (btnTeamLogin) {
@@ -9024,6 +9131,8 @@
           if (!teamModeEnabled()) return alert("Nejdřív se přihlaste.");
           try {
             closeTeamUsersListModal();
+            closeTeamTeamsListModal();
+            closeTeamAddTeamModal();
             if (teamUsersPanel) teamUsersPanel.hidden = true;
             var data = await apiRequest("/admin/users-list");
             setupAdminMembershipsPanel(data);
@@ -9044,16 +9153,67 @@
       if (btnTeamListTeams) {
         btnTeamListTeams.addEventListener("click", async function () {
           if (!teamModeEnabled()) return alert("Nejdřív se přihlaste.");
-          if (teamTeamsPanel && !teamTeamsPanel.hidden) {
-            teamTeamsPanel.hidden = true;
-            return;
-          }
           try {
+            closeTeamUsersListModal();
+            closeTeamMembershipsModal();
+            closeTeamAddMemberModal();
+            closeTeamAddTeamModal();
             var data = await apiRequest("/admin/teams-list");
             renderAdminTeamsList(data);
             setTeamStatus("Seznam týmů načten.", "ok");
           } catch (err) {
             setTeamStatus("Načtení týmů selhalo: " + (err && err.message ? err.message : String(err)), "err");
+          }
+        });
+      }
+      if (teamTeamsListModalClose) {
+        teamTeamsListModalClose.addEventListener("click", closeTeamTeamsListModal);
+      }
+      if (teamTeamsListModalBackdrop) {
+        teamTeamsListModalBackdrop.addEventListener("click", function (ev) {
+          if (ev.target === teamTeamsListModalBackdrop) closeTeamTeamsListModal();
+        });
+      }
+      if (teamAddTeamModalClose) {
+        teamAddTeamModalClose.addEventListener("click", closeTeamAddTeamModal);
+      }
+      if (teamAddTeamCancel) {
+        teamAddTeamCancel.addEventListener("click", closeTeamAddTeamModal);
+      }
+      if (teamAddTeamModalBackdrop) {
+        teamAddTeamModalBackdrop.addEventListener("click", function (ev) {
+          if (ev.target === teamAddTeamModalBackdrop) closeTeamAddTeamModal();
+        });
+      }
+      if (teamAddTeamForm) {
+        teamAddTeamForm.addEventListener("submit", async function (ev) {
+          ev.preventDefault();
+          var orgName = teamAddTeamNameInput ? String(teamAddTeamNameInput.value || "").trim() : "";
+          if (orgName.length < 2) {
+            alert("Název týmu musí mít alespoň 2 znaky.");
+            return;
+          }
+          try {
+            setTeamStatus("Přidávám tým...", "");
+            var out = await apiRequest("/admin/teams", {
+              method: "POST",
+              body: JSON.stringify({
+                organization_name: orgName
+              })
+            });
+            closeTeamAddTeamModal();
+            setTeamStatus(
+              "Tým přidán: " +
+                (out.organization_name || orgName) +
+                " (jste v něm automaticky nepřidáni — členy nastavte ve výpisu uživatelů).",
+              "ok"
+            );
+            if (teamTeamsListModalBackdrop && !teamTeamsListModalBackdrop.hidden) {
+              var listData = await apiRequest("/admin/teams-list");
+              renderAdminTeamsList(listData, { openAfter: false });
+            }
+          } catch (err) {
+            setTeamStatus("Přidání týmu selhalo: " + (err && err.message ? err.message : String(err)), "err");
           }
         });
       }
@@ -9177,7 +9337,7 @@
           try {
             await apiRequest("/admin/teams/" + encodeURIComponent(teamId), { method: "DELETE" });
             var data = await apiRequest("/admin/teams-list");
-            renderAdminTeamsList(data);
+            renderAdminTeamsList(data, { openAfter: false });
             setTeamStatus("Tým byl vymazán.", "ok");
           } catch (err) {
             setTeamStatus("Vymazání týmu selhalo: " + (err && err.message ? err.message : String(err)), "err");
@@ -9217,7 +9377,8 @@
           if (teamMembershipsTbody) teamMembershipsTbody.innerHTML = "";
           if (teamMembershipsAllSummary) teamMembershipsAllSummary.textContent = "";
           adminMembershipsCache = null;
-          if (teamTeamsPanel) teamTeamsPanel.hidden = true;
+          closeTeamTeamsListModal();
+          closeTeamAddTeamModal();
           if (teamTeamsTbody) teamTeamsTbody.innerHTML = "";
         });
       }
