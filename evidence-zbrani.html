@@ -349,6 +349,35 @@
       width: 100%;
       text-align: center;
     }
+    .doc-blue-sections-row {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+    .doc-blue-sections-row > section {
+      margin-bottom: 0;
+      min-width: 0;
+    }
+    .doc-blue-sections-row > section > details.doc-sec-disclosure > summary {
+      min-height: 5.05rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      text-align: center;
+    }
+    .doc-blue-sections-row .doc-section-fold-mark {
+      display: none !important;
+    }
+    .doc-blue-sections-row > section > details.doc-sec-disclosure > summary .doc-sec-summary-inner {
+      justify-content: center;
+      width: 100%;
+    }
+    .doc-blue-sections-row > section > details.doc-sec-disclosure > summary h2 {
+      width: 100%;
+      text-align: center;
+    }
     .doc-top-sections-row .doc-section-fold-mark {
       display: none !important;
     }
@@ -2861,6 +2890,7 @@
 
     </div>
 
+    <div class="doc-blue-sections-row">
     <section class="naboje-section naboje-detail-collapsed">
       <details class="doc-sec-disclosure" data-detail-toggle-class="naboje-detail-collapsed">
         <summary class="naboje-section-head" aria-expanded="false" aria-label="Otevřít náboje v okně">
@@ -2978,6 +3008,8 @@
       </div>
       </details>
     </section>
+
+    </div>
 
     <section class="streleby-section streleby-detail-collapsed">
       <details class="doc-sec-disclosure" data-detail-toggle-class="streleby-detail-collapsed">
