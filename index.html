@@ -2740,8 +2740,86 @@
       .nakupy-modal-head-start {
         width: 100%;
       }
-      table {
+      .table-wrap table {
         min-width: 38rem;
+      }
+      .table-wrap table.table-vyj,
+      .table-wrap table.table-apr,
+      .table-wrap table.table-reg,
+      .table-wrap table.table-str,
+      .table-wrap table.table-nak {
+        min-width: 0;
+        border-collapse: separate;
+        border-spacing: 0 0.5rem;
+      }
+      .table-wrap table.table-vyj thead,
+      .table-wrap table.table-apr thead,
+      .table-wrap table.table-reg thead,
+      .table-wrap table.table-str thead,
+      .table-wrap table.table-nak thead {
+        display: none;
+      }
+      .table-wrap table.table-vyj tbody tr,
+      .table-wrap table.table-apr tbody tr,
+      .table-wrap table.table-reg tbody tr,
+      .table-wrap table.table-str tbody tr,
+      .table-wrap table.table-nak tbody tr {
+        display: block;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        background: var(--surface2);
+        padding: 0.22rem 0.45rem;
+      }
+      .table-wrap table.table-vyj tbody td,
+      .table-wrap table.table-apr tbody td,
+      .table-wrap table.table-reg tbody td,
+      .table-wrap table.table-str tbody td,
+      .table-wrap table.table-nak tbody td {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 0.55rem;
+        width: 100%;
+        border: 0;
+        padding: 0.36rem 0.15rem;
+        text-align: right;
+      }
+      .table-wrap table.table-vyj tbody td::before,
+      .table-wrap table.table-apr tbody td::before,
+      .table-wrap table.table-reg tbody td::before,
+      .table-wrap table.table-str tbody td::before,
+      .table-wrap table.table-nak tbody td::before {
+        content: attr(data-label);
+        font-size: 0.7rem;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: var(--muted);
+        font-weight: 700;
+        text-align: left;
+        flex: 0 0 42%;
+      }
+      .table-wrap table.table-vyj tbody td.col-actions,
+      .table-wrap table.table-apr tbody td.col-actions,
+      .table-wrap table.table-reg tbody td.col-actions,
+      .table-wrap table.table-str tbody td.col-actions,
+      .table-wrap table.table-nak tbody td.col-actions {
+        display: block;
+        text-align: left;
+        padding-top: 0.45rem;
+      }
+      .table-wrap table.table-vyj tbody td.col-actions::before,
+      .table-wrap table.table-apr tbody td.col-actions::before,
+      .table-wrap table.table-reg tbody td.col-actions::before,
+      .table-wrap table.table-str tbody td.col-actions::before,
+      .table-wrap table.table-nak tbody td.col-actions::before {
+        display: none;
+      }
+      .table-wrap table.table-vyj tbody td.col-actions button,
+      .table-wrap table.table-apr tbody td.col-actions button,
+      .table-wrap table.table-reg tbody td.col-actions button,
+      .table-wrap table.table-str tbody td.col-actions button,
+      .table-wrap table.table-nak tbody td.col-actions button {
+        width: 100%;
       }
       section.naboje-section .naboje-table-total-row,
       .naboje-modal-body .naboje-table-total-row {
@@ -8438,11 +8516,11 @@
           var tr = document.createElement("tr");
           var zText = truncate(x.zbranHcZStrelivo || "", 56);
           tr.innerHTML =
-            "<td>" + escapeHtml(x.nazevVyjimky || "") + "</td>" +
-            "<td class=\"num\">" + formatCisloJednaciCell(x.cisloJednaci) + "</td>" +
-            "<td title=\"" + escapeHtml(x.zbranHcZStrelivo || "") + "\">" + escapeHtml(zText || "—") + "</td>" +
-            "<td class=\"num\">" + formatDate(x.datumVydani) + "</td>" +
-            "<td class=\"col-actions cell-actions\">" +
+            "<td data-label=\"Název výjimky\">" + escapeHtml(x.nazevVyjimky || "") + "</td>" +
+            "<td class=\"num\" data-label=\"Číslo jednací\">" + formatCisloJednaciCell(x.cisloJednaci) + "</td>" +
+            "<td data-label=\"Zbraň / HČZ / střelivo\" title=\"" + escapeHtml(x.zbranHcZStrelivo || "") + "\">" + escapeHtml(zText || "—") + "</td>" +
+            "<td class=\"num\" data-label=\"Datum vydání\">" + formatDate(x.datumVydani) + "</td>" +
+            "<td class=\"col-actions cell-actions\" data-label=\"Akce\">" +
             "<button type=\"button\" data-vyj=\"edit\" data-id=\"" + escapeHtml(x.id) + "\">Upravit</button>" +
             "<button type=\"button\" class=\"del\" data-vyj=\"del\" data-id=\"" + escapeHtml(x.id) + "\">Vymazat</button>" +
             "</td>";
@@ -8473,9 +8551,9 @@
         rows.forEach(function (x) {
           var tr = document.createElement("tr");
           tr.innerHTML =
-            "<td>" + escapeHtml(x.druhAprobace || "") + "</td>" +
-            "<td class=\"num\">" + formatDate(x.datumZapisu) + "</td>" +
-            "<td class=\"col-actions cell-actions\">" +
+            "<td data-label=\"Druh aprobace\">" + escapeHtml(x.druhAprobace || "") + "</td>" +
+            "<td class=\"num\" data-label=\"Datum zápisu\">" + formatDate(x.datumZapisu) + "</td>" +
+            "<td class=\"col-actions cell-actions\" data-label=\"Akce\">" +
             "<button type=\"button\" data-apr=\"edit\" data-id=\"" + escapeHtml(x.id) + "\">Upravit</button>" +
             "<button type=\"button\" class=\"del\" data-apr=\"del\" data-id=\"" + escapeHtml(x.id) + "\">Vymazat</button>" +
             "</td>";
@@ -8513,15 +8591,15 @@
           var tr = document.createElement("tr");
           var vc = truncate(x.vyrobniCisla || "", 40);
           tr.innerHTML =
-            "<td class=\"num\">" + formatPoradiCell(x.poradoveCislo) + "</td>" +
-            "<td>" + escapeHtml(truncate(x.kategorieZbrane || "", 24) || "—") + "</td>" +
-            "<td>" + escapeHtml(truncate(x.druhZbrane || "", 20) || "—") + "</td>" +
-            "<td>" + escapeHtml(truncate(x.vyrobce || "", 20) || "—") + "</td>" +
-            "<td>" + escapeHtml(truncate(x.vzor || "", 16) || "—") + "</td>" +
-            "<td>" + escapeHtml(truncate(x.raze || "", 14) || "—") + "</td>" +
-            "<td title=\"" + escapeHtml(x.vyrobniCisla || "") + "\">" + escapeHtml(vc || "—") + "</td>" +
-            "<td class=\"num\">" + formatDate(x.datumRegistrace) + "</td>" +
-            "<td class=\"col-actions cell-actions\">" +
+            "<td class=\"num\" data-label=\"Poř. č.\">" + formatPoradiCell(x.poradoveCislo) + "</td>" +
+            "<td data-label=\"Kategorie\">" + escapeHtml(truncate(x.kategorieZbrane || "", 24) || "—") + "</td>" +
+            "<td data-label=\"Druh\">" + escapeHtml(truncate(x.druhZbrane || "", 20) || "—") + "</td>" +
+            "<td data-label=\"Výrobce\">" + escapeHtml(truncate(x.vyrobce || "", 20) || "—") + "</td>" +
+            "<td data-label=\"Vzor\">" + escapeHtml(truncate(x.vzor || "", 16) || "—") + "</td>" +
+            "<td data-label=\"Ráže\">" + escapeHtml(truncate(x.raze || "", 14) || "—") + "</td>" +
+            "<td data-label=\"Výr. čísla\" title=\"" + escapeHtml(x.vyrobniCisla || "") + "\">" + escapeHtml(vc || "—") + "</td>" +
+            "<td class=\"num\" data-label=\"Registrace\">" + formatDate(x.datumRegistrace) + "</td>" +
+            "<td class=\"col-actions cell-actions\" data-label=\"Akce\">" +
             "<button type=\"button\" data-reg=\"edit\" data-id=\"" + escapeHtml(x.id) + "\">Upravit</button>" +
             "<button type=\"button\" class=\"del\" data-reg=\"del\" data-id=\"" + escapeHtml(x.id) + "\">Vymazat</button>" +
             "</td>";
@@ -8583,12 +8661,12 @@
           var zb = truncate(x.zbran || "", 36);
           var nb = truncate(x.naboje || "", 36);
           tr.innerHTML =
-            "<td class=\"num\">" + formatDate(x.datum) + "</td>" +
-            "<td title=\"" + escapeHtml(x.strelnice || "") + "\">" + escapeHtml(truncate(x.strelnice || "", 32) || "—") + "</td>" +
-            "<td title=\"" + escapeHtml(x.zbran || "") + "\">" + escapeHtml(zb || "—") + "</td>" +
-            "<td title=\"" + escapeHtml(x.naboje || "") + "\">" + escapeHtml(nb || "—") + "</td>" +
-            "<td class=\"num\">" + formatPocetNabojuCell(x.pocetNaboju) + "</td>" +
-            "<td class=\"col-actions cell-actions\">" +
+            "<td class=\"num\" data-label=\"Datum\">" + formatDate(x.datum) + "</td>" +
+            "<td data-label=\"Střelnice\" title=\"" + escapeHtml(x.strelnice || "") + "\">" + escapeHtml(truncate(x.strelnice || "", 32) || "—") + "</td>" +
+            "<td data-label=\"Zbraň\" title=\"" + escapeHtml(x.zbran || "") + "\">" + escapeHtml(zb || "—") + "</td>" +
+            "<td data-label=\"Náboje\" title=\"" + escapeHtml(x.naboje || "") + "\">" + escapeHtml(nb || "—") + "</td>" +
+            "<td class=\"num\" data-label=\"Počet nábojů\">" + formatPocetNabojuCell(x.pocetNaboju) + "</td>" +
+            "<td class=\"col-actions cell-actions\" data-label=\"Akce\">" +
             "<button type=\"button\" data-str=\"edit\" data-id=\"" + escapeHtml(x.id) + "\">Upravit</button>" +
             "<button type=\"button\" class=\"del\" data-str=\"del\" data-id=\"" + escapeHtml(x.id) + "\">Vymazat</button>" +
             "</td>";
@@ -8648,14 +8726,14 @@
           var st = truncate(x.strelnice || "", 28);
           var pz = truncate(x.proZbran || "", 24);
           tr.innerHTML =
-            "<td class=\"num\">" + formatDate(x.datum) + "</td>" +
-            "<td>" + escapeHtml(truncate(x.kategorie || "", 18) || "—") + "</td>" +
-            "<td title=\"" + escapeHtml(x.nazev || "") + "\">" + escapeHtml(nz || "—") + "</td>" +
-            "<td title=\"" + escapeHtml(x.strelnice || "") + "\">" + escapeHtml(st || "—") + "</td>" +
-            "<td class=\"num\">" + formatPocetNakupCell(x.pocet) + "</td>" +
-            "<td title=\"" + escapeHtml(x.proZbran || "") + "\">" + escapeHtml(pz || "—") + "</td>" +
-            "<td class=\"num\">" + formatNakCenaCell(x.cena) + "</td>" +
-            "<td class=\"col-actions cell-actions\">" +
+            "<td class=\"num\" data-label=\"Datum\">" + formatDate(x.datum) + "</td>" +
+            "<td data-label=\"Kategorie\">" + escapeHtml(truncate(x.kategorie || "", 18) || "—") + "</td>" +
+            "<td data-label=\"Produkt\" title=\"" + escapeHtml(x.nazev || "") + "\">" + escapeHtml(nz || "—") + "</td>" +
+            "<td data-label=\"Střelnice\" title=\"" + escapeHtml(x.strelnice || "") + "\">" + escapeHtml(st || "—") + "</td>" +
+            "<td class=\"num\" data-label=\"Počet ks\">" + formatPocetNakupCell(x.pocet) + "</td>" +
+            "<td data-label=\"Pro zbraň\" title=\"" + escapeHtml(x.proZbran || "") + "\">" + escapeHtml(pz || "—") + "</td>" +
+            "<td class=\"num\" data-label=\"Cena\">" + formatNakCenaCell(x.cena) + "</td>" +
+            "<td class=\"col-actions cell-actions\" data-label=\"Akce\">" +
             "<button type=\"button\" data-nak=\"edit\" data-id=\"" + escapeHtml(x.id) + "\">Upravit</button>" +
             "<button type=\"button\" class=\"del\" data-nak=\"del\" data-id=\"" + escapeHtml(x.id) + "\">Vymazat</button>" +
             "</td>";
