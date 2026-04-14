@@ -9048,14 +9048,41 @@
           alert("Nejdřív se přihlaste.");
           return;
         }
+        var fallbackOrgId = teamSession && teamSession.organizationId ? Number(teamSession.organizationId) : 0;
+        try {
+          var meForSwitch = await apiRequest("/auth/me");
+          var meOrgId = Number(meForSwitch && meForSwitch.organization_id);
+          if (Number.isFinite(meOrgId) && meOrgId > 0) {
+            fallbackOrgId = meOrgId;
+            if (teamSession) {
+              teamSession.organizationId = meOrgId;
+              if (meForSwitch && meForSwitch.organization_name) {
+                teamSession.organizationName = String(meForSwitch.organization_name);
+              }
+              saveTeamSession();
+            }
+          }
+        } catch (_meErr) {}
+        var fallbackOrgName =
+          teamSession && teamSession.organizationName
+            ? String(teamSession.organizationName)
+            : (Number.isFinite(fallbackOrgId) && fallbackOrgId > 0
+                ? ("Aktuální tým (ID: " + String(fallbackOrgId) + ")")
+                : "");
         closeTeamUsersListModal();
         closeTeamMembershipsModal();
         closeTeamAddMemberModal();
         closeTeamTeamsListModal();
         closeTeamAddTeamModal();
         if (teamSwitchOrgSelect) {
-          teamSwitchOrgSelect.innerHTML = "<option value=\"\">Načítám týmy...</option>";
-          teamSwitchOrgSelect.value = "";
+          if (Number.isFinite(fallbackOrgId) && fallbackOrgId > 0) {
+            teamSwitchOrgSelect.innerHTML =
+              "<option value=\"" + String(fallbackOrgId) + "\">" + escapeHtmlLite(fallbackOrgName) + "</option>";
+            teamSwitchOrgSelect.value = String(fallbackOrgId);
+          } else {
+            teamSwitchOrgSelect.innerHTML = "<option value=\"\">Načítám týmy...</option>";
+            teamSwitchOrgSelect.value = "";
+          }
         }
         if (teamSwitchOrgPassword) teamSwitchOrgPassword.value = "";
         setTeamSwitchOrgStatus("Načítám seznam týmů...");
@@ -9064,15 +9091,26 @@
         try {
           var data = await apiRequest("/admin/teams-list");
           var teams = data && Array.isArray(data.teams) ? data.teams : [];
+          var hasFallbackInTeams =
+            Number.isFinite(fallbackOrgId) &&
+            fallbackOrgId > 0 &&
+            teams.some(function (org) {
+              return Number(org && org.organization_id) === fallbackOrgId;
+            });
+          if (Number.isFinite(fallbackOrgId) && fallbackOrgId > 0 && !hasFallbackInTeams) {
+            teams.unshift({
+              organization_id: fallbackOrgId,
+              organization_name: fallbackOrgName || ("Tým #" + String(fallbackOrgId))
+            });
+          }
           if (!teams.length) {
-            var fallbackOrgId = teamSession && teamSession.organizationId ? Number(teamSession.organizationId) : 0;
             setTeamSwitchOrgChoices(
               [],
               Number.isFinite(fallbackOrgId) && fallbackOrgId > 0 ? fallbackOrgId : ""
             );
             setTeamSwitchOrgStatus("Seznam týmů z API je prázdný. Je předvyplněn aktuální tým.", "");
           } else {
-            setTeamSwitchOrgChoices(teams, teamSession && teamSession.organizationId ? teamSession.organizationId : "");
+            setTeamSwitchOrgChoices(teams, Number.isFinite(fallbackOrgId) && fallbackOrgId > 0 ? fallbackOrgId : "");
             setTeamSwitchOrgStatus("Vyberte tým a zadejte heslo.");
           }
           if (teamSwitchOrgPassword) {
@@ -9081,10 +9119,12 @@
             }, 0);
           }
         } catch (err) {
-          var currentOrgId = teamSession && teamSession.organizationId ? Number(teamSession.organizationId) : 0;
+          var currentOrgId = Number.isFinite(fallbackOrgId) && fallbackOrgId > 0
+            ? fallbackOrgId
+            : (teamSession && teamSession.organizationId ? Number(teamSession.organizationId) : 0);
           if (Number.isFinite(currentOrgId) && currentOrgId > 0) {
             setTeamSwitchOrgChoices(
-              [{ organization_id: currentOrgId, organization_name: "Aktuální tým" }],
+              [{ organization_id: currentOrgId, organization_name: fallbackOrgName || "Aktuální tým" }],
               currentOrgId
             );
           } else if (teamSwitchOrgSelect) {
