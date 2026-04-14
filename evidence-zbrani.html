@@ -323,6 +323,21 @@
       overflow: visible;
       background: var(--surface);
     }
+    .doc-top-sections-row {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+    .doc-top-sections-row > section {
+      margin-bottom: 0;
+      min-width: 0;
+    }
+    .doc-top-sections-row > section > details.doc-sec-disclosure > summary {
+      min-height: 3.15rem;
+      display: flex;
+      align-items: center;
+    }
     /* Nativní <details>: funguje i v náhledu Soubory na iOS, kde neběží JavaScript */
     details.doc-sec-disclosure {
       margin: 0;
@@ -2573,6 +2588,7 @@
         </article>
       </div>
     </div>
+    <div class="doc-top-sections-row">
     <section class="holder-section holder-detail-collapsed">
       <details class="doc-sec-disclosure" data-detail-toggle-class="holder-detail-collapsed">
         <summary class="holder-section-head" aria-expanded="false" aria-label="Otevřít údaje držitele v okně">
@@ -2826,6 +2842,8 @@
       </div>
       </details>
     </section>
+
+    </div>
 
     <section class="naboje-section naboje-detail-collapsed">
       <details class="doc-sec-disclosure" data-detail-toggle-class="naboje-detail-collapsed">
