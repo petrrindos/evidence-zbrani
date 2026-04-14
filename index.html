@@ -3148,6 +3148,7 @@
         <button type="button" id="btnExportPdfStats" title="Otevře tisk — v dialogu zvolte „Uložit jako PDF“. Do výstupu jdou jen sekce Náboje, Přehled střeleb a Náklady na zbraně.">
           Export do PDF (náboje, přehled, náklady)
         </button>
+        <button type="button" id="btnChangeHistoryShow">Historie změn</button>
       </div>
     </div>
     <div id="teamAuthSectionHost">
@@ -3436,6 +3437,45 @@
         <button type="button" class="holder-modal-close" id="holderModalClose">Zavřít</button>
       </div>
       <div id="holderModalBodyMount" class="holder-modal-body"></div>
+    </div>
+  </div>
+
+  <div
+    id="changeHistoryModalBackdrop"
+    class="holder-modal-backdrop"
+    hidden
+    aria-hidden="true"
+  >
+    <div
+      class="holder-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="changeHistoryModalTitle"
+      tabindex="-1"
+    >
+      <div class="holder-modal-head">
+        <h2 id="changeHistoryModalTitle">Historie změn</h2>
+        <button type="button" class="holder-modal-close" id="changeHistoryModalClose">Zavřít</button>
+      </div>
+      <div class="holder-modal-body" style="padding: 0.65rem">
+        <p id="changeHistorySummary" style="margin:0 0 0.55rem;font-size:0.82rem;color:var(--muted);"></p>
+        <table class="team-users-panel" style="margin:0;" aria-label="Historie změn">
+          <thead>
+            <tr>
+              <th>Datum a čas</th>
+              <th>Uživatel</th>
+              <th>Akce</th>
+              <th>Změna</th>
+              <th>Režim</th>
+            </tr>
+          </thead>
+          <tbody id="changeHistoryTbody"></tbody>
+        </table>
+        <div class="toolbar" style="margin-top:0.65rem;">
+          <button type="button" id="btnChangeHistoryExport">Export historie JSON</button>
+          <button type="button" id="btnChangeHistoryClear">Smazat historii</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -3767,6 +3807,8 @@
       var strelebyPdfPreviewRevealed = false;
       var strelebyPdfZbranSelectInitialized = false;
       var SESSION_KEY = "cz.app.evidenceZbrani.teamSession.v1";
+      var CHANGE_HISTORY_KEY = "cz.app.evidenceZbrani.changeHistory.v1";
+      var CHANGE_HISTORY_LIMIT = 300;
       var TEAM_API_DEFAULT = "https://evidence-zbrani.onrender.com/api";
       var TEAM_OWNER_EMAIL = "petr.rindos@gmail.com";
       var teamSession = null;
@@ -3825,6 +3867,96 @@
         } catch (_e) {
           /* Local/session storage může být blokované (private mode, file sandbox). */
         }
+      }
+
+      function loadChangeHistory() {
+        try {
+          var raw = localStorage.getItem(CHANGE_HISTORY_KEY);
+          if (!raw) return [];
+          var parsed = JSON.parse(raw);
+          if (!Array.isArray(parsed)) return [];
+          return parsed.filter(function (row) {
+            return row && typeof row === "object";
+          });
+        } catch (_e) {
+          return [];
+        }
+      }
+
+      function saveChangeHistory(rows) {
+        try {
+          var list = Array.isArray(rows) ? rows : [];
+          localStorage.setItem(CHANGE_HISTORY_KEY, JSON.stringify(list));
+        } catch (_e) {
+          /* Local/session storage může být blokované (private mode, file sandbox). */
+        }
+      }
+
+      function formatHistoryDateTime(iso) {
+        if (!iso) return "—";
+        var dt = new Date(iso);
+        if (isNaN(dt.getTime())) return String(iso);
+        try {
+          return dt.toLocaleString("cs-CZ");
+        } catch (_e) {
+          return dt.toISOString();
+        }
+      }
+
+      function getHistoryActorLabel() {
+        if (teamSession && teamSession.email) {
+          var email = String(teamSession.email || "").trim();
+          if (email) return email;
+        }
+        return "lokální uživatel";
+      }
+
+      function buildStateChangeDetail(prevState, nextState) {
+        var changes = [];
+        function jsonEqual(a, b) {
+          return JSON.stringify(a) === JSON.stringify(b);
+        }
+        var prevHolder = prevState && prevState.holder ? prevState.holder : emptyHolder();
+        var nextHolder = nextState && nextState.holder ? nextState.holder : emptyHolder();
+        if (!jsonEqual(prevHolder, nextHolder)) changes.push("Držitel (upraveno)");
+        function pushArrayDelta(key, label) {
+          var before = prevState && Array.isArray(prevState[key]) ? prevState[key] : [];
+          var after = nextState && Array.isArray(nextState[key]) ? nextState[key] : [];
+          if (jsonEqual(before, after)) return;
+          var delta = after.length - before.length;
+          if (delta > 0) {
+            changes.push(label + " (+" + String(delta) + ")");
+          } else if (delta < 0) {
+            changes.push(label + " (" + String(delta) + ")");
+          } else {
+            changes.push(label + " (upraveno)");
+          }
+        }
+        pushArrayDelta("vyjimky", "Výjimky");
+        pushArrayDelta("aprobace", "Aprobace");
+        pushArrayDelta("registrovaneZbrane", "Registrované zbraně");
+        pushArrayDelta("streleby", "Střelby");
+        pushArrayDelta("nakupy", "Nákupy");
+        return changes.join(", ");
+      }
+
+      function recordStateChange(prevState, nextState, changeMeta) {
+        var detail = changeMeta && changeMeta.detail
+          ? String(changeMeta.detail || "").trim()
+          : buildStateChangeDetail(prevState, nextState);
+        if (!detail) return;
+        var action = changeMeta && changeMeta.action ? String(changeMeta.action || "").trim() : "Uložení";
+        var rows = loadChangeHistory();
+        rows.unshift({
+          id: uid(),
+          at: new Date().toISOString(),
+          user: getHistoryActorLabel(),
+          action: action || "Uložení",
+          detail: detail,
+          mode: teamModeEnabled() ? "týmový" : "lokální"
+        });
+        if (rows.length > CHANGE_HISTORY_LIMIT) rows = rows.slice(0, CHANGE_HISTORY_LIMIT);
+        saveChangeHistory(rows);
       }
 
       function loadTeamSession() {
@@ -5991,11 +6123,12 @@
         return parseLocalState();
       }
 
-      function saveState(state) {
+      function saveState(state, changeMeta) {
         if (teamModeEnabled() && !canWriteRemoteState()) {
           setTeamStatus("Role " + (teamSession.role || "?") + " má pouze čtení. Změny nebyly uloženy.", "err");
           return;
         }
+        var previous = loadState();
         var normalized = {
           holder: Object.assign(emptyHolder(), state.holder || {}),
           vyjimky: Array.isArray(state.vyjimky) ? state.vyjimky : [],
@@ -6009,6 +6142,7 @@
           remoteStateCache = cloneJson(normalized);
           queueRemoteStateSave(cloneJson(normalized));
         }
+        recordStateChange(previous, normalized, changeMeta);
       }
 
       function loadVyjimky() {
@@ -7555,6 +7689,7 @@
       var nakForm = document.getElementById("nakForm");
       var btnExport = document.getElementById("btnExport");
       var btnExportPdfStats = document.getElementById("btnExportPdfStats");
+      var btnChangeHistoryShow = document.getElementById("btnChangeHistoryShow");
       var importFile = document.getElementById("importFile");
       var teamApiBaseInput = document.getElementById("teamApiBase");
       var teamOrgNameInput = document.getElementById("teamOrgName");
@@ -7605,6 +7740,12 @@
       var teamAddTeamForm = document.getElementById("teamAddTeamForm");
       var teamAddTeamNameInput = document.getElementById("teamAddTeamNameInput");
       var teamAddTeamCancel = document.getElementById("teamAddTeamCancel");
+      var changeHistoryModalBackdrop = document.getElementById("changeHistoryModalBackdrop");
+      var changeHistoryModalClose = document.getElementById("changeHistoryModalClose");
+      var changeHistorySummary = document.getElementById("changeHistorySummary");
+      var changeHistoryTbody = document.getElementById("changeHistoryTbody");
+      var btnChangeHistoryExport = document.getElementById("btnChangeHistoryExport");
+      var btnChangeHistoryClear = document.getElementById("btnChangeHistoryClear");
       var teamApiWrap = teamApiBaseInput ? teamApiBaseInput.closest("div") : null;
       var teamOrgWrap = teamOrgNameInput ? teamOrgNameInput.closest("div") : null;
       var teamEmailWrap = teamEmailInput ? teamEmailInput.closest("div") : null;
@@ -7832,6 +7973,44 @@
             teamAddTeamNameInput.focus();
           }, 0);
         }
+      }
+
+      function closeChangeHistoryModal() {
+        if (changeHistoryModalBackdrop) {
+          changeHistoryModalBackdrop.hidden = true;
+          changeHistoryModalBackdrop.setAttribute("aria-hidden", "true");
+        }
+      }
+
+      function renderChangeHistoryModalRows() {
+        if (!changeHistoryTbody) return;
+        var rows = loadChangeHistory();
+        if (changeHistorySummary) {
+          changeHistorySummary.textContent =
+            "Počet záznamů: " + String(rows.length) + " (max. " + String(CHANGE_HISTORY_LIMIT) + ").";
+        }
+        if (!rows.length) {
+          changeHistoryTbody.innerHTML = "<tr><td colspan=\"5\">Zatím bez změn.</td></tr>";
+          return;
+        }
+        changeHistoryTbody.innerHTML = rows.map(function (row) {
+          return (
+            "<tr>" +
+              "<td>" + escapeHtmlLite(formatHistoryDateTime(row.at)) + "</td>" +
+              "<td>" + escapeHtmlLite(row.user || "—") + "</td>" +
+              "<td>" + escapeHtmlLite(row.action || "Uložení") + "</td>" +
+              "<td>" + escapeHtmlLite(row.detail || "") + "</td>" +
+              "<td>" + escapeHtmlLite(row.mode || "—") + "</td>" +
+            "</tr>"
+          );
+        }).join("");
+      }
+
+      function openChangeHistoryModal() {
+        if (!changeHistoryModalBackdrop) return;
+        renderChangeHistoryModalRows();
+        changeHistoryModalBackdrop.hidden = false;
+        changeHistoryModalBackdrop.setAttribute("aria-hidden", "false");
       }
 
       function updateTeamMembershipsGlobalSummary(payload) {
@@ -8894,7 +9073,8 @@
           registrovaneZbrane: (s.registrovaneZbrane || []).map(normalizeRegZbraneRow).filter(Boolean),
           streleby: strelebyNorm,
           strelebyCelkemKs: strelebyCelkemKs,
-          nakupy: (s.nakupy || []).map(normalizeNakupRow).filter(Boolean)
+          nakupy: (s.nakupy || []).map(normalizeNakupRow).filter(Boolean),
+          changeHistory: loadChangeHistory()
         };
         var blob = new Blob([JSON.stringify(bundle, null, 2)], { type: "application/json" });
         var a = document.createElement("a");
@@ -8945,6 +9125,38 @@
           setTimeout(function () {
             if (document.body.classList.contains("print-pdf-naboje-prehled-naklady")) cleanup();
           }, 120000);
+        });
+      }
+      if (btnChangeHistoryShow) {
+        btnChangeHistoryShow.addEventListener("click", function () {
+          openChangeHistoryModal();
+        });
+      }
+      if (changeHistoryModalClose) {
+        changeHistoryModalClose.addEventListener("click", closeChangeHistoryModal);
+      }
+      if (changeHistoryModalBackdrop) {
+        changeHistoryModalBackdrop.addEventListener("click", function (ev) {
+          if (ev.target === changeHistoryModalBackdrop) closeChangeHistoryModal();
+        });
+      }
+      if (btnChangeHistoryExport) {
+        btnChangeHistoryExport.addEventListener("click", function () {
+          var rows = loadChangeHistory();
+          var blob = new Blob([JSON.stringify(rows, null, 2)], { type: "application/json" });
+          var a = document.createElement("a");
+          a.href = URL.createObjectURL(blob);
+          a.download = "historie-zmen-evidence-zbrani.json";
+          a.click();
+          URL.revokeObjectURL(a.href);
+        });
+      }
+      if (btnChangeHistoryClear) {
+        btnChangeHistoryClear.addEventListener("click", function () {
+          if (!confirm("Opravdu smazat celou historii změn?")) return;
+          saveChangeHistory([]);
+          renderChangeHistoryModalRows();
+          setTeamStatus("Historie změn byla smazána.", "ok");
         });
       }
 
@@ -9099,6 +9311,18 @@
             if (err && err.status === 409 && detail && typeof detail === "object" && Array.isArray(detail.organizations)) {
               setTeamLoginOrgChoices(detail.organizations);
               setTeamStatus(detail.message || "Vyberte tým a klikněte znovu na Přihlásit.", "err");
+              return;
+            }
+            if (err && (err.status === 401 || err.status === 403)) {
+              setTeamStatus("Přihlášení selhalo: neplatný e-mail nebo heslo.", "err");
+              return;
+            }
+            if (err && err.status >= 500) {
+              setTeamStatus("Přihlášení selhalo: server je dočasně nedostupný, zkuste to za chvíli.", "err");
+              return;
+            }
+            if (err && err.message === "Failed to fetch") {
+              setTeamStatus("Přihlášení selhalo: nelze se spojit se serverem (zkontrolujte internet nebo API URL).", "err");
               return;
             }
             setTeamStatus("Přihlášení selhalo: " + (err && err.message ? err.message : String(err)), "err");
@@ -9561,7 +9785,13 @@
                 nakupy: hasNakKey
                   ? importNakupyArray(data.nakupy, true)
                   : prevRep.nakupy
+              }, {
+                action: "Import JSON",
+                detail: "Nahrazení dat importem ze souboru."
               });
+              if (Array.isArray(data.changeHistory)) {
+                saveChangeHistory(data.changeHistory.slice(0, CHANGE_HISTORY_LIMIT));
+              }
             } else {
               var cur = loadState();
               var newH = Object.assign(emptyHolder(), data.holder || {});
@@ -9583,7 +9813,15 @@
               if (hasNakKey) {
                 cur.nakupy = importNakupyArray(data.nakupy, false);
               }
-              saveState(cur);
+              saveState(cur, {
+                action: "Import JSON",
+                detail: "Sloučení dat importem ze souboru."
+              });
+              if (Array.isArray(data.changeHistory)) {
+                var existingHistory = loadChangeHistory();
+                var mergedHistory = data.changeHistory.concat(existingHistory).slice(0, CHANGE_HISTORY_LIMIT);
+                saveChangeHistory(mergedHistory);
+              }
             }
             applyHolderToForm(loadState().holder);
             resetDocManageUi();
