@@ -705,6 +705,58 @@
       flex: 1;
       min-height: 0;
     }
+    .expiry-alert-modal {
+      max-width: min(34rem, 96vw);
+      border-color: #ef4444;
+    }
+    .expiry-alert-modal .holder-modal-head {
+      background: #fff;
+      border-bottom-color: #fecaca;
+    }
+    .expiry-alert-modal .holder-modal-head h2 {
+      color: #dc2626;
+    }
+    .expiry-alert-modal .holder-modal-close {
+      background: #fff;
+      border-color: #fecaca;
+      color: #dc2626;
+    }
+    .expiry-alert-modal .holder-modal-close:hover {
+      border-color: #ef4444;
+      color: #dc2626;
+    }
+    .expiry-alert-modal .holder-modal-body {
+      background: #fff;
+      color: #dc2626;
+      padding: 0.85rem;
+    }
+    .expiry-alert-message {
+      margin: 0;
+      font-size: 0.95rem;
+      line-height: 1.45;
+      color: #dc2626;
+      font-weight: 600;
+    }
+    .expiry-alert-actions {
+      margin-top: 0.75rem;
+      display: flex;
+      justify-content: flex-end;
+    }
+    .expiry-alert-actions button {
+      padding: 0.56rem 0.9rem;
+      border-radius: 8px;
+      border: 1px solid #fecaca;
+      background: #fff;
+      color: #dc2626;
+      font-size: 0.9rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+    .expiry-alert-actions button:hover {
+      border-color: #ef4444;
+      color: #dc2626;
+    }
     .holder-modal-body .holder-detail-body {
       display: flex;
       flex-direction: column;
@@ -4203,6 +4255,32 @@
         <div class="toolbar" style="margin-top:0.65rem;">
           <button type="button" id="btnChangeHistoryExport">Export historie JSON</button>
           <button type="button" id="btnChangeHistoryClear">Smazat historii</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div
+    id="holderExpiryAlertBackdrop"
+    class="holder-modal-backdrop"
+    hidden
+    aria-hidden="true"
+  >
+    <div
+      class="holder-modal expiry-alert-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="holderExpiryAlertTitle"
+      tabindex="-1"
+    >
+      <div class="holder-modal-head">
+        <h2 id="holderExpiryAlertTitle">Upozornění na platnost</h2>
+        <button type="button" class="holder-modal-close" id="holderExpiryAlertClose">Zavřít</button>
+      </div>
+      <div class="holder-modal-body">
+        <p id="holderExpiryAlertText" class="expiry-alert-message"></p>
+        <div class="expiry-alert-actions">
+          <button type="button" id="holderExpiryAlertOk">Rozumím</button>
         </div>
       </div>
     </div>
@@ -8950,6 +9028,10 @@
       var changeHistoryTbody = document.getElementById("changeHistoryTbody");
       var btnChangeHistoryExport = document.getElementById("btnChangeHistoryExport");
       var btnChangeHistoryClear = document.getElementById("btnChangeHistoryClear");
+      var holderExpiryAlertBackdrop = document.getElementById("holderExpiryAlertBackdrop");
+      var holderExpiryAlertClose = document.getElementById("holderExpiryAlertClose");
+      var holderExpiryAlertText = document.getElementById("holderExpiryAlertText");
+      var holderExpiryAlertOk = document.getElementById("holderExpiryAlertOk");
       var teamApiHealthPanel = document.getElementById("teamApiHealthPanel");
       var btnTeamApiHealthCheck = document.getElementById("btnTeamApiHealthCheck");
       var teamApiHealthStateEl = document.getElementById("teamApiHealthState");
@@ -9390,6 +9472,20 @@
           changeHistoryModalBackdrop.hidden = true;
           changeHistoryModalBackdrop.setAttribute("aria-hidden", "true");
         }
+      }
+
+      function closeHolderExpiryAlertModal() {
+        if (holderExpiryAlertBackdrop) {
+          holderExpiryAlertBackdrop.hidden = true;
+          holderExpiryAlertBackdrop.setAttribute("aria-hidden", "true");
+        }
+      }
+
+      function openHolderExpiryAlertModal(text) {
+        if (!holderExpiryAlertBackdrop || !holderExpiryAlertText) return;
+        holderExpiryAlertText.textContent = String(text || "").trim();
+        holderExpiryAlertBackdrop.hidden = false;
+        holderExpiryAlertBackdrop.setAttribute("aria-hidden", "false");
       }
 
       function renderChangeHistoryModalRows() {
@@ -9908,7 +10004,7 @@
         var msg = buildHolderExpiryAlertText(loadState().holder);
         if (!msg) return;
         setTimeout(function () {
-          alert(msg);
+          openHolderExpiryAlertModal(msg);
         }, 120);
       }
 
@@ -10688,6 +10784,17 @@
       if (changeHistoryModalBackdrop) {
         changeHistoryModalBackdrop.addEventListener("click", function (ev) {
           if (ev.target === changeHistoryModalBackdrop) closeChangeHistoryModal();
+        });
+      }
+      if (holderExpiryAlertClose) {
+        holderExpiryAlertClose.addEventListener("click", closeHolderExpiryAlertModal);
+      }
+      if (holderExpiryAlertOk) {
+        holderExpiryAlertOk.addEventListener("click", closeHolderExpiryAlertModal);
+      }
+      if (holderExpiryAlertBackdrop) {
+        holderExpiryAlertBackdrop.addEventListener("click", function (ev) {
+          if (ev.target === holderExpiryAlertBackdrop) closeHolderExpiryAlertModal();
         });
       }
       if (btnChangeHistoryExport) {
