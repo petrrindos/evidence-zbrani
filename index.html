@@ -5740,42 +5740,22 @@
 
       function runNabojeModalPdfPrint() {
         var data = buildNabojeModalExportData();
-        var headHtml = data.headLines
-          .map(function (pair) {
-            return (
-              "<p><strong>" +
-              escapeHtml(pair[0]) +
-              ":</strong> " +
-              escapeHtml(pair[1]) +
-              "</p>"
-            );
-          })
-          .join("");
-        var rowsHtml = data.metricRows
-          .map(function (row) {
-            return (
-              "<tr>" +
-              "<th scope=\"row\">" + escapeHtml(row[0]) + "</th>" +
-              "<td class=\"num\">" + escapeHtml(row[1]) + "</td>" +
-              "<td class=\"num\">" + escapeHtml(row[2]) + "</td>" +
-              "</tr>"
-            );
-          })
-          .join("");
+        var subMount = document.getElementById("nabojeModalPdfSubMount");
+        var tb = document.getElementById("nabojeModalPdfTbody");
+        var root = document.getElementById("nabojeModalPdfPrintRoot");
+        if (!tb || !root) return;
+        writeNabojeModalPdfContent(subMount, tb, data);
+        root.removeAttribute("hidden");
+        var clone = root.cloneNode(true);
+        clone.hidden = false;
+        clone.removeAttribute("id");
         openPdfPopupDocument(
           "Náboje - Export PDF",
-          "<section class=\"pdf-sec\">" +
-            "<h2>Náboje</h2>" +
-            headHtml +
-            "<table><thead><tr>" +
-            "<th>Ukazatel</th>" +
-            "<th class=\"num\">9 mm Luger</th>" +
-            "<th class=\"num\">.223 REM</th>" +
-            "</tr></thead><tbody>" +
-            rowsHtml +
-            "</tbody></table>" +
-            "</section>"
+          "<section class=\"pdf-sec\">" + clone.innerHTML + "</section>"
         );
+        root.setAttribute("hidden", "");
+        tb.innerHTML = "";
+        if (subMount) subMount.innerHTML = "";
       }
 
       function exportNabojeModalExcel() {
