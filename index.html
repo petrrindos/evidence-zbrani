@@ -91,6 +91,21 @@
       gap: 0.5rem 0.75rem;
       align-items: center;
     }
+    .toolbar-docs.toolbar-docs-foot .toolbar-foot-primary {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 0.5rem 0.75rem;
+      width: 100%;
+      align-items: stretch;
+    }
+    .toolbar-docs.toolbar-docs-foot .toolbar-foot-primary > button,
+    .toolbar-docs.toolbar-docs-foot .toolbar-foot-primary > .file-wrap {
+      width: 100%;
+      min-width: 0;
+    }
+    .toolbar-docs.toolbar-docs-foot .toolbar-foot-primary > .file-wrap > button {
+      width: 100%;
+    }
     .toolbar-docs .toolbar-foot-primary > button,
     .toolbar-docs .toolbar-foot-primary > .file-wrap > button {
       font-size: 0.86rem;
