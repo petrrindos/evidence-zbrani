@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#151a22" />
+      <stop offset="100%" stop-color="#1c232e" />
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="96" fill="url(#bg)" />
+  <rect x="64" y="64" width="384" height="384" rx="64" fill="#0c0f14" />
+  <path d="M150 178h212a22 22 0 0 1 22 22v24H128v-24a22 22 0 0 1 22-22zm-22 74h256v54H128v-54zm22 82h212a22 22 0 0 1 22 22v24H128v-24a22 22 0 0 1 22-22z" fill="#60a5fa"/>
+  <circle cx="172" cy="202" r="11" fill="#34d399"/>
+  <circle cx="172" cy="380" r="11" fill="#34d399"/>
+  <text x="256" y="470" text-anchor="middle" fill="#8b9aad" font-family="Segoe UI, Arial, sans-serif" font-size="30">ZBROJNÍ EVIDENCE</text>
+</svg>

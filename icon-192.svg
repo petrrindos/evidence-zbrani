@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="192" height="192" viewBox="0 0 192 192">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#151a22" />
+      <stop offset="100%" stop-color="#1c232e" />
+    </linearGradient>
+  </defs>
+  <rect width="192" height="192" rx="36" fill="url(#bg)" />
+  <rect x="24" y="24" width="144" height="144" rx="24" fill="#0c0f14" />
+  <path d="M56 68h80a8 8 0 018 8v8H48v-8a8 8 0 018-8zm-8 28h96v20H48V96zm8 32h80a8 8 0 018 8v8H48v-8a8 8 0 018-8z" fill="#60a5fa"/>
+  <circle cx="64" cy="78" r="4" fill="#34d399"/>
+  <circle cx="64" cy="146" r="4" fill="#34d399"/>
+  <text x="96" y="179" text-anchor="middle" fill="#8b9aad" font-family="Segoe UI, Arial, sans-serif" font-size="12">EVIDENCE</text>
+</svg>

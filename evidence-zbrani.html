@@ -4,6 +4,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#0c0f14" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Zbrojní evidence" />
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="icon" type="image/svg+xml" href="./icon-192.svg" />
+  <link rel="apple-touch-icon" href="./icon-192.svg" />
   <title>Zbrojní evidence</title>
   <style>
     :root {
@@ -11326,6 +11333,15 @@
         renderStreleby();
         renderNakupy();
       })();
+    })();
+  </script>
+  <script>
+    (function registerPwaServiceWorker() {
+      if (!("serviceWorker" in navigator)) return;
+      if (!/^https?:$/i.test(String(window.location.protocol || ""))) return;
+      window.addEventListener("load", function () {
+        navigator.serviceWorker.register("./sw.js", { scope: "./" }).catch(function () {});
+      });
     })();
   </script>
   <!-- Načíst až po hlavní aplikaci: na mobilu jinak blokovaný CDN zabrání registraci UI (např. šipek sekcí). -->
