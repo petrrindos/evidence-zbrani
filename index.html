@@ -5349,11 +5349,6 @@
       }
 
       function openPdfPopupDocument(title, bodyHtml) {
-        var popup = window.open("about:blank", "_blank", "width=1100,height=900");
-        if (!popup) {
-          alert("Vyskakovací okno bylo zablokováno. Povolte pop-up pro tento web.");
-          return false;
-        }
         var html =
           "<!doctype html>" +
           "<html lang=\"cs\"><head><meta charset=\"utf-8\">" +
@@ -5372,21 +5367,53 @@
           bodyHtml +
           "</body></html>";
         try {
-          popup.document.open();
-          popup.document.write(html);
-          popup.document.close();
-          popup.focus();
-          setTimeout(function () {
+          var iframe = document.createElement("iframe");
+          iframe.setAttribute("aria-hidden", "true");
+          iframe.style.position = "fixed";
+          iframe.style.right = "0";
+          iframe.style.bottom = "0";
+          iframe.style.width = "0";
+          iframe.style.height = "0";
+          iframe.style.border = "0";
+          iframe.style.visibility = "hidden";
+          document.body.appendChild(iframe);
+
+          var printed = false;
+          function cleanup() {
+            setTimeout(function () {
+              try {
+                if (iframe.parentNode) iframe.parentNode.removeChild(iframe);
+              } catch (_) {}
+            }, 1200);
+          }
+          function runPrint() {
+            if (printed) return;
+            printed = true;
             try {
-              popup.print();
+              if (iframe.contentWindow) {
+                iframe.contentWindow.focus();
+                iframe.contentWindow.print();
+              }
             } catch (_) {}
-          }, 500);
+            cleanup();
+          }
+
+          var doc = iframe.contentDocument || (iframe.contentWindow ? iframe.contentWindow.document : null);
+          if (!doc) {
+            cleanup();
+            alert("PDF tisk se nepodařilo připravit.");
+            return false;
+          }
+          iframe.onload = function () {
+            setTimeout(runPrint, 350);
+          };
+          doc.open();
+          doc.write(html);
+          doc.close();
+          setTimeout(runPrint, 900);
           return true;
         } catch (err) {
-          try {
-            popup.close();
-          } catch (_) {}
-          alert("PDF okno se nepodařilo naplnit obsahem. Zkuste to prosím znovu.");
+          alert("PDF tisk se nepodařilo připravit. Zkuste to prosím znovu.");
           return false;
         }
       }
