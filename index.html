@@ -143,6 +143,22 @@
       margin-left: auto;
       flex-shrink: 0;
     }
+    .team-auth-head-actions button {
+      padding: 0.58rem 0.4rem;
+      font-size: 0.74rem;
+      font-weight: 700;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--surface2);
+      color: #fff;
+      cursor: pointer;
+      white-space: nowrap;
+      line-height: 1.2;
+    }
+    .team-auth-head-actions button:hover {
+      border-color: var(--accent);
+      color: #fff;
+    }
     .team-auth-title {
       font-size: 0.82rem;
       letter-spacing: 0.05em;
@@ -3305,6 +3321,9 @@
       <section class="team-auth" aria-label="Týmový režim" style="margin-top:0.5cm;">
         <header class="team-auth-head">
           <h2 class="team-auth-title">SÍŤOVÝ PŘÍSTUP</h2>
+          <div class="team-auth-head-actions">
+            <button type="button" id="btnTeamLogout">Odhlásit</button>
+          </div>
         </header>
         <div class="team-auth-grid">
           <div>
@@ -3346,7 +3365,6 @@
           <button type="button" id="btnTeamCreateMember">Přidat člena</button>
           <button type="button" id="btnTeamRegisterOwner">Přidat tým</button>
           <button type="button" id="btnTeamAudit">Stáhnout audit JSON</button>
-          <button type="button" id="btnTeamLogout">Odhlásit</button>
         </div>
         <div id="teamUsersPanel" class="team-users-panel" hidden>
           <table aria-label="Seznam uživatelů (e-mail a heslo)">
