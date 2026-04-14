@@ -5739,23 +5739,53 @@
       }
 
       function runNabojeModalPdfPrint() {
+        try {
+          renderNabojeStats();
+        } catch (_) {}
+
+        var liveBody = document.getElementById("nabojeDetailBody");
+        var liveTable = liveBody ? liveBody.querySelector("table.table-naboje") : null;
+        var liveTbody = document.getElementById("tbodyNaboje");
+        var headNak = document.getElementById("nabojeNakupCelkemHead");
+        var headVyst = document.getElementById("nabojeVystrelenoCelkemHead");
+        var headZas = document.getElementById("nabojeZasobyCelkemHead");
+        if (liveTable && liveTbody && liveTbody.children.length > 0) {
+          var tableClone = liveTable.cloneNode(true);
+          var summaryHtml =
+            "<p><strong>Nákupy celkem (Kč):</strong> " + escapeHtml(String(headNak && headNak.textContent ? headNak.textContent : "—")) + "</p>" +
+            "<p><strong>Vystříleno celkem (Kč):</strong> " + escapeHtml(String(headVyst && headVyst.textContent ? headVyst.textContent : "—")) + "</p>" +
+            "<p><strong>Zásoby celkem (Kč):</strong> " + escapeHtml(String(headZas && headZas.textContent ? headZas.textContent : "—")) + "</p>";
+          if (
+            openPdfPopupDocument(
+              "Náboje - Export PDF",
+              "<section class=\"pdf-sec\"><h2>Náboje</h2>" + summaryHtml + tableClone.outerHTML + "</section>"
+            )
+          ) {
+            return;
+          }
+        }
+
         var data = buildNabojeModalExportData();
         var subMount = document.getElementById("nabojeModalPdfSubMount");
         var tb = document.getElementById("nabojeModalPdfTbody");
         var root = document.getElementById("nabojeModalPdfPrintRoot");
-        if (!tb || !root) return;
+        if (!tb || !root) {
+          alert("Export PDF Náboje se nepodařilo připravit.");
+          return;
+        }
         writeNabojeModalPdfContent(subMount, tb, data);
         root.removeAttribute("hidden");
         var clone = root.cloneNode(true);
         clone.hidden = false;
         clone.removeAttribute("id");
-        openPdfPopupDocument(
+        var ok = openPdfPopupDocument(
           "Náboje - Export PDF",
           "<section class=\"pdf-sec\">" + clone.innerHTML + "</section>"
         );
         root.setAttribute("hidden", "");
         tb.innerHTML = "";
         if (subMount) subMount.innerHTML = "";
+        if (!ok) alert("Export PDF Náboje se nepodařilo vytvořit.");
       }
 
       function exportNabojeModalExcel() {
