@@ -6875,10 +6875,77 @@
         return parseLocalState();
       }
 
+      function buildSaveValidationError(state) {
+        function isIsoOrEmpty(v) {
+          var s = String(v || "").trim();
+          return !s || /^\d{4}-\d{2}-\d{2}$/.test(s);
+        }
+        var h = Object.assign(emptyHolder(), state && state.holder ? state.holder : {});
+        if (!isIsoOrEmpty(h.datumNarozeni)) return "Držitel: datum narození musí být ve formátu RRRR-MM-DD.";
+        if (!isIsoOrEmpty(h.datumZapisu)) return "Držitel: datum zápisu musí být ve formátu RRRR-MM-DD.";
+        if (!isIsoOrEmpty(h.platnostDo)) return "Držitel: platnost do musí být ve formátu RRRR-MM-DD.";
+        if (h.datumZapisu && h.platnostDo && String(h.platnostDo) < String(h.datumZapisu)) {
+          return "Držitel: pole „Platnost do“ nesmí být dříve než „Datum zápisu“.";
+        }
+
+        var i;
+        var vyj = Array.isArray(state && state.vyjimky) ? state.vyjimky : [];
+        for (i = 0; i < vyj.length; i++) {
+          var vx = vyj[i] || {};
+          if (!String(vx.nazevVyjimky || "").trim()) return "Výjimky: záznam #" + (i + 1) + " nemá název výjimky.";
+          var cj = String(vx.cisloJednaci || "").trim();
+          if (!cj) return "Výjimky: záznam #" + (i + 1) + " nemá číslo jednací.";
+          if (!hasAnyDigit(cj)) return "Výjimky: záznam #" + (i + 1) + " má neplatné číslo jednací.";
+          if (!isIsoOrEmpty(vx.datumVydani)) return "Výjimky: záznam #" + (i + 1) + " má neplatné datum vydání.";
+        }
+
+        var apr = Array.isArray(state && state.aprobace) ? state.aprobace : [];
+        for (i = 0; i < apr.length; i++) {
+          var ax = apr[i] || {};
+          if (!String(ax.druhAprobace || "").trim()) return "Aprobace: záznam #" + (i + 1) + " nemá druh aprobace.";
+          if (!isIsoOrEmpty(ax.datumZapisu)) return "Aprobace: záznam #" + (i + 1) + " má neplatné datum zápisu.";
+        }
+
+        var reg = Array.isArray(state && state.registrovaneZbrane) ? state.registrovaneZbrane : [];
+        for (i = 0; i < reg.length; i++) {
+          var rx = reg[i] || {};
+          var por = String(rx.poradoveCislo || "").trim();
+          if (!por) return "Registrované zbraně: záznam #" + (i + 1) + " nemá pořadové číslo.";
+          if (por.length > 20) return "Registrované zbraně: záznam #" + (i + 1) + " má příliš dlouhé pořadové číslo.";
+          if (!isIsoOrEmpty(rx.datumRegistrace)) return "Registrované zbraně: záznam #" + (i + 1) + " má neplatné datum registrace.";
+        }
+
+        var str = Array.isArray(state && state.streleby) ? state.streleby : [];
+        for (i = 0; i < str.length; i++) {
+          var sx = str[i] || {};
+          if (!String(sx.strelnice || "").trim()) return "Střelby: záznam #" + (i + 1) + " nemá střelnici.";
+          if (!String(sx.zbran || "").trim()) return "Střelby: záznam #" + (i + 1) + " nemá zbraň.";
+          if (!String(sx.naboje || "").trim()) return "Střelby: záznam #" + (i + 1) + " nemá typ nábojů.";
+          if (!isIsoOrEmpty(sx.datum)) return "Střelby: záznam #" + (i + 1) + " má neplatné datum.";
+          if (parsePocetNabojuNum(sx.pocetNaboju) <= 0) {
+            return "Střelby: záznam #" + (i + 1) + " musí mít počet nábojů větší než 0.";
+          }
+        }
+
+        var nak = Array.isArray(state && state.nakupy) ? state.nakupy : [];
+        for (i = 0; i < nak.length; i++) {
+          var nx = nak[i] || {};
+          if (!String(nx.kategorie || "").trim()) return "Nákupy: záznam #" + (i + 1) + " nemá kategorii.";
+          if (!isIsoOrEmpty(nx.datum)) return "Nákupy: záznam #" + (i + 1) + " má neplatné datum.";
+          if (String(nx.pocet || "").trim() && parsePocetNakupKs(nx.pocet) <= 0) {
+            return "Nákupy: záznam #" + (i + 1) + " má neplatný počet ks.";
+          }
+          if (String(nx.cena || "").trim() && parseCenaKcNaboj(nx.cena) < 0) {
+            return "Nákupy: záznam #" + (i + 1) + " má neplatnou cenu.";
+          }
+        }
+        return "";
+      }
+
       function saveState(state, changeMeta) {
         if (teamModeEnabled() && !canWriteRemoteState()) {
           setTeamStatus("Role " + (teamSession.role || "?") + " má pouze čtení. Změny nebyly uloženy.", "err");
-          return;
+          return false;
         }
         var previous = loadState();
         var normalized = {
@@ -6889,12 +6956,19 @@
           streleby: Array.isArray(state.streleby) ? state.streleby : [],
           nakupy: Array.isArray(state.nakupy) ? state.nakupy : []
         };
+        var validationError = buildSaveValidationError(normalized);
+        if (validationError) {
+          alert("Uložení zablokováno: " + validationError);
+          setTeamStatus("Uložení zablokováno: " + validationError, "err");
+          return false;
+        }
         localStorage.setItem(STORAGE_KEY, JSON.stringify(normalized));
         if (teamModeEnabled()) {
           remoteStateCache = cloneJson(normalized);
           queueRemoteStateSave(cloneJson(normalized));
         }
         recordStateChange(previous, normalized, changeMeta);
+        return true;
       }
 
       function loadVyjimky() {
@@ -6908,13 +6982,13 @@
       function saveVyjimkyList(list) {
         var s = loadState();
         s.vyjimky = list;
-        saveState(s);
+        return saveState(s);
       }
 
       function saveAprobaceList(list) {
         var s = loadState();
         s.aprobace = list;
-        saveState(s);
+        return saveState(s);
       }
 
       function loadRegZbrane() {
@@ -6924,7 +6998,7 @@
       function saveRegZbraneList(list) {
         var s = loadState();
         s.registrovaneZbrane = list;
-        saveState(s);
+        return saveState(s);
       }
 
       function loadStreleby() {
@@ -6934,7 +7008,7 @@
       function saveStrelebyList(list) {
         var s = loadState();
         s.streleby = list;
-        saveState(s);
+        return saveState(s);
       }
 
       function loadNakupy() {
@@ -6944,7 +7018,7 @@
       function saveNakupyList(list) {
         var s = loadState();
         s.nakupy = list;
-        saveState(s);
+        return saveState(s);
       }
 
       function escapeHtml(s) {
@@ -9401,7 +9475,7 @@
 
           var s = loadState();
           s.holder = holderData;
-          saveState(s);
+          if (!saveState(s)) return;
           closeHolderModal();
         });
       }
@@ -9417,6 +9491,16 @@
         }
         if (!cis) {
           alert("Vyplňte číslo jednací.");
+          document.getElementById("vyjCisloJednaci").focus();
+          return;
+        }
+        if (cis.length > 60) {
+          alert("Číslo jednací je příliš dlouhé.");
+          document.getElementById("vyjCisloJednaci").focus();
+          return;
+        }
+        if (!hasAnyDigit(cis)) {
+          alert("Číslo jednací musí obsahovat alespoň jednu číslici.");
           document.getElementById("vyjCisloJednaci").focus();
           return;
         }
@@ -9451,7 +9535,7 @@
         } else {
           list.push(Object.assign({ id: uid() }, payload));
         }
-        saveVyjimkyList(list);
+        if (!saveVyjimkyList(list)) return;
         hideVyjFormPanel();
         renderVyjimky();
       });
@@ -9495,7 +9579,7 @@
         } else {
           list.push(Object.assign({ id: uid() }, payload));
         }
-        saveAprobaceList(list);
+        if (!saveAprobaceList(list)) return;
         hideAprFormPanel();
         renderAprobace();
       });
@@ -9600,7 +9684,7 @@
         } else {
           list.push(Object.assign({ id: uid() }, payload));
         }
-        saveRegZbraneList(list);
+        if (!saveRegZbraneList(list)) return;
         hideRegFormPanel();
         renderRegZbrane();
       });
@@ -9694,7 +9778,7 @@
         } else {
           list.push(Object.assign({ id: uid() }, payload));
         }
-        saveStrelebyList(list);
+        if (!saveStrelebyList(list)) return;
         hideStrFormPanel();
         renderStreleby();
       });
@@ -9804,7 +9888,7 @@
         } else {
           list.push(Object.assign({ id: uid() }, payload));
         }
-        saveNakupyList(list);
+        if (!saveNakupyList(list)) return;
         hideNakFormPanel();
         renderNakupy();
       });
@@ -10793,7 +10877,7 @@
                     "“)?\n\nOK = nahradit všechny uložené nákupy v prohlížeči\nZrušit = přidat k již uloženým nákupům"
                 );
                 var nlist = importNakupyArray(nrows, repN);
-                saveNakupyList(nlist);
+                if (!saveNakupyList(nlist)) return;
                 applyHolderToForm(loadState().holder);
                 resetDocManageUi();
                 renderVyjimky();
@@ -10818,7 +10902,7 @@
                   "“)?\n\nOK = nahradit všechny uložené střelby v prohlížeči\nZrušit = přidat k již uloženým střelbám"
               );
               var list = importStrelebyArray(srows, rep);
-              saveStrelebyList(list);
+              if (!saveStrelebyList(list)) return;
               applyHolderToForm(loadState().holder);
               resetDocManageUi();
               renderVyjimky();
@@ -10865,7 +10949,7 @@
             var hasNakKey = Object.prototype.hasOwnProperty.call(data, "nakupy");
             if (rep) {
               var prevRep = loadState();
-              saveState({
+              if (!saveState({
                 holder: Object.assign(emptyHolder(), data.holder || {}),
                 vyjimky: docFromFile
                   ? importVyjimkyArray(docs.vyjimky, true)
@@ -10885,7 +10969,7 @@
               }, {
                 action: "Import JSON",
                 detail: "Nahrazení dat importem ze souboru."
-              });
+              })) return;
               if (Array.isArray(data.changeHistory)) {
                 saveChangeHistory(data.changeHistory.slice(0, CHANGE_HISTORY_LIMIT));
               }
@@ -10910,10 +10994,10 @@
               if (hasNakKey) {
                 cur.nakupy = importNakupyArray(data.nakupy, false);
               }
-              saveState(cur, {
+              if (!saveState(cur, {
                 action: "Import JSON",
                 detail: "Sloučení dat importem ze souboru."
-              });
+              })) return;
               if (Array.isArray(data.changeHistory)) {
                 var existingHistory = loadChangeHistory();
                 var mergedHistory = data.changeHistory.concat(existingHistory).slice(0, CHANGE_HISTORY_LIMIT);
