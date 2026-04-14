@@ -757,6 +757,22 @@
       border-color: #ef4444;
       color: #dc2626;
     }
+    .pwa-install-status {
+      margin: 0 0 0.7rem;
+      font-size: 0.88rem;
+      color: var(--muted);
+    }
+    .pwa-install-status.ok {
+      color: #166534;
+    }
+    .pwa-install-status.err {
+      color: #b91c1c;
+    }
+    .pwa-install-actions {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: flex-end;
+    }
     .holder-modal-body .holder-detail-body {
       display: flex;
       flex-direction: column;
@@ -3841,6 +3857,7 @@
         </span>
         <button type="button" id="btnExport">Export JSON</button>
         <button type="button" id="btnChangeHistoryShow">Historie změn</button>
+        <button type="button" id="btnPwaInstall">PWA / instalace jako aplikace</button>
       </div>
     </div>
     <div id="teamAuthSectionHost">
@@ -4281,6 +4298,33 @@
         <p id="holderExpiryAlertText" class="expiry-alert-message"></p>
         <div class="expiry-alert-actions">
           <button type="button" id="holderExpiryAlertOk">Rozumím</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div
+    id="pwaInstallModalBackdrop"
+    class="holder-modal-backdrop"
+    hidden
+    aria-hidden="true"
+  >
+    <div
+      class="holder-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="pwaInstallModalTitle"
+      tabindex="-1"
+    >
+      <div class="holder-modal-head">
+        <h2 id="pwaInstallModalTitle">PWA / instalace jako aplikace</h2>
+        <button type="button" class="holder-modal-close" id="pwaInstallModalClose">Zavřít</button>
+      </div>
+      <div class="holder-modal-body" style="padding: 0.75rem">
+        <p id="pwaInstallStatus" class="pwa-install-status"></p>
+        <div class="pwa-install-actions">
+          <button type="button" id="btnPwaInstallRun">Instalovat</button>
+          <button type="button" id="btnPwaInstallClose">Zavřít</button>
         </div>
       </div>
     </div>
@@ -8962,6 +9006,7 @@
       var btnExport = document.getElementById("btnExport");
       var btnExportPdfStats = document.getElementById("btnExportPdfStats");
       var btnChangeHistoryShow = document.getElementById("btnChangeHistoryShow");
+      var btnPwaInstall = document.getElementById("btnPwaInstall");
       var importFile = document.getElementById("importFile");
       var teamApiBaseInput = document.getElementById("teamApiBase");
       var teamOrgNameInput = document.getElementById("teamOrgName");
@@ -9032,6 +9077,11 @@
       var holderExpiryAlertClose = document.getElementById("holderExpiryAlertClose");
       var holderExpiryAlertText = document.getElementById("holderExpiryAlertText");
       var holderExpiryAlertOk = document.getElementById("holderExpiryAlertOk");
+      var pwaInstallModalBackdrop = document.getElementById("pwaInstallModalBackdrop");
+      var pwaInstallModalClose = document.getElementById("pwaInstallModalClose");
+      var pwaInstallStatus = document.getElementById("pwaInstallStatus");
+      var btnPwaInstallRun = document.getElementById("btnPwaInstallRun");
+      var btnPwaInstallClose = document.getElementById("btnPwaInstallClose");
       var teamApiHealthPanel = document.getElementById("teamApiHealthPanel");
       var btnTeamApiHealthCheck = document.getElementById("btnTeamApiHealthCheck");
       var teamApiHealthStateEl = document.getElementById("teamApiHealthState");
@@ -9048,6 +9098,7 @@
       var teamPasswordWrap = teamPasswordInput ? teamPasswordInput.closest("div") : null;
       var teamLoginOrgWrap = teamLoginOrgInput ? teamLoginOrgInput.closest("div") : null;
       var teamRoleWrap = teamMemberRoleInput ? teamMemberRoleInput.closest("div") : null;
+      var pwaInstallDeferredPrompt = null;
 
       function syncTeamAuthPlacement(loggedIn) {
         if (!teamAuthSection || !teamAuthSectionHost || !teamAuthModalBackdrop || !teamAuthModalBody) return;
@@ -9486,6 +9537,72 @@
         holderExpiryAlertText.textContent = String(text || "").trim();
         holderExpiryAlertBackdrop.hidden = false;
         holderExpiryAlertBackdrop.setAttribute("aria-hidden", "false");
+      }
+
+      function closePwaInstallModal() {
+        if (!pwaInstallModalBackdrop) return;
+        pwaInstallModalBackdrop.hidden = true;
+        pwaInstallModalBackdrop.setAttribute("aria-hidden", "true");
+      }
+
+      function isPwaStandaloneMode() {
+        var mm = window.matchMedia ? window.matchMedia("(display-mode: standalone)") : null;
+        return !!((mm && mm.matches) || window.navigator.standalone === true);
+      }
+
+      function getPwaInstallManualHint() {
+        var ua = String((window.navigator && window.navigator.userAgent) || "").toLowerCase();
+        var isIos = /iphone|ipad|ipod/.test(ua);
+        if (isIos) {
+          return "Na iOS otevřete Sdílet a zvolte Přidat na plochu.";
+        }
+        return "Instalaci spusťte z nabídky prohlížeče (např. Přidat na plochu / Install app).";
+      }
+
+      function setPwaInstallStatus(text, tone) {
+        if (!pwaInstallStatus) return;
+        pwaInstallStatus.textContent = String(text || "");
+        pwaInstallStatus.classList.remove("ok", "err");
+        if (tone === "ok" || tone === "err") pwaInstallStatus.classList.add(tone);
+      }
+
+      function openPwaInstallModal() {
+        if (!pwaInstallModalBackdrop) return;
+        if (isPwaStandaloneMode()) {
+          setPwaInstallStatus("Aplikace je už nainstalovaná.", "ok");
+        } else if (pwaInstallDeferredPrompt) {
+          setPwaInstallStatus("Instalaci spustíte tlačítkem Instalovat.", "");
+        } else {
+          setPwaInstallStatus(getPwaInstallManualHint(), "");
+        }
+        pwaInstallModalBackdrop.hidden = false;
+        pwaInstallModalBackdrop.setAttribute("aria-hidden", "false");
+      }
+
+      async function runPwaInstallPrompt() {
+        if (isPwaStandaloneMode()) {
+          setPwaInstallStatus("Aplikace je už nainstalovaná.", "ok");
+          return;
+        }
+        if (!pwaInstallDeferredPrompt) {
+          setPwaInstallStatus(getPwaInstallManualHint(), "");
+          return;
+        }
+        try {
+          pwaInstallDeferredPrompt.prompt();
+          var choice = await pwaInstallDeferredPrompt.userChoice;
+          pwaInstallDeferredPrompt = null;
+          if (choice && choice.outcome === "accepted") {
+            setPwaInstallStatus("Instalace byla potvrzena.", "ok");
+            return;
+          }
+          setPwaInstallStatus("Instalace byla zrušena.", "");
+        } catch (err) {
+          setPwaInstallStatus(
+            "Instalaci se nepodařilo spustit: " + (err && err.message ? err.message : String(err)),
+            "err"
+          );
+        }
       }
 
       function renderChangeHistoryModalRows() {
@@ -10778,6 +10895,27 @@
           openChangeHistoryModal();
         });
       }
+      if (btnPwaInstall) {
+        btnPwaInstall.addEventListener("click", function () {
+          openPwaInstallModal();
+        });
+      }
+      if (pwaInstallModalClose) {
+        pwaInstallModalClose.addEventListener("click", closePwaInstallModal);
+      }
+      if (btnPwaInstallClose) {
+        btnPwaInstallClose.addEventListener("click", closePwaInstallModal);
+      }
+      if (btnPwaInstallRun) {
+        btnPwaInstallRun.addEventListener("click", function () {
+          runPwaInstallPrompt();
+        });
+      }
+      if (pwaInstallModalBackdrop) {
+        pwaInstallModalBackdrop.addEventListener("click", function (ev) {
+          if (ev.target === pwaInstallModalBackdrop) closePwaInstallModal();
+        });
+      }
       if (changeHistoryModalClose) {
         changeHistoryModalClose.addEventListener("click", closeChangeHistoryModal);
       }
@@ -11576,10 +11714,27 @@
         reader.readAsText(f, "UTF-8");
       });
 
+      window.addEventListener("beforeinstallprompt", function (ev) {
+        ev.preventDefault();
+        pwaInstallDeferredPrompt = ev;
+        setPwaInstallStatus("Instalační dialog je připraven. Klikněte na Instalovat.", "");
+      });
+
+      window.addEventListener("appinstalled", function () {
+        pwaInstallDeferredPrompt = null;
+        setPwaInstallStatus("Aplikace byla úspěšně nainstalovaná.", "ok");
+        closePwaInstallModal();
+      });
+
       (async function startApp() {
         window.addEventListener("online", function () {
           flushRemoteSyncQueue();
         });
+        if (isPwaStandaloneMode()) {
+          setPwaInstallStatus("Aplikace je už nainstalovaná.", "ok");
+        } else {
+          setPwaInstallStatus(getPwaInstallManualHint(), "");
+        }
         try {
           await restoreTeamSessionOnStart();
         } catch (err) {
