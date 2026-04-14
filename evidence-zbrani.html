@@ -516,6 +516,9 @@
     .team-add-team-modal-backdrop {
       z-index: 10006;
     }
+    .team-switch-org-modal-backdrop {
+      z-index: 10007;
+    }
     .reg-zbrane-modal-backdrop {
       position: fixed;
       inset: 0;
@@ -3364,6 +3367,7 @@
           <button type="button" id="btnTeamListTeams">Vypsat týmy</button>
           <button type="button" id="btnTeamCreateMember">Přidat člena</button>
           <button type="button" id="btnTeamRegisterOwner">Přidat tým</button>
+          <button type="button" id="btnTeamSwitchOrg">Změnit tým</button>
           <button type="button" id="btnTeamAudit">Stáhnout audit JSON</button>
         </div>
         <div id="teamUsersPanel" class="team-users-panel" hidden>
@@ -3581,6 +3585,51 @@
             <button type="button" id="teamAddTeamCancel">Zrušit</button>
           </div>
         </form>
+      </div>
+    </div>
+  </div>
+
+  <div
+    id="teamSwitchOrgModalBackdrop"
+    class="holder-modal-backdrop team-switch-org-modal-backdrop"
+    hidden
+    aria-hidden="true"
+  >
+    <div
+      class="holder-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="teamSwitchOrgModalTitle"
+      tabindex="-1"
+    >
+      <div class="holder-modal-head">
+        <h2 id="teamSwitchOrgModalTitle">Změnit tým</h2>
+        <button type="button" class="holder-modal-close" id="teamSwitchOrgModalClose">Zavřít</button>
+      </div>
+      <div class="holder-modal-body" style="padding: 0.85rem">
+        <form id="teamSwitchOrgForm" class="team-auth-grid" style="margin: 0">
+          <div>
+            <label for="teamSwitchOrgSelect">Vyberte tým</label>
+            <select id="teamSwitchOrgSelect" required>
+              <option value="">Načítám týmy...</option>
+            </select>
+          </div>
+          <div>
+            <label for="teamSwitchOrgPassword">Heslo</label>
+            <input
+              type="password"
+              id="teamSwitchOrgPassword"
+              autocomplete="current-password"
+              placeholder="Pro potvrzení přepnutí"
+              required
+            />
+          </div>
+          <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center">
+            <button type="submit" id="teamSwitchOrgSubmit">Přepnout tým</button>
+            <button type="button" id="teamSwitchOrgCancel">Zrušit</button>
+          </div>
+        </form>
+        <p id="teamSwitchOrgStatus" class="team-auth-status" style="margin-top: 0.55rem;"></p>
       </div>
     </div>
   </div>
@@ -7920,6 +7969,7 @@
       var btnTeamManageMemberships = document.getElementById("btnTeamManageMemberships");
       var btnTeamListTeams = document.getElementById("btnTeamListTeams");
       var btnTeamCreateMember = document.getElementById("btnTeamCreateMember");
+      var btnTeamSwitchOrg = document.getElementById("btnTeamSwitchOrg");
       var teamAuthSectionHost = document.getElementById("teamAuthSectionHost");
       var teamAuthModalBackdrop = document.getElementById("teamAuthModalBackdrop");
       var teamAuthModalBody = document.getElementById("teamAuthModalBody");
@@ -7958,6 +8008,13 @@
       var teamAddTeamForm = document.getElementById("teamAddTeamForm");
       var teamAddTeamNameInput = document.getElementById("teamAddTeamNameInput");
       var teamAddTeamCancel = document.getElementById("teamAddTeamCancel");
+      var teamSwitchOrgModalBackdrop = document.getElementById("teamSwitchOrgModalBackdrop");
+      var teamSwitchOrgModalClose = document.getElementById("teamSwitchOrgModalClose");
+      var teamSwitchOrgForm = document.getElementById("teamSwitchOrgForm");
+      var teamSwitchOrgSelect = document.getElementById("teamSwitchOrgSelect");
+      var teamSwitchOrgPassword = document.getElementById("teamSwitchOrgPassword");
+      var teamSwitchOrgCancel = document.getElementById("teamSwitchOrgCancel");
+      var teamSwitchOrgStatus = document.getElementById("teamSwitchOrgStatus");
       var changeHistoryModalBackdrop = document.getElementById("changeHistoryModalBackdrop");
       var changeHistoryModalClose = document.getElementById("changeHistoryModalClose");
       var changeHistorySummary = document.getElementById("changeHistorySummary");
@@ -8016,6 +8073,7 @@
         if (btnTeamManageMemberships) btnTeamManageMemberships.hidden = !ownerAllowed;
         if (btnTeamListTeams) btnTeamListTeams.hidden = !ownerAllowed;
         if (btnTeamCreateMember) btnTeamCreateMember.hidden = !ownerAllowed;
+        if (btnTeamSwitchOrg) btnTeamSwitchOrg.hidden = !loggedIn;
         if (btnTeamAudit) btnTeamAudit.hidden = !ownerAllowed;
         if (btnTeamLogout) btnTeamLogout.hidden = !loggedIn;
         if (btnTeamLogoutTop) btnTeamLogoutTop.hidden = !loggedIn;
@@ -8023,6 +8081,7 @@
         if (!ownerAllowed) closeTeamMembershipsModal();
         if (!ownerAllowed) closeTeamTeamsListModal();
         if (!ownerAllowed) closeTeamAddTeamModal();
+        if (!loggedIn) closeTeamSwitchOrgModal();
       }
 
       function getAuthFormData() {
@@ -8191,6 +8250,80 @@
           setTimeout(function () {
             teamAddTeamNameInput.focus();
           }, 0);
+        }
+      }
+
+      function setTeamSwitchOrgStatus(text, cls) {
+        if (!teamSwitchOrgStatus) return;
+        teamSwitchOrgStatus.textContent = text || "";
+        teamSwitchOrgStatus.classList.remove("ok");
+        teamSwitchOrgStatus.classList.remove("err");
+        if (cls) teamSwitchOrgStatus.classList.add(cls);
+      }
+
+      function closeTeamSwitchOrgModal() {
+        if (teamSwitchOrgModalBackdrop) {
+          teamSwitchOrgModalBackdrop.hidden = true;
+          teamSwitchOrgModalBackdrop.setAttribute("aria-hidden", "true");
+        }
+        setTeamSwitchOrgStatus("");
+      }
+
+      async function openTeamSwitchOrgModal() {
+        if (!teamSwitchOrgModalBackdrop) return;
+        if (!teamModeEnabled()) {
+          alert("Nejdřív se přihlaste.");
+          return;
+        }
+        closeTeamUsersListModal();
+        closeTeamMembershipsModal();
+        closeTeamAddMemberModal();
+        closeTeamTeamsListModal();
+        closeTeamAddTeamModal();
+        if (teamSwitchOrgSelect) {
+          teamSwitchOrgSelect.innerHTML = "<option value=\"\">Načítám týmy...</option>";
+          teamSwitchOrgSelect.value = "";
+        }
+        if (teamSwitchOrgPassword) teamSwitchOrgPassword.value = "";
+        setTeamSwitchOrgStatus("Načítám seznam týmů...");
+        teamSwitchOrgModalBackdrop.hidden = false;
+        teamSwitchOrgModalBackdrop.setAttribute("aria-hidden", "false");
+        try {
+          var data = await apiRequest("/admin/teams-list");
+          var teams = data && Array.isArray(data.teams) ? data.teams : [];
+          if (!teamSwitchOrgSelect) return;
+          if (!teams.length) {
+            teamSwitchOrgSelect.innerHTML = "<option value=\"\">Žádné týmy k dispozici</option>";
+            setTeamSwitchOrgStatus("Nepodařilo se načíst žádné týmy.", "err");
+            return;
+          }
+          var opts = ["<option value=\"\">Vyberte tým...</option>"];
+          teams.forEach(function (t) {
+            var teamId = Number(t && t.organization_id);
+            if (!Number.isFinite(teamId) || teamId < 1) return;
+            var name = String(t && t.organization_name ? t.organization_name : ("Tým #" + teamId));
+            var members = Number(t && t.members_count);
+            var suffix = Number.isFinite(members) ? (" (" + String(members) + " členů)") : "";
+            opts.push("<option value=\"" + String(teamId) + "\">" + escapeHtmlLite(name + suffix) + "</option>");
+          });
+          teamSwitchOrgSelect.innerHTML = opts.join("");
+          if (teamSession && teamSession.organizationId) {
+            teamSwitchOrgSelect.value = String(teamSession.organizationId);
+          }
+          setTeamSwitchOrgStatus("Vyberte tým a zadejte heslo.");
+          if (teamSwitchOrgPassword) {
+            setTimeout(function () {
+              teamSwitchOrgPassword.focus();
+            }, 0);
+          }
+        } catch (err) {
+          if (teamSwitchOrgSelect) {
+            teamSwitchOrgSelect.innerHTML = "<option value=\"\">Načtení týmů selhalo</option>";
+          }
+          setTeamSwitchOrgStatus(
+            "Načtení týmů selhalo: " + (err && err.message ? err.message : String(err)),
+            "err"
+          );
         }
       }
 
@@ -9715,6 +9848,65 @@
           }
         });
       }
+      if (btnTeamSwitchOrg) {
+        btnTeamSwitchOrg.addEventListener("click", async function () {
+          await openTeamSwitchOrgModal();
+        });
+      }
+      if (teamSwitchOrgModalClose) {
+        teamSwitchOrgModalClose.addEventListener("click", closeTeamSwitchOrgModal);
+      }
+      if (teamSwitchOrgCancel) {
+        teamSwitchOrgCancel.addEventListener("click", closeTeamSwitchOrgModal);
+      }
+      if (teamSwitchOrgModalBackdrop) {
+        teamSwitchOrgModalBackdrop.addEventListener("click", function (ev) {
+          if (ev.target === teamSwitchOrgModalBackdrop) closeTeamSwitchOrgModal();
+        });
+      }
+      if (teamSwitchOrgForm) {
+        teamSwitchOrgForm.addEventListener("submit", async function (ev) {
+          ev.preventDefault();
+          if (!teamModeEnabled()) return alert("Nejdřív se přihlaste.");
+          var orgId = teamSwitchOrgSelect ? Number(teamSwitchOrgSelect.value) : 0;
+          var password = teamSwitchOrgPassword ? String(teamSwitchOrgPassword.value || "") : "";
+          if (!Number.isFinite(orgId) || orgId < 1) {
+            setTeamSwitchOrgStatus("Vyberte tým.", "err");
+            return;
+          }
+          if (!password.trim()) {
+            setTeamSwitchOrgStatus("Zadejte heslo pro potvrzení.", "err");
+            return;
+          }
+          var email = teamSession && teamSession.email ? String(teamSession.email) : "";
+          if (!email) {
+            setTeamSwitchOrgStatus("Nelze určit přihlášený e-mail.", "err");
+            return;
+          }
+          if (teamSession && Number(teamSession.organizationId) === orgId) {
+            setTeamSwitchOrgStatus("Tento tým je už aktivní.", "ok");
+            return;
+          }
+          try {
+            setTeamSwitchOrgStatus("Přepínám tým...");
+            var out = await apiRequest("/auth/login", {
+              method: "POST",
+              body: JSON.stringify({
+                email: email,
+                password: password,
+                organization_id: orgId
+              })
+            });
+            await loginAndLoadSharedState(out, "Tým byl změněn");
+            closeTeamSwitchOrgModal();
+          } catch (err) {
+            setTeamSwitchOrgStatus(
+              "Přepnutí týmu selhalo: " + (err && err.message ? err.message : String(err)),
+              "err"
+            );
+          }
+        });
+      }
       if (teamMembershipsTbody) {
         teamMembershipsTbody.addEventListener("change", function (e) {
           var sel = e.target && e.target.closest ? e.target.closest("select[data-user-row-team]") : null;
@@ -9876,6 +10068,7 @@
         adminMembershipsCache = null;
         closeTeamTeamsListModal();
         closeTeamAddTeamModal();
+        closeTeamSwitchOrgModal();
         if (teamTeamsTbody) teamTeamsTbody.innerHTML = "";
       }
       if (btnTeamLogout) {
