@@ -9603,39 +9603,51 @@
           closeNakladyZbraneModal();
           closeNabojeModal();
           closePrehledStrModal();
-          var selectors = [
-            "section.naboje-section",
-            "section.prehled-streleb-section",
-            "section.naklady-zbrane-section"
-          ];
-          var saved = [];
-          var i;
-          for (i = 0; i < selectors.length; i++) {
-            var sec = document.querySelector(selectors[i]);
-            if (!sec) continue;
-            var det = sec.querySelector("details.doc-sec-disclosure");
-            if (det) {
-              saved.push({ det: det, open: det.open });
-              det.open = true;
-            }
+          var roots = [
+            document.getElementById("nabojeModalPdfPrintRoot"),
+            document.getElementById("prehledStrPdfPrintRoot"),
+            document.getElementById("nakladyZbranePdfPrintRoot")
+          ].filter(Boolean);
+          if (!roots.length) {
+            alert("Podklady pro PDF nejsou připraveny.");
+            return;
           }
-          function cleanup() {
-            document.body.classList.remove("print-pdf-naboje-prehled-naklady");
-            saved.forEach(function (item) {
-              if (item && item.det) item.det.open = item.open;
-            });
+          var popup = window.open("", "_blank", "noopener,noreferrer,width=1100,height=900");
+          if (!popup) {
+            alert("Vyskakovací okno bylo zablokováno. Povolte pop-up pro tento web.");
+            return;
           }
-          document.body.classList.add("print-pdf-naboje-prehled-naklady");
-          window.addEventListener("afterprint", function onAfterPrint() {
-            window.removeEventListener("afterprint", onAfterPrint);
-            cleanup();
-          });
+          var sectionsHtml = roots
+            .map(function (root) {
+              var clone = root.cloneNode(true);
+              clone.hidden = false;
+              clone.removeAttribute("id");
+              return "<section class=\"pdf-sec\">" + clone.innerHTML + "</section>";
+            })
+            .join("");
+          var html =
+            "<!doctype html>" +
+            "<html lang=\"cs\"><head><meta charset=\"utf-8\">" +
+            "<title>Export PDF</title>" +
+            "<style>" +
+            "body{font-family:Arial,sans-serif;margin:14px;color:#111;}" +
+            ".pdf-sec{margin:0 0 14px 0;}" +
+            "h2{margin:0 0 8px 0;font-size:16px;}" +
+            "p{margin:6px 0;font-size:12px;color:#333;}" +
+            "table{width:100%;border-collapse:collapse;font-size:12px;}" +
+            "th,td{border:1px solid #000;padding:6px 7px;text-align:left;vertical-align:top;}" +
+            "th.num,td.num{text-align:right;}" +
+            "@page{size:A4;margin:12mm;}" +
+            "</style></head><body>" +
+            sectionsHtml +
+            "</body></html>";
+          popup.document.open();
+          popup.document.write(html);
+          popup.document.close();
+          popup.focus();
           setTimeout(function () {
-            window.print();
-          }, 150);
-          setTimeout(function () {
-            if (document.body.classList.contains("print-pdf-naboje-prehled-naklady")) cleanup();
-          }, 120000);
+            popup.print();
+          }, 220);
         });
       }
       if (btnChangeHistoryShow) {
