@@ -8259,6 +8259,29 @@
         if (cls) teamSwitchOrgStatus.classList.add(cls);
       }
 
+      function setTeamSwitchOrgChoices(orgs, preferredOrgId) {
+        if (!teamSwitchOrgSelect) return;
+        var rows = Array.isArray(orgs) ? orgs : [];
+        var opts = ["<option value=\"\">Vyberte tým...</option>"];
+        rows.forEach(function (org) {
+          var orgId = Number(org && org.organization_id);
+          if (!Number.isFinite(orgId) || orgId < 1) return;
+          var orgName = String(org && org.organization_name ? org.organization_name : ("Tým #" + orgId));
+          var role = String(org && org.role ? org.role : "").trim();
+          var members = Number(org && org.members_count);
+          var suffix = "";
+          if (role) suffix = " (" + role + ")";
+          else if (Number.isFinite(members)) suffix = " (" + String(members) + " členů)";
+          opts.push("<option value=\"" + String(orgId) + "\">" + escapeHtmlLite(orgName + suffix) + "</option>");
+        });
+        teamSwitchOrgSelect.innerHTML = opts.join("");
+        if (preferredOrgId != null && preferredOrgId !== "") {
+          teamSwitchOrgSelect.value = String(preferredOrgId);
+        } else {
+          teamSwitchOrgSelect.value = "";
+        }
+      }
+
       function closeTeamSwitchOrgModal() {
         if (teamSwitchOrgModalBackdrop) {
           teamSwitchOrgModalBackdrop.hidden = true;
@@ -8289,39 +8312,29 @@
         try {
           var data = await apiRequest("/admin/teams-list");
           var teams = data && Array.isArray(data.teams) ? data.teams : [];
-          if (!teamSwitchOrgSelect) return;
           if (!teams.length) {
-            teamSwitchOrgSelect.innerHTML = "<option value=\"\">Žádné týmy k dispozici</option>";
-            setTeamSwitchOrgStatus("Nepodařilo se načíst žádné týmy.", "err");
-            return;
+            setTeamSwitchOrgChoices([], "");
+            setTeamSwitchOrgStatus("Zadejte heslo. Týmy načteme z vašeho účtu.", "");
+          } else {
+            setTeamSwitchOrgChoices(teams, teamSession && teamSession.organizationId ? teamSession.organizationId : "");
+            setTeamSwitchOrgStatus("Vyberte tým a zadejte heslo.");
           }
-          var opts = ["<option value=\"\">Vyberte tým...</option>"];
-          teams.forEach(function (t) {
-            var teamId = Number(t && t.organization_id);
-            if (!Number.isFinite(teamId) || teamId < 1) return;
-            var name = String(t && t.organization_name ? t.organization_name : ("Tým #" + teamId));
-            var members = Number(t && t.members_count);
-            var suffix = Number.isFinite(members) ? (" (" + String(members) + " členů)") : "";
-            opts.push("<option value=\"" + String(teamId) + "\">" + escapeHtmlLite(name + suffix) + "</option>");
-          });
-          teamSwitchOrgSelect.innerHTML = opts.join("");
-          if (teamSession && teamSession.organizationId) {
-            teamSwitchOrgSelect.value = String(teamSession.organizationId);
-          }
-          setTeamSwitchOrgStatus("Vyberte tým a zadejte heslo.");
           if (teamSwitchOrgPassword) {
             setTimeout(function () {
               teamSwitchOrgPassword.focus();
             }, 0);
           }
         } catch (err) {
-          if (teamSwitchOrgSelect) {
-            teamSwitchOrgSelect.innerHTML = "<option value=\"\">Načtení týmů selhalo</option>";
+          var currentOrgId = teamSession && teamSession.organizationId ? Number(teamSession.organizationId) : 0;
+          if (Number.isFinite(currentOrgId) && currentOrgId > 0) {
+            setTeamSwitchOrgChoices(
+              [{ organization_id: currentOrgId, organization_name: "Aktuální tým" }],
+              currentOrgId
+            );
+          } else if (teamSwitchOrgSelect) {
+            teamSwitchOrgSelect.innerHTML = "<option value=\"\">Vyberte tým...</option>";
           }
-          setTeamSwitchOrgStatus(
-            "Načtení týmů selhalo: " + (err && err.message ? err.message : String(err)),
-            "err"
-          );
+          setTeamSwitchOrgStatus("Zadejte heslo. Týmy načteme z vašeho účtu.", "");
         }
       }
 
@@ -9868,10 +9881,6 @@
           if (!teamModeEnabled()) return alert("Nejdřív se přihlaste.");
           var orgId = teamSwitchOrgSelect ? Number(teamSwitchOrgSelect.value) : 0;
           var password = teamSwitchOrgPassword ? String(teamSwitchOrgPassword.value || "") : "";
-          if (!Number.isFinite(orgId) || orgId < 1) {
-            setTeamSwitchOrgStatus("Vyberte tým.", "err");
-            return;
-          }
           if (!password.trim()) {
             setTeamSwitchOrgStatus("Zadejte heslo pro potvrzení.", "err");
             return;
@@ -9880,6 +9889,45 @@
           if (!email) {
             setTeamSwitchOrgStatus("Nelze určit přihlášený e-mail.", "err");
             return;
+          }
+          if (!Number.isFinite(orgId) || orgId < 1) {
+            try {
+              setTeamSwitchOrgStatus("Načítám týmy z vašeho účtu...");
+              var probeOut = await apiRequest("/auth/login", {
+                method: "POST",
+                body: JSON.stringify({
+                  email: email,
+                  password: password
+                })
+              });
+              await loginAndLoadSharedState(probeOut, "Přihlášení úspěšné");
+              closeTeamSwitchOrgModal();
+              return;
+            } catch (probeErr) {
+              var detail = probeErr && probeErr.data ? probeErr.data.detail : null;
+              if (
+                probeErr &&
+                probeErr.status === 409 &&
+                detail &&
+                typeof detail === "object" &&
+                Array.isArray(detail.organizations)
+              ) {
+                setTeamSwitchOrgChoices(
+                  detail.organizations,
+                  teamSession && teamSession.organizationId ? teamSession.organizationId : ""
+                );
+                setTeamSwitchOrgStatus(
+                  detail.message || "Vyberte tým a klikněte znovu na Přepnout tým.",
+                  "err"
+                );
+                return;
+              }
+              setTeamSwitchOrgStatus(
+                "Načtení týmů selhalo: " + (probeErr && probeErr.message ? probeErr.message : String(probeErr)),
+                "err"
+              );
+              return;
+            }
           }
           if (teamSession && Number(teamSession.organizationId) === orgId) {
             setTeamSwitchOrgStatus("Tento tým je už aktivní.", "ok");
