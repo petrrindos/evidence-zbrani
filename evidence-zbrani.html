@@ -9101,6 +9101,18 @@
               setTeamStatus(detail.message || "Vyberte tým a klikněte znovu na Přihlásit.", "err");
               return;
             }
+            if (err && (err.status === 401 || err.status === 403)) {
+              setTeamStatus("Přihlášení selhalo: neplatný e-mail nebo heslo.", "err");
+              return;
+            }
+            if (err && err.status >= 500) {
+              setTeamStatus("Přihlášení selhalo: server je dočasně nedostupný, zkuste to za chvíli.", "err");
+              return;
+            }
+            if (err && err.message === "Failed to fetch") {
+              setTeamStatus("Přihlášení selhalo: nelze se spojit se serverem (zkontrolujte internet nebo API URL).", "err");
+              return;
+            }
             setTeamStatus("Přihlášení selhalo: " + (err && err.message ? err.message : String(err)), "err");
           }
         });
