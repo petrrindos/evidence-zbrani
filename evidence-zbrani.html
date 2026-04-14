@@ -1465,6 +1465,90 @@
       color: var(--muted);
       font-weight: 700;
     }
+    section.dashboard-section .dashboard-section-head {
+      display: block;
+      padding: 0.45rem 0.85rem;
+      border-bottom: 1px solid var(--border);
+      background: var(--str-nak-head-bg);
+    }
+    section.dashboard-section .dashboard-section-head h2 {
+      margin: 0;
+      padding: 0;
+      border: none;
+      background: transparent;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--str-nak-head-text);
+      font-weight: 700;
+    }
+    .dashboard-body {
+      padding: 0.75rem 0.8rem 0.85rem;
+    }
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 0.55rem;
+      margin-bottom: 0.7rem;
+    }
+    .dashboard-card {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--surface2);
+      padding: 0.55rem 0.62rem;
+      min-height: 5.05rem;
+    }
+    .dashboard-card .k {
+      margin: 0 0 0.25rem;
+      font-size: 0.7rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-weight: 700;
+    }
+    .dashboard-card .v {
+      margin: 0;
+      font-size: 1.15rem;
+      line-height: 1.2;
+      font-weight: 700;
+      color: #fff;
+    }
+    .dashboard-card .hint {
+      margin: 0.2rem 0 0;
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+    .dashboard-split {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 0.6rem;
+    }
+    .dashboard-panel {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--surface2);
+      padding: 0.55rem 0.62rem;
+    }
+    .dashboard-panel h3 {
+      margin: 0 0 0.38rem;
+      font-size: 0.74rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .dashboard-list {
+      margin: 0;
+      padding-left: 1.1rem;
+      font-size: 0.84rem;
+    }
+    .dashboard-list li + li {
+      margin-top: 0.24rem;
+    }
+    .dashboard-empty {
+      margin: 0;
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
     section.holder-section .holder-add-btn,
     section.vyjimky-section .vyjimky-add-btn,
     section.aprobace-section .aprobace-add-btn,
@@ -2406,6 +2490,64 @@
 <body>
   <div class="wrap">
     <h1 class="page-title">Zbrojní evidence</h1>
+    <section class="dashboard-section">
+      <details class="doc-sec-disclosure" open>
+        <summary class="dashboard-section-head" aria-expanded="true" aria-label="Zobrazit dashboard">
+          <span class="doc-sec-summary-inner">
+            <span class="doc-section-fold-mark" aria-hidden="true">▶</span>
+            <h2>Dashboard</h2>
+          </span>
+        </summary>
+      <div class="doc-sec-panel">
+      <div class="dashboard-body">
+        <div class="dashboard-grid">
+          <article class="dashboard-card">
+            <p class="k">Registrované zbraně</p>
+            <p class="v" id="dashboardRegCount">0</p>
+            <p class="hint" id="dashboardRegHint">Aktivní záznamy</p>
+          </article>
+          <article class="dashboard-card">
+            <p class="k">Střelby celkem</p>
+            <p class="v" id="dashboardStrelebyCount">0</p>
+            <p class="hint" id="dashboardStrelebyHint">0 ks nábojů vystříleno</p>
+          </article>
+          <article class="dashboard-card">
+            <p class="k">Nákupy celkem</p>
+            <p class="v" id="dashboardNakupyCount">0</p>
+            <p class="hint" id="dashboardNakupyHint">0 Kč celkem</p>
+          </article>
+          <article class="dashboard-card">
+            <p class="k">Tento měsíc</p>
+            <p class="v" id="dashboardMonthCount">0 / 0</p>
+            <p class="hint" id="dashboardMonthHint">Střelby / nákupy</p>
+          </article>
+          <article class="dashboard-card">
+            <p class="k">Výjimky a aprobace</p>
+            <p class="v" id="dashboardDocsCount">0 / 0</p>
+            <p class="hint">Výjimky / aprobace</p>
+          </article>
+          <article class="dashboard-card">
+            <p class="k">Poslední střelba</p>
+            <p class="v" id="dashboardLastStreleba">—</p>
+            <p class="hint" id="dashboardLastStrelebaHint">Bez záznamu</p>
+          </article>
+        </div>
+        <div class="dashboard-split">
+          <div class="dashboard-panel">
+            <h3>Top zbraně podle střeleb</h3>
+            <ol id="dashboardTopZbrane" class="dashboard-list"></ol>
+            <p id="dashboardTopZbraneEmpty" class="dashboard-empty" hidden>Zatím bez střeleb.</p>
+          </div>
+          <div class="dashboard-panel">
+            <h3>Top střelnice podle návštěv</h3>
+            <ol id="dashboardTopStrelnice" class="dashboard-list"></ol>
+            <p id="dashboardTopStrelniceEmpty" class="dashboard-empty" hidden>Zatím bez střeleb.</p>
+          </div>
+        </div>
+      </div>
+      </div>
+      </details>
+    </section>
     <section class="holder-section holder-detail-collapsed">
       <details class="doc-sec-disclosure" data-detail-toggle-class="holder-detail-collapsed">
         <summary class="holder-section-head" aria-expanded="false" aria-label="Otevřít údaje držitele v okně">
@@ -7415,6 +7557,104 @@
         return { n: NaN, t: t };
       }
 
+      function renderDashboard() {
+        var regRows = loadRegZbrane().map(normalizeRegZbraneRow).filter(Boolean);
+        var strRows = loadStreleby().map(normalizeStrelebaRow).filter(Boolean);
+        var nakRows = loadNakupy().map(normalizeNakupRow).filter(Boolean);
+        var vyjRows = loadVyjimky().map(normalizeVyjimkaRow).filter(Boolean);
+        var aprRows = loadAprobace().map(normalizeAprobaceRow).filter(Boolean);
+        var totalRounds = 0;
+        var totalNakCost = 0;
+        var shotsByZbran = {};
+        var roundsByZbran = {};
+        var shotsByStrelnice = {};
+        var latestStrelbaIso = "";
+        var latestStrelbaZbran = "";
+        var now = new Date();
+        var ymNow = now.getFullYear() + "-" + pad2Datum(now.getMonth() + 1);
+        var monthShots = 0;
+        var monthNakupy = 0;
+        strRows.forEach(function (r) {
+          var rounds = parsePocetNabojuNum(r.pocetNaboju);
+          totalRounds += rounds;
+          var z = String(r.zbran || "Neurčeno").trim() || "Neurčeno";
+          var st = String(r.strelnice || "Neurčeno").trim() || "Neurčeno";
+          shotsByZbran[z] = (shotsByZbran[z] || 0) + 1;
+          roundsByZbran[z] = (roundsByZbran[z] || 0) + rounds;
+          shotsByStrelnice[st] = (shotsByStrelnice[st] || 0) + 1;
+          var iso = normalizeDatumToIso(r.datum);
+          if (/^\d{4}-\d{2}-\d{2}$/.test(iso) && (!latestStrelbaIso || iso > latestStrelbaIso)) {
+            latestStrelbaIso = iso;
+            latestStrelbaZbran = z;
+          }
+          if (iso.slice(0, 7) === ymNow) monthShots += 1;
+        });
+        nakRows.forEach(function (r) {
+          totalNakCost += parseCenaKcNaboj(r.cena);
+          var iso = normalizeDatumToIso(r.datum);
+          if (iso.slice(0, 7) === ymNow) monthNakupy += 1;
+        });
+        function setText(id, value) {
+          var el = document.getElementById(id);
+          if (el) el.textContent = value;
+        }
+        setText("dashboardRegCount", formatIntegerCs(regRows.length));
+        setText("dashboardRegHint", "Aktivní záznamy");
+        setText("dashboardStrelebyCount", formatIntegerCs(strRows.length));
+        setText("dashboardStrelebyHint", formatIntegerCs(totalRounds) + " ks nábojů vystříleno");
+        setText("dashboardNakupyCount", formatIntegerCs(nakRows.length));
+        setText("dashboardNakupyHint", formatMoneyNaboj(totalNakCost) + " celkem");
+        setText("dashboardMonthCount", formatIntegerCs(monthShots) + " / " + formatIntegerCs(monthNakupy));
+        setText("dashboardMonthHint", "Střelby / nákupy (" + ymNow + ")");
+        setText("dashboardDocsCount", formatIntegerCs(vyjRows.length) + " / " + formatIntegerCs(aprRows.length));
+        setText("dashboardLastStreleba", latestStrelbaIso ? formatDate(latestStrelbaIso) : "—");
+        setText(
+          "dashboardLastStrelebaHint",
+          latestStrelbaIso ? ("Zbraň: " + latestStrelbaZbran) : "Bez záznamu"
+        );
+
+        var topZbraneEl = document.getElementById("dashboardTopZbrane");
+        var topZbraneEmpty = document.getElementById("dashboardTopZbraneEmpty");
+        if (topZbraneEl) {
+          var topZbrane = Object.keys(shotsByZbran)
+            .map(function (name) {
+              return {
+                name: name,
+                shots: shotsByZbran[name] || 0,
+                rounds: roundsByZbran[name] || 0
+              };
+            })
+            .sort(function (a, b) {
+              if (b.shots !== a.shots) return b.shots - a.shots;
+              if (b.rounds !== a.rounds) return b.rounds - a.rounds;
+              return a.name.localeCompare(b.name, "cs", { sensitivity: "base" });
+            })
+            .slice(0, 5);
+          topZbraneEl.innerHTML = topZbrane.map(function (row) {
+            return "<li>" + escapeHtml(row.name) + " — " + formatIntegerCs(row.shots) + " střeleb, " + formatIntegerCs(row.rounds) + " ks</li>";
+          }).join("");
+          if (topZbraneEmpty) topZbraneEmpty.hidden = topZbrane.length > 0;
+        }
+
+        var topStrelniceEl = document.getElementById("dashboardTopStrelnice");
+        var topStrelniceEmpty = document.getElementById("dashboardTopStrelniceEmpty");
+        if (topStrelniceEl) {
+          var topStrelnice = Object.keys(shotsByStrelnice)
+            .map(function (name) {
+              return { name: name, shots: shotsByStrelnice[name] || 0 };
+            })
+            .sort(function (a, b) {
+              if (b.shots !== a.shots) return b.shots - a.shots;
+              return a.name.localeCompare(b.name, "cs", { sensitivity: "base" });
+            })
+            .slice(0, 5);
+          topStrelniceEl.innerHTML = topStrelnice.map(function (row) {
+            return "<li>" + escapeHtml(row.name) + " — " + formatIntegerCs(row.shots) + " návštěv</li>";
+          }).join("");
+          if (topStrelniceEmpty) topStrelniceEmpty.hidden = topStrelnice.length > 0;
+        }
+      }
+
       function renderVyjimky() {
         var tbody = document.getElementById("tbodyVyj");
         var emptyEl = document.getElementById("vyjEmptyState");
@@ -7425,6 +7665,7 @@
         if (vyjDetailEl) vyjDetailEl.classList.toggle("doc-manage-open", vyjManageOpen);
         if (all.length === 0) {
           emptyEl.hidden = false;
+          renderDashboard();
           return;
         }
         emptyEl.hidden = true;
@@ -7447,6 +7688,7 @@
             "</td>";
           tbody.appendChild(tr);
         });
+        renderDashboard();
       }
 
       function renderAprobace() {
@@ -7459,6 +7701,7 @@
         if (aprDetailEl) aprDetailEl.classList.toggle("doc-manage-open", aprManageOpen);
         if (all.length === 0) {
           emptyEl.hidden = false;
+          renderDashboard();
           return;
         }
         emptyEl.hidden = true;
@@ -7478,6 +7721,7 @@
             "</td>";
           tbody.appendChild(tr);
         });
+        renderDashboard();
       }
 
       function renderRegZbrane() {
@@ -7490,6 +7734,7 @@
         if (regDetailEl) regDetailEl.classList.toggle("doc-manage-open", regManageOpen);
         if (all.length === 0) {
           emptyEl.hidden = false;
+          renderDashboard();
           return;
         }
         emptyEl.hidden = true;
@@ -7522,6 +7767,7 @@
             "</td>";
           tbody.appendChild(tr);
         });
+        renderDashboard();
       }
 
       function renderStreleby() {
@@ -7546,6 +7792,7 @@
           fillStrelebyPdfZbranSelect();
           if (strelebyPdfPreviewRevealed) refreshStrelebyPdfPreview(true);
           else updateStrelebyPdfExportButtonState();
+          renderDashboard();
           return;
         }
         var rows = all.slice().sort(function (a, b) {
@@ -7567,6 +7814,7 @@
           fillStrelebyPdfZbranSelect();
           if (strelebyPdfPreviewRevealed) refreshStrelebyPdfPreview(true);
           else updateStrelebyPdfExportButtonState();
+          renderDashboard();
           return;
         }
         emptyEl.hidden = true;
@@ -7591,6 +7839,7 @@
         fillStrelebyPdfZbranSelect();
         if (strelebyPdfPreviewRevealed) refreshStrelebyPdfPreview(true);
         else updateStrelebyPdfExportButtonState();
+        renderDashboard();
       }
 
       function renderNakupy() {
@@ -7611,6 +7860,7 @@
           emptyEl.textContent =
             "Žádné nákupy — otevřete „Upravit“ a přidejte záznam tlačítkem „Nový záznam“.";
           renderNabojeStats();
+          renderDashboard();
           return;
         }
         var rows = all.slice().sort(function (a, b) {
@@ -7628,6 +7878,7 @@
           emptyEl.textContent =
             "Pro vybranou kategorii nejsou žádné nákupy. Zvolte „Všechny kategorie“ nebo jinou kategorii v hlavičce okna Nákupy.";
           renderNabojeStats();
+          renderDashboard();
           return;
         }
         emptyEl.hidden = true;
@@ -7651,6 +7902,7 @@
           tbody.appendChild(tr);
         });
         renderNabojeStats();
+        renderDashboard();
       }
 
       function resetDocManageUi() {
