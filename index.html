@@ -173,22 +173,22 @@
       margin-bottom: 0.6rem;
     }
     .team-auth-actions-row {
-      display: flex !important;
-      flex-wrap: nowrap !important;
+      display: grid !important;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
       gap: 0.45rem !important;
       width: 100%;
-      overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
     }
     .team-auth .toolbar button {
-      font-size: 0.74rem;
+      font-size: 0.72rem;
     }
     .team-auth-actions-row button {
-      flex: 0 0 auto;
-      padding: 0.58rem 0.4rem;
-      font-size: 0.74rem;
+      width: 100%;
+      padding: 0.7rem 0.28rem;
+      font-size: 0.72rem;
       font-weight: 700;
       white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
       line-height: 1.2;
     }
     .team-auth-grid label {
