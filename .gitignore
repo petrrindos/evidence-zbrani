@@ -1,4 +1,16 @@
 .DS_Store
-server/.DS_Store
-.DS_Store
-server/.DS_Store
+
+# Local IDE/workspace files
+*.code-workspace
+
+# Local Python environments
+.venv/
+server/.venv/
+
+# Local backup/export files
+evidence-zbrani-zaloha*.json
+audit-log-evidence-zbrani.json
+
+# Local SSH key files (do not commit)
+petrrindos
+petrrindos.pub
