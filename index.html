@@ -3750,7 +3750,7 @@
           <button type="button" id="btnTeamSwitchOrg">Změnit tým</button>
           <button type="button" id="btnTeamAudit">Stáhnout audit JSON</button>
         </div>
-        <section class="team-api-health" aria-label="Health panel API">
+        <section id="teamApiHealthPanel" class="team-api-health" aria-label="Health panel API">
           <div class="team-api-health-head">
             <h3 class="team-api-health-title">Health panel API</h3>
             <button type="button" id="btnTeamApiHealthCheck">Ověřit API</button>
@@ -4046,6 +4046,7 @@
           </div>
           <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center">
             <button type="submit" id="teamSwitchOrgSubmit">Přepnout tým</button>
+            <button type="button" id="teamSwitchOrgLoadFromAccount">Načíst týmy z účtu</button>
             <button type="button" id="teamSwitchOrgCancel">Zrušit</button>
           </div>
         </form>
@@ -8750,6 +8751,7 @@
       var teamSwitchOrgForm = document.getElementById("teamSwitchOrgForm");
       var teamSwitchOrgSelect = document.getElementById("teamSwitchOrgSelect");
       var teamSwitchOrgPassword = document.getElementById("teamSwitchOrgPassword");
+      var teamSwitchOrgLoadFromAccount = document.getElementById("teamSwitchOrgLoadFromAccount");
       var teamSwitchOrgCancel = document.getElementById("teamSwitchOrgCancel");
       var teamSwitchOrgStatus = document.getElementById("teamSwitchOrgStatus");
       var changeHistoryModalBackdrop = document.getElementById("changeHistoryModalBackdrop");
@@ -8758,6 +8760,7 @@
       var changeHistoryTbody = document.getElementById("changeHistoryTbody");
       var btnChangeHistoryExport = document.getElementById("btnChangeHistoryExport");
       var btnChangeHistoryClear = document.getElementById("btnChangeHistoryClear");
+      var teamApiHealthPanel = document.getElementById("teamApiHealthPanel");
       var btnTeamApiHealthCheck = document.getElementById("btnTeamApiHealthCheck");
       var teamApiHealthStateEl = document.getElementById("teamApiHealthState");
       var teamApiHealthStatusCodeEl = document.getElementById("teamApiHealthStatusCode");
@@ -8823,6 +8826,7 @@
         if (btnTeamAudit) btnTeamAudit.hidden = !ownerAllowed;
         if (btnTeamLogout) btnTeamLogout.hidden = !loggedIn;
         if (btnTeamLogoutTop) btnTeamLogoutTop.hidden = !loggedIn;
+        if (teamApiHealthPanel) teamApiHealthPanel.hidden = !ownerAllowed;
         if (!ownerAllowed && teamUsersPanel) teamUsersPanel.hidden = true;
         if (!ownerAllowed) closeTeamMembershipsModal();
         if (!ownerAllowed) closeTeamTeamsListModal();
@@ -9040,6 +9044,63 @@
           teamSwitchOrgModalBackdrop.setAttribute("aria-hidden", "true");
         }
         setTeamSwitchOrgStatus("");
+      }
+
+      async function loadTeamSwitchOrgChoicesFromAccount(password) {
+        var email = teamSession && teamSession.email ? String(teamSession.email) : "";
+        if (!email) {
+          setTeamSwitchOrgStatus("Nelze určit přihlášený e-mail.", "err");
+          return false;
+        }
+        if (!String(password || "").trim()) {
+          setTeamSwitchOrgStatus("Zadejte heslo.", "err");
+          return false;
+        }
+        try {
+          setTeamSwitchOrgStatus("Načítám týmy z vašeho účtu...");
+          var probeOut = await apiRequest("/auth/login", {
+            method: "POST",
+            body: JSON.stringify({
+              email: email,
+              password: password
+            })
+          });
+          var singleOrgId = Number(probeOut && probeOut.organization_id);
+          if (Number.isFinite(singleOrgId) && singleOrgId > 0) {
+            setTeamSwitchOrgChoices(
+              [{ organization_id: singleOrgId, organization_name: "Tým #" + String(singleOrgId) }],
+              singleOrgId
+            );
+            setTeamSwitchOrgStatus("Účet má jeden tým. Vyberte ho a klikněte na Přepnout tým.", "ok");
+            return true;
+          }
+          setTeamSwitchOrgStatus("Týmy se nepodařilo načíst z odpovědi serveru.", "err");
+          return false;
+        } catch (probeErr) {
+          var detail = probeErr && probeErr.data ? probeErr.data.detail : null;
+          if (
+            probeErr &&
+            probeErr.status === 409 &&
+            detail &&
+            typeof detail === "object" &&
+            Array.isArray(detail.organizations)
+          ) {
+            setTeamSwitchOrgChoices(
+              detail.organizations,
+              teamSession && teamSession.organizationId ? teamSession.organizationId : ""
+            );
+            setTeamSwitchOrgStatus(
+              detail.message || "Týmy načteny. Vyberte tým a klikněte na Přepnout tým.",
+              "ok"
+            );
+            return true;
+          }
+          setTeamSwitchOrgStatus(
+            "Načtení týmů selhalo: " + (probeErr && probeErr.message ? probeErr.message : String(probeErr)),
+            "err"
+          );
+          return false;
+        }
       }
 
       async function openTeamSwitchOrgModal() {
@@ -10762,6 +10823,12 @@
       if (teamSwitchOrgCancel) {
         teamSwitchOrgCancel.addEventListener("click", closeTeamSwitchOrgModal);
       }
+      if (teamSwitchOrgLoadFromAccount) {
+        teamSwitchOrgLoadFromAccount.addEventListener("click", async function () {
+          var password = teamSwitchOrgPassword ? String(teamSwitchOrgPassword.value || "") : "";
+          await loadTeamSwitchOrgChoicesFromAccount(password);
+        });
+      }
       if (teamSwitchOrgModalBackdrop) {
         teamSwitchOrgModalBackdrop.addEventListener("click", function (ev) {
           if (ev.target === teamSwitchOrgModalBackdrop) closeTeamSwitchOrgModal();
@@ -10783,43 +10850,8 @@
             return;
           }
           if (!Number.isFinite(orgId) || orgId < 1) {
-            try {
-              setTeamSwitchOrgStatus("Načítám týmy z vašeho účtu...");
-              var probeOut = await apiRequest("/auth/login", {
-                method: "POST",
-                body: JSON.stringify({
-                  email: email,
-                  password: password
-                })
-              });
-              await loginAndLoadSharedState(probeOut, "Přihlášení úspěšné");
-              closeTeamSwitchOrgModal();
-              return;
-            } catch (probeErr) {
-              var detail = probeErr && probeErr.data ? probeErr.data.detail : null;
-              if (
-                probeErr &&
-                probeErr.status === 409 &&
-                detail &&
-                typeof detail === "object" &&
-                Array.isArray(detail.organizations)
-              ) {
-                setTeamSwitchOrgChoices(
-                  detail.organizations,
-                  teamSession && teamSession.organizationId ? teamSession.organizationId : ""
-                );
-                setTeamSwitchOrgStatus(
-                  detail.message || "Vyberte tým a klikněte znovu na Přepnout tým.",
-                  "err"
-                );
-                return;
-              }
-              setTeamSwitchOrgStatus(
-                "Načtení týmů selhalo: " + (probeErr && probeErr.message ? probeErr.message : String(probeErr)),
-                "err"
-              );
-              return;
-            }
+            await loadTeamSwitchOrgChoicesFromAccount(password);
+            return;
           }
           if (teamSession && Number(teamSession.organizationId) === orgId) {
             setTeamSwitchOrgStatus("Tento tým je už aktivní.", "ok");
