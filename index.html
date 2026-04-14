@@ -9125,11 +9125,50 @@
         };
       }
 
+      function isIsoDateOrEmpty(value) {
+        var s = String(value || "").trim();
+        return !s || /^\d{4}-\d{2}-\d{2}$/.test(s);
+      }
+
+      function hasAnyDigit(value) {
+        return /[0-9]/.test(String(value || ""));
+      }
+
       if (holderForm) {
         holderForm.addEventListener("submit", function (e) {
           e.preventDefault();
+          var holderData = readHolderFromForm();
+          holderData.datumNarozeni = normalizeDatumToIso(holderData.datumNarozeni);
+          holderData.datumZapisu = normalizeDatumToIso(holderData.datumZapisu);
+          holderData.platnostDo = normalizeDatumToIso(holderData.platnostDo);
+
+          if (!isIsoDateOrEmpty(holderData.datumNarozeni)) {
+            alert("Datum narození musí být ve formátu RRRR-MM-DD.");
+            document.getElementById("hDatumNarozeni").focus();
+            return;
+          }
+          if (!isIsoDateOrEmpty(holderData.datumZapisu)) {
+            alert("Datum zápisu musí být ve formátu RRRR-MM-DD.");
+            document.getElementById("hDatumZapisu").focus();
+            return;
+          }
+          if (!isIsoDateOrEmpty(holderData.platnostDo)) {
+            alert("Platnost do musí být ve formátu RRRR-MM-DD.");
+            document.getElementById("hPlatnostDo").focus();
+            return;
+          }
+          if (
+            holderData.datumZapisu &&
+            holderData.platnostDo &&
+            holderData.platnostDo < holderData.datumZapisu
+          ) {
+            alert("Pole „Platnost do“ nesmí být dříve než „Datum zápisu“.");
+            document.getElementById("hPlatnostDo").focus();
+            return;
+          }
+
           var s = loadState();
-          s.holder = readHolderFromForm();
+          s.holder = holderData;
           saveState(s);
           closeHolderModal();
         });
@@ -9153,8 +9192,13 @@
           nazevVyjimky: naz,
           cisloJednaci: cis,
           zbranHcZStrelivo: (document.getElementById("vyjZbranHcZ").value || "").trim(),
-          datumVydani: document.getElementById("vyjDatumVydani").value || ""
+          datumVydani: normalizeDatumToIso(document.getElementById("vyjDatumVydani").value || "")
         };
+        if (!isIsoDateOrEmpty(payload.datumVydani)) {
+          alert("Datum vydání musí být ve formátu RRRR-MM-DD.");
+          document.getElementById("vyjDatumVydani").focus();
+          return;
+        }
         var list = loadVyjimky();
         var xid = document.getElementById("vyjEditId").value;
         if (xid) {
@@ -9194,8 +9238,13 @@
         }
         var payload = {
           druhAprobace: druh,
-          datumZapisu: document.getElementById("aprDatumZapisu").value || ""
+          datumZapisu: normalizeDatumToIso(document.getElementById("aprDatumZapisu").value || "")
         };
+        if (!isIsoDateOrEmpty(payload.datumZapisu)) {
+          alert("Datum zápisu musí být ve formátu RRRR-MM-DD.");
+          document.getElementById("aprDatumZapisu").focus();
+          return;
+        }
         var list = loadAprobace();
         var xid = document.getElementById("aprEditId").value;
         if (xid) {
@@ -9275,6 +9324,11 @@
           document.getElementById("regPoradi").focus();
           return;
         }
+        if (por.length > 20) {
+          alert("Pořadové číslo je příliš dlouhé.");
+          document.getElementById("regPoradi").focus();
+          return;
+        }
         var payload = {
           poradoveCislo: por,
           kategorieZbrane: (document.getElementById("regKategorie").value || "").trim(),
@@ -9283,8 +9337,13 @@
           vzor: (document.getElementById("regVzor").value || "").trim(),
           raze: (document.getElementById("regRaze").value || "").trim(),
           vyrobniCisla: (document.getElementById("regVyrobniCisla").value || "").trim(),
-          datumRegistrace: document.getElementById("regDatumReg").value || ""
+          datumRegistrace: normalizeDatumToIso(document.getElementById("regDatumReg").value || "")
         };
+        if (!isIsoDateOrEmpty(payload.datumRegistrace)) {
+          alert("Datum registrace musí být ve formátu RRRR-MM-DD.");
+          document.getElementById("regDatumReg").focus();
+          return;
+        }
         var list = loadRegZbrane();
         var xid = document.getElementById("regEditId").value;
         if (xid) {
@@ -9361,12 +9420,27 @@
           return;
         }
         var payload = {
-          datum: document.getElementById("strDatum").value || "",
+          datum: normalizeDatumToIso(document.getElementById("strDatum").value || ""),
           strelnice: st,
           zbran: zb,
           naboje: nab,
           pocetNaboju: (document.getElementById("strPocetNaboju").value || "").trim()
         };
+        if (!isIsoDateOrEmpty(payload.datum)) {
+          alert("Datum střelby musí být ve formátu RRRR-MM-DD.");
+          document.getElementById("strDatum").focus();
+          return;
+        }
+        if (!payload.pocetNaboju) {
+          alert("Vyplňte počet nábojů.");
+          document.getElementById("strPocetNaboju").focus();
+          return;
+        }
+        if (!hasAnyDigit(payload.pocetNaboju) || parsePocetNabojuNum(payload.pocetNaboju) <= 0) {
+          alert("Počet nábojů musí být celé číslo větší než 0.");
+          document.getElementById("strPocetNaboju").focus();
+          return;
+        }
         var list = loadStreleby();
         var xid = document.getElementById("strEditId").value;
         if (xid) {
@@ -9448,7 +9522,7 @@
           return;
         }
         var payload = {
-          datum: document.getElementById("nakDatum").value || "",
+          datum: normalizeDatumToIso(document.getElementById("nakDatum").value || ""),
           kategorie: kat,
           nazev: naz,
           strelnice: document.getElementById("nakStrelnice").value || "",
@@ -9456,6 +9530,25 @@
           proZbran: document.getElementById("nakProZbran").value || "",
           cena: (document.getElementById("nakCena").value || "").trim()
         };
+        if (!isIsoDateOrEmpty(payload.datum)) {
+          alert("Datum nákupu musí být ve formátu RRRR-MM-DD.");
+          document.getElementById("nakDatum").focus();
+          return;
+        }
+        if (payload.pocet) {
+          if (!hasAnyDigit(payload.pocet) || parsePocetNakupKs(payload.pocet) <= 0) {
+            alert("Počet ks musí být celé číslo větší než 0.");
+            document.getElementById("nakPocet").focus();
+            return;
+          }
+        }
+        if (payload.cena) {
+          if (!hasAnyDigit(payload.cena) || parseCenaKcNaboj(payload.cena) < 0) {
+            alert("Cena musí být číslo 0 nebo vyšší.");
+            document.getElementById("nakCena").focus();
+            return;
+          }
+        }
         var list = loadNakupy();
         var xid = document.getElementById("nakEditId").value;
         if (xid) {
