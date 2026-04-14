@@ -2698,6 +2698,39 @@
         break-inside: avoid;
         page-break-inside: avoid;
       }
+      body.print-pdf-reg-zbrane-only #regZbranePdfPrintRoot,
+      body.print-pdf-vyjimky-only #vyjimkyPdfPrintRoot,
+      body.print-pdf-aprobace-only #aprobacePdfPrintRoot,
+      body.print-pdf-naboje-modal-only #nabojeModalPdfPrintRoot,
+      body.print-pdf-prehled-str-only #prehledStrPdfPrintRoot,
+      body.print-pdf-naklady-zbrane-only #nakladyZbranePdfPrintRoot {
+        color: #000 !important;
+        background: #fff !important;
+      }
+      body.print-pdf-reg-zbrane-only #regZbranePdfPrintRoot *,
+      body.print-pdf-vyjimky-only #vyjimkyPdfPrintRoot *,
+      body.print-pdf-aprobace-only #aprobacePdfPrintRoot *,
+      body.print-pdf-naboje-modal-only #nabojeModalPdfPrintRoot *,
+      body.print-pdf-prehled-str-only #prehledStrPdfPrintRoot *,
+      body.print-pdf-naklady-zbrane-only #nakladyZbranePdfPrintRoot * {
+        color: #000 !important;
+        text-shadow: none !important;
+        box-shadow: none !important;
+      }
+      body.print-pdf-reg-zbrane-only #regZbranePdfPrintRoot table th,
+      body.print-pdf-reg-zbrane-only #regZbranePdfPrintRoot table td,
+      body.print-pdf-vyjimky-only #vyjimkyPdfPrintRoot table th,
+      body.print-pdf-vyjimky-only #vyjimkyPdfPrintRoot table td,
+      body.print-pdf-aprobace-only #aprobacePdfPrintRoot table th,
+      body.print-pdf-aprobace-only #aprobacePdfPrintRoot table td,
+      body.print-pdf-naboje-modal-only #nabojeModalPdfPrintRoot table th,
+      body.print-pdf-naboje-modal-only #nabojeModalPdfPrintRoot table td,
+      body.print-pdf-prehled-str-only #prehledStrPdfPrintRoot table th,
+      body.print-pdf-prehled-str-only #prehledStrPdfPrintRoot table td,
+      body.print-pdf-naklady-zbrane-only #nakladyZbranePdfPrintRoot table th,
+      body.print-pdf-naklady-zbrane-only #nakladyZbranePdfPrintRoot table td {
+        border: 1px solid #000 !important;
+      }
     }
   </style>
 </head>
@@ -5621,31 +5654,64 @@
 
       function runNabojeModalPdfPrint() {
         var data = buildNabojeModalExportData();
-        closeModalsBeforeSectionPdfPrint();
-        var subMount = document.getElementById("nabojeModalPdfSubMount");
-        var tb = document.getElementById("nabojeModalPdfTbody");
-        if (!tb) return;
-        writeNabojeModalPdfContent(subMount, tb, data);
-        var root = document.getElementById("nabojeModalPdfPrintRoot");
-        if (!root) return;
-        root.removeAttribute("hidden");
-        document.body.classList.add("print-pdf-naboje-modal-only");
-        function cleanup() {
-          document.body.classList.remove("print-pdf-naboje-modal-only");
-          root.setAttribute("hidden", "");
-          tb.innerHTML = "";
-          if (subMount) subMount.innerHTML = "";
+        var popup = window.open("", "_blank", "noopener,noreferrer,width=980,height=860");
+        if (!popup) {
+          alert("Vyskakovací okno bylo zablokováno. Povolte pop-up pro tento web.");
+          return;
         }
-        window.addEventListener("afterprint", function onAfter() {
-          window.removeEventListener("afterprint", onAfter);
-          cleanup();
-        });
+        var headHtml = data.headLines
+          .map(function (pair) {
+            return (
+              "<p><strong>" +
+              escapeHtml(pair[0]) +
+              ":</strong> " +
+              escapeHtml(pair[1]) +
+              "</p>"
+            );
+          })
+          .join("");
+        var rowsHtml = data.metricRows
+          .map(function (row) {
+            return (
+              "<tr>" +
+              "<th scope=\"row\">" + escapeHtml(row[0]) + "</th>" +
+              "<td class=\"num\">" + escapeHtml(row[1]) + "</td>" +
+              "<td class=\"num\">" + escapeHtml(row[2]) + "</td>" +
+              "</tr>"
+            );
+          })
+          .join("");
+        var html =
+          "<!doctype html>" +
+          "<html lang=\"cs\"><head><meta charset=\"utf-8\">" +
+          "<title>Náboje - Export PDF</title>" +
+          "<style>" +
+          "body{font-family:Arial,sans-serif;margin:14px;color:#111;background:#fff;}" +
+          "h2{margin:0 0 8px 0;font-size:18px;color:#111;}" +
+          "p{margin:5px 0;font-size:12px;color:#111;}" +
+          "table{width:100%;border-collapse:collapse;font-size:12px;margin-top:8px;}" +
+          "th,td{border:1px solid #000;padding:6px 7px;text-align:left;vertical-align:top;color:#111;}" +
+          "th{font-weight:600;background:#f3f4f6;}" +
+          "th.num,td.num{text-align:right;}" +
+          "@page{size:A4;margin:12mm;}" +
+          "</style></head><body>" +
+          "<h2>Náboje</h2>" +
+          headHtml +
+          "<table><thead><tr>" +
+          "<th>Ukazatel</th>" +
+          "<th class=\"num\">9 mm Luger</th>" +
+          "<th class=\"num\">.223 REM</th>" +
+          "</tr></thead><tbody>" +
+          rowsHtml +
+          "</tbody></table>" +
+          "</body></html>";
+        popup.document.open();
+        popup.document.write(html);
+        popup.document.close();
+        popup.focus();
         setTimeout(function () {
-          window.print();
-        }, 150);
-        setTimeout(function () {
-          if (document.body.classList.contains("print-pdf-naboje-modal-only")) cleanup();
-        }, 120000);
+          popup.print();
+        }, 220);
       }
 
       function exportNabojeModalExcel() {
