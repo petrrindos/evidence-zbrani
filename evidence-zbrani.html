@@ -220,22 +220,36 @@
       gap: 0.5rem 0.65rem;
       margin-bottom: 0.6rem;
     }
+    .team-auth-login-row {
+      margin: 0 0 0.45rem 0 !important;
+    }
     .team-auth-actions-row {
       display: grid !important;
-      grid-template-columns: 9fr 15fr 17fr 11fr 12fr 10fr 10fr 18fr;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
       gap: 0.45rem !important;
       width: 100%;
     }
     .team-auth .toolbar button {
-      font-size: 0.86rem;
+      font-size: 0.9rem;
     }
     .team-auth-actions-row button {
       width: 100%;
-      padding: 0.7rem 0.28rem;
-      font-size: 0.86rem;
+      min-height: 2.525rem;
+      padding: 0.5rem 0.85rem;
+      font-size: 0.9rem;
       font-weight: 700;
+      text-transform: uppercase;
+      color: #6b7280;
       white-space: nowrap;
       line-height: 1.2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .team-auth-actions-row button:hover {
+      color: #6b7280;
     }
     .team-auth-grid label {
       display: block;
@@ -3506,8 +3520,10 @@
             </select>
           </div>
         </div>
-        <div class="toolbar team-auth-actions-row" style="margin:0;">
+        <div class="toolbar team-auth-login-row" style="margin:0;">
           <button type="button" id="btnTeamLogin">Přihlásit</button>
+        </div>
+        <div class="toolbar team-auth-actions-row" style="margin:0;">
           <button type="button" id="btnTeamListUsers">Vypsat uživatele</button>
           <button type="button" id="btnTeamManageMemberships">Členství v týmech</button>
           <button type="button" id="btnTeamListTeams">Vypsat týmy</button>
