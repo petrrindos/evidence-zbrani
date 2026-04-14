@@ -4540,10 +4540,14 @@
       var CHANGE_HISTORY_LIMIT = 300;
       var TEAM_API_DEFAULT = "https://evidence-zbrani.onrender.com/api";
       var TEAM_OWNER_EMAIL = "petr.rindos@gmail.com";
+      var REMOTE_SYNC_QUEUE_KEY_BASE = "cz.app.evidenceZbrani.remoteSyncQueue.v1";
+      var REMOTE_SYNC_QUEUE_LIMIT = 40;
       var teamSession = null;
       var remoteStateCache = null;
       var saveRemoteTimer = 0;
       var saveRemoteInFlight = false;
+      var saveRemotePendingState = null;
+      var flushRemoteQueueInFlight = false;
       var apiHealth = {
         state: "unknown",
         lastStatusCode: null,
@@ -4708,6 +4712,85 @@
         }
       }
 
+      function getRemoteSyncQueueKey() {
+        var org = teamSession && teamSession.organizationId != null ? String(teamSession.organizationId) : "0";
+        var email = teamSession && teamSession.email ? String(teamSession.email).trim().toLowerCase() : "unknown";
+        return REMOTE_SYNC_QUEUE_KEY_BASE + "." + org + "." + email;
+      }
+
+      function loadRemoteSyncQueue() {
+        try {
+          var raw = localStorage.getItem(getRemoteSyncQueueKey());
+          if (!raw) return [];
+          var parsed = JSON.parse(raw);
+          return Array.isArray(parsed) ? parsed : [];
+        } catch (_e) {
+          return [];
+        }
+      }
+
+      function saveRemoteSyncQueue(rows) {
+        try {
+          var list = Array.isArray(rows) ? rows : [];
+          if (!list.length) {
+            localStorage.removeItem(getRemoteSyncQueueKey());
+            return;
+          }
+          localStorage.setItem(getRemoteSyncQueueKey(), JSON.stringify(list.slice(0, REMOTE_SYNC_QUEUE_LIMIT)));
+        } catch (_e) {}
+      }
+
+      function enqueueRemoteSyncState(state, reason) {
+        var queue = loadRemoteSyncQueue();
+        queue.push({
+          id: uid(),
+          at: new Date().toISOString(),
+          reason: String(reason || "autosave"),
+          data: normalizeTeamStateShape(state)
+        });
+        if (queue.length > REMOTE_SYNC_QUEUE_LIMIT) {
+          queue = queue.slice(queue.length - REMOTE_SYNC_QUEUE_LIMIT);
+        }
+        saveRemoteSyncQueue(queue);
+        return queue.length;
+      }
+
+      async function flushRemoteSyncQueue() {
+        if (!teamModeEnabled() || !canWriteRemoteState()) return;
+        if (flushRemoteQueueInFlight || saveRemoteInFlight) return;
+        var queue = loadRemoteSyncQueue();
+        if (!queue.length) return;
+        flushRemoteQueueInFlight = true;
+        var sent = 0;
+        try {
+          while (queue.length && teamModeEnabled() && canWriteRemoteState()) {
+            var item = queue[0];
+            var payload = normalizeTeamStateShape(item && item.data ? item.data : {});
+            await apiRequest("/state", {
+              method: "PUT",
+              body: JSON.stringify({ data: payload })
+            });
+            remoteStateCache = cloneJson(payload);
+            queue.shift();
+            sent += 1;
+            saveRemoteSyncQueue(queue);
+          }
+          if (!queue.length && sent > 0) {
+            setTeamStatus("Synchronizováno z offline fronty: " + sent + " změn.", "ok");
+          } else if (queue.length) {
+            setTeamStatus("Čeká offline fronta: " + queue.length + " změn.", "err");
+          }
+        } catch (err) {
+          saveRemoteSyncQueue(queue);
+          setTeamStatus(
+            "Offline fronta čeká (" + queue.length + "): " + (err && err.message ? err.message : String(err)),
+            "err"
+          );
+        } finally {
+          flushRemoteQueueInFlight = false;
+        }
+      }
+
       function loadChangeHistory() {
         try {
           var raw = localStorage.getItem(CHANGE_HISTORY_KEY);
@@ -4856,22 +4939,36 @@
 
       function queueRemoteStateSave(state) {
         if (!teamModeEnabled() || !canWriteRemoteState()) return;
+        saveRemotePendingState = cloneJson(normalizeTeamStateShape(state));
         if (saveRemoteTimer) clearTimeout(saveRemoteTimer);
         saveRemoteTimer = setTimeout(function () {
           if (saveRemoteInFlight) return;
+          var payload = saveRemotePendingState
+            ? cloneJson(normalizeTeamStateShape(saveRemotePendingState))
+            : cloneJson(normalizeTeamStateShape(state));
+          saveRemotePendingState = null;
           saveRemoteInFlight = true;
           apiRequest("/state", {
             method: "PUT",
-            body: JSON.stringify({ data: state })
+            body: JSON.stringify({ data: payload })
           })
             .then(function () {
               setTeamStatus("Uloženo do týmové DB (" + (teamSession.role || "?") + ")", "ok");
             })
             .catch(function (err) {
-              setTeamStatus("Uložení do DB selhalo: " + (err && err.message ? err.message : String(err)), "err");
+              var qlen = enqueueRemoteSyncState(payload, "autosave");
+              setTeamStatus(
+                "Uložení do DB selhalo, uloženo do offline fronty (" + qlen + ").",
+                "err"
+              );
             })
             .finally(function () {
               saveRemoteInFlight = false;
+              if (saveRemotePendingState) {
+                queueRemoteStateSave(saveRemotePendingState);
+              } else {
+                flushRemoteSyncQueue();
+              }
             });
         }, 220);
       }
@@ -9712,6 +9809,7 @@
         bindTeamSession(teamSession);
         clearTeamLoginOrgChoices();
         setTeamStatus(successText + " (role: " + teamSession.role + ")", "ok");
+        flushRemoteSyncQueue();
       }
 
       async function restoreTeamSessionOnStart() {
@@ -9731,6 +9829,7 @@
           saveTeamSession();
           await refreshRemoteStateFromServer();
           bindTeamSession(teamSession);
+          flushRemoteSyncQueue();
         } catch (err) {
           bindTeamSession(null);
           setTeamStatus("Relace vypršela: " + (err && err.message ? err.message : String(err)), "err");
@@ -11120,7 +11219,11 @@
         bindTeamSession(null);
         clearTeamLoginOrgChoices();
         remoteStateCache = null;
+        if (saveRemoteTimer) clearTimeout(saveRemoteTimer);
         saveRemoteTimer = 0;
+        saveRemoteInFlight = false;
+        saveRemotePendingState = null;
+        flushRemoteQueueInFlight = false;
         if (teamUsersPanel) teamUsersPanel.hidden = true;
         if (teamUsersTbody) teamUsersTbody.innerHTML = "";
         closeTeamUsersListModal();
@@ -11317,6 +11420,9 @@
       });
 
       (async function startApp() {
+        window.addEventListener("online", function () {
+          flushRemoteSyncQueue();
+        });
         try {
           await restoreTeamSessionOnStart();
         } catch (err) {
