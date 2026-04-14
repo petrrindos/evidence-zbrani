@@ -2639,91 +2639,7 @@
       </details>
     </section>
 
-    <section class="reg-zbrane-section reg-zbrane-detail-collapsed">
-      <details class="doc-sec-disclosure" data-detail-toggle-class="reg-zbrane-detail-collapsed">
-        <summary class="reg-zbrane-section-head" aria-expanded="false" aria-label="Otevřít registrované zbraně v okně">
-          <span class="reg-zbrane-head-start doc-sec-summary-inner">
-            <span class="doc-section-fold-mark" aria-hidden="true">▶</span>
-            <h2>Registrované zbraně</h2>
-          </span>
-        </summary>
-      <div class="doc-sec-panel">
-      <div id="regPanelSlot">
-      <div id="regDetailBody" class="reg-zbrane-detail-body">
-      <div class="doc-section-edit-bar">
-        <button type="button" class="reg-zbrane-add-btn" id="btnRegShowAdd">Upravit</button>
-      </div>
-      <div id="regManagePanel" class="doc-manage-panel" hidden>
-        <div class="doc-manage-toolbar">
-          <button type="button" class="doc-novy-btn" id="btnRegNovyZaznam">Nový záznam</button>
-        </div>
-      <div id="regFormPanel" class="reg-form-panel" hidden>
-        <p class="edit-banner" id="regFormBanner"></p>
-        <form id="regForm" class="fields grid-2" novalidate>
-          <div>
-            <label for="regPoradi">Pořadové číslo</label>
-            <input type="text" id="regPoradi" name="regPoradi" required maxlength="20" inputmode="numeric" autocomplete="off" />
-          </div>
-          <div>
-            <label for="regDatumReg">Datum registrace</label>
-            <input type="date" id="regDatumReg" name="regDatumReg" />
-          </div>
-          <div>
-            <label for="regKategorie">Kategorie zbraně</label>
-            <input type="text" id="regKategorie" name="regKategorie" maxlength="120" />
-          </div>
-          <div>
-            <label for="regDruh">Druh zbraně</label>
-            <input type="text" id="regDruh" name="regDruh" maxlength="120" />
-          </div>
-          <div>
-            <label for="regVyrobce">Výrobce</label>
-            <input type="text" id="regVyrobce" name="regVyrobce" maxlength="120" />
-          </div>
-          <div>
-            <label for="regVzor">Vzor</label>
-            <input type="text" id="regVzor" name="regVzor" maxlength="120" />
-          </div>
-          <div>
-            <label for="regRaze">Ráže</label>
-            <input type="text" id="regRaze" name="regRaze" maxlength="80" />
-          </div>
-          <div class="field-span-2">
-            <label for="regVyrobniCisla">Výrobní čísla</label>
-            <textarea id="regVyrobniCisla" name="regVyrobniCisla" maxlength="500" rows="2" placeholder="Jedno nebo více výrobních čísel…"></textarea>
-          </div>
-          <input type="hidden" id="regEditId" value="" />
-        </form>
-        <div class="form-actions">
-          <button type="submit" form="regForm" class="save" id="btnSaveReg">Přidat novou zbraň</button>
-          <button type="button" class="ghost" id="btnCancelReg">Zrušit</button>
-        </div>
-      </div>
-      </div>
-      <div class="table-wrap">
-        <table class="table-reg">
-          <thead>
-            <tr>
-              <th>Poř. č.</th>
-              <th>Kategorie</th>
-              <th>Druh</th>
-              <th>Výrobce</th>
-              <th>Vzor</th>
-              <th>Ráže</th>
-              <th>Výr. čísla</th>
-              <th>Registrace</th>
-              <th class="col-actions"></th>
-            </tr>
-          </thead>
-          <tbody id="tbodyReg"></tbody>
-        </table>
-        <div class="empty" id="regEmptyState" hidden>Žádné registrované zbraně — otevřete „Upravit“ a přidejte záznam tlačítkem „Nový záznam“.</div>
-      </div>
-      </div>
-      </div>
-      </div>
-      </details>
-    </section>
+
 
     <section class="vyjimky-section vyjimky-detail-collapsed">
       <details class="doc-sec-disclosure" data-detail-toggle-class="vyjimky-detail-collapsed">
@@ -3322,6 +3238,92 @@
         <tbody id="nakladyZbranePdfTbody"></tbody>
       </table>
     </div>
+
+    <section class="reg-zbrane-section reg-zbrane-detail-collapsed">
+      <details class="doc-sec-disclosure" data-detail-toggle-class="reg-zbrane-detail-collapsed">
+        <summary class="reg-zbrane-section-head" aria-expanded="false" aria-label="Otevřít registrované zbraně v okně">
+          <span class="reg-zbrane-head-start doc-sec-summary-inner">
+            <span class="doc-section-fold-mark" aria-hidden="true">▶</span>
+            <h2>Registrované zbraně</h2>
+          </span>
+        </summary>
+      <div class="doc-sec-panel">
+      <div id="regPanelSlot">
+      <div id="regDetailBody" class="reg-zbrane-detail-body">
+      <div class="doc-section-edit-bar">
+        <button type="button" class="reg-zbrane-add-btn" id="btnRegShowAdd">Upravit</button>
+      </div>
+      <div id="regManagePanel" class="doc-manage-panel" hidden>
+        <div class="doc-manage-toolbar">
+          <button type="button" class="doc-novy-btn" id="btnRegNovyZaznam">Nový záznam</button>
+        </div>
+      <div id="regFormPanel" class="reg-form-panel" hidden>
+        <p class="edit-banner" id="regFormBanner"></p>
+        <form id="regForm" class="fields grid-2" novalidate>
+          <div>
+            <label for="regPoradi">Pořadové číslo</label>
+            <input type="text" id="regPoradi" name="regPoradi" required maxlength="20" inputmode="numeric" autocomplete="off" />
+          </div>
+          <div>
+            <label for="regDatumReg">Datum registrace</label>
+            <input type="date" id="regDatumReg" name="regDatumReg" />
+          </div>
+          <div>
+            <label for="regKategorie">Kategorie zbraně</label>
+            <input type="text" id="regKategorie" name="regKategorie" maxlength="120" />
+          </div>
+          <div>
+            <label for="regDruh">Druh zbraně</label>
+            <input type="text" id="regDruh" name="regDruh" maxlength="120" />
+          </div>
+          <div>
+            <label for="regVyrobce">Výrobce</label>
+            <input type="text" id="regVyrobce" name="regVyrobce" maxlength="120" />
+          </div>
+          <div>
+            <label for="regVzor">Vzor</label>
+            <input type="text" id="regVzor" name="regVzor" maxlength="120" />
+          </div>
+          <div>
+            <label for="regRaze">Ráže</label>
+            <input type="text" id="regRaze" name="regRaze" maxlength="80" />
+          </div>
+          <div class="field-span-2">
+            <label for="regVyrobniCisla">Výrobní čísla</label>
+            <textarea id="regVyrobniCisla" name="regVyrobniCisla" maxlength="500" rows="2" placeholder="Jedno nebo více výrobních čísel…"></textarea>
+          </div>
+          <input type="hidden" id="regEditId" value="" />
+        </form>
+        <div class="form-actions">
+          <button type="submit" form="regForm" class="save" id="btnSaveReg">Přidat novou zbraň</button>
+          <button type="button" class="ghost" id="btnCancelReg">Zrušit</button>
+        </div>
+      </div>
+      </div>
+      <div class="table-wrap">
+        <table class="table-reg">
+          <thead>
+            <tr>
+              <th>Poř. č.</th>
+              <th>Kategorie</th>
+              <th>Druh</th>
+              <th>Výrobce</th>
+              <th>Vzor</th>
+              <th>Ráže</th>
+              <th>Výr. čísla</th>
+              <th>Registrace</th>
+              <th class="col-actions"></th>
+            </tr>
+          </thead>
+          <tbody id="tbodyReg"></tbody>
+        </table>
+        <div class="empty" id="regEmptyState" hidden>Žádné registrované zbraně — otevřete „Upravit“ a přidejte záznam tlačítkem „Nový záznam“.</div>
+      </div>
+      </div>
+      </div>
+      </div>
+      </details>
+    </section>
 
     <div class="toolbar toolbar-docs toolbar-docs-foot">
       <div class="toolbar-foot-primary">
