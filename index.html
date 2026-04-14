@@ -43,6 +43,31 @@
     h1.page-title {
       font-size: 1.62rem;
     }
+    .page-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.65rem;
+      margin: 0 0 1rem;
+    }
+    .page-head .page-title {
+      margin: 0;
+    }
+    .top-logout-btn {
+      padding: 0.62rem 0.58rem;
+      font-size: 0.9rem;
+      font-weight: 700;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--surface2);
+      color: #fff;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .top-logout-btn:hover {
+      border-color: var(--accent);
+      color: #fff;
+    }
     .toolbar {
       display: flex;
       flex-wrap: wrap;
@@ -2502,7 +2527,10 @@
 </head>
 <body>
   <div class="wrap">
-    <h1 class="page-title">Zbrojní evidence</h1>
+    <div class="page-head">
+      <h1 class="page-title">Zbrojní evidence</h1>
+      <button type="button" id="btnTeamLogoutTop" class="top-logout-btn" hidden>Odhlásit</button>
+    </div>
     <div class="dashboard-body" style="padding:0 0 0.85rem;">
       <div class="dashboard-grid">
         <article class="dashboard-card">
@@ -7883,6 +7911,7 @@
       var teamUsersModalTbody = document.getElementById("teamUsersModalTbody");
       var btnTeamAudit = document.getElementById("btnTeamAudit");
       var btnTeamLogout = document.getElementById("btnTeamLogout");
+      var btnTeamLogoutTop = document.getElementById("btnTeamLogoutTop");
       var teamAuthSection = document.querySelector("section.team-auth");
       var teamAuthGrid = teamAuthSection ? teamAuthSection.querySelector(".team-auth-grid") : null;
       var teamAuthTitle = teamAuthSection ? teamAuthSection.querySelector(".team-auth-title") : null;
@@ -7965,6 +7994,7 @@
         if (btnTeamCreateMember) btnTeamCreateMember.hidden = !ownerAllowed;
         if (btnTeamAudit) btnTeamAudit.hidden = !ownerAllowed;
         if (btnTeamLogout) btnTeamLogout.hidden = !loggedIn;
+        if (btnTeamLogoutTop) btnTeamLogoutTop.hidden = !loggedIn;
         if (!ownerAllowed && teamUsersPanel) teamUsersPanel.hidden = true;
         if (!ownerAllowed) closeTeamMembershipsModal();
         if (!ownerAllowed) closeTeamTeamsListModal();
@@ -9807,24 +9837,28 @@
           }
         });
       }
+      function handleTeamLogout() {
+        bindTeamSession(null);
+        clearTeamLoginOrgChoices();
+        remoteStateCache = null;
+        saveRemoteTimer = 0;
+        if (teamUsersPanel) teamUsersPanel.hidden = true;
+        if (teamUsersTbody) teamUsersTbody.innerHTML = "";
+        closeTeamUsersListModal();
+        if (teamUsersModalTbody) teamUsersModalTbody.innerHTML = "";
+        closeTeamMembershipsModal();
+        if (teamMembershipsTbody) teamMembershipsTbody.innerHTML = "";
+        if (teamMembershipsAllSummary) teamMembershipsAllSummary.textContent = "";
+        adminMembershipsCache = null;
+        closeTeamTeamsListModal();
+        closeTeamAddTeamModal();
+        if (teamTeamsTbody) teamTeamsTbody.innerHTML = "";
+      }
       if (btnTeamLogout) {
-        btnTeamLogout.addEventListener("click", function () {
-          bindTeamSession(null);
-          clearTeamLoginOrgChoices();
-          remoteStateCache = null;
-          saveRemoteTimer = 0;
-          if (teamUsersPanel) teamUsersPanel.hidden = true;
-          if (teamUsersTbody) teamUsersTbody.innerHTML = "";
-          closeTeamUsersListModal();
-          if (teamUsersModalTbody) teamUsersModalTbody.innerHTML = "";
-          closeTeamMembershipsModal();
-          if (teamMembershipsTbody) teamMembershipsTbody.innerHTML = "";
-          if (teamMembershipsAllSummary) teamMembershipsAllSummary.textContent = "";
-          adminMembershipsCache = null;
-          closeTeamTeamsListModal();
-          closeTeamAddTeamModal();
-          if (teamTeamsTbody) teamTeamsTbody.innerHTML = "";
-        });
+        btnTeamLogout.addEventListener("click", handleTeamLogout);
+      }
+      if (btnTeamLogoutTop) {
+        btnTeamLogoutTop.addEventListener("click", handleTeamLogout);
       }
 
       if (importFile) importFile.addEventListener("change", function () {
