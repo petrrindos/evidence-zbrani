@@ -278,6 +278,64 @@
     }
     .team-auth-status.ok { color: #34d399; }
     .team-auth-status.err { color: #fda4af; }
+    .team-api-health {
+      margin-top: 0.6rem;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.6rem;
+      background: var(--surface2);
+    }
+    .team-api-health-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+      margin-bottom: 0.45rem;
+    }
+    .team-api-health-title {
+      margin: 0;
+      font-size: 0.74rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 700;
+    }
+    .team-api-health-head button {
+      min-height: 2.1rem;
+      padding: 0.4rem 0.7rem;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: #6b7280;
+      white-space: nowrap;
+    }
+    .team-api-health-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 0.45rem 0.6rem;
+    }
+    .team-api-health-item {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.42rem 0.5rem;
+      background: #0f1720;
+    }
+    .team-api-health-item .k {
+      margin: 0 0 0.2rem 0;
+      font-size: 0.68rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .team-api-health-item .v {
+      margin: 0;
+      font-size: 0.82rem;
+      color: #cbd5e1;
+      font-weight: 600;
+      word-break: break-word;
+    }
+    .team-api-health-item .v.err { color: #fda4af; }
+    .team-api-health-item .v.ok { color: #34d399; }
     .team-users-panel {
       margin-top: 0.65rem;
       border: 1px solid var(--border);
@@ -3566,6 +3624,46 @@
           <button type="button" id="btnTeamSwitchOrg">Změnit tým</button>
           <button type="button" id="btnTeamAudit">Stáhnout audit JSON</button>
         </div>
+        <section class="team-api-health" aria-label="Health panel API">
+          <div class="team-api-health-head">
+            <h3 class="team-api-health-title">Health panel API</h3>
+            <button type="button" id="btnTeamApiHealthCheck">Ověřit API</button>
+          </div>
+          <div class="team-api-health-grid">
+            <div class="team-api-health-item">
+              <p class="k">Stav API</p>
+              <p class="v" id="teamApiHealthState">NEZNÁMÝ</p>
+            </div>
+            <div class="team-api-health-item">
+              <p class="k">Poslední HTTP status</p>
+              <p class="v" id="teamApiHealthStatusCode">—</p>
+            </div>
+            <div class="team-api-health-item">
+              <p class="k">Poslední latence</p>
+              <p class="v" id="teamApiHealthLatency">—</p>
+            </div>
+            <div class="team-api-health-item">
+              <p class="k">Požadavky / chyby</p>
+              <p class="v" id="teamApiHealthCounts">0 / 0</p>
+            </div>
+            <div class="team-api-health-item">
+              <p class="k">Poslední endpoint</p>
+              <p class="v" id="teamApiHealthEndpoint">—</p>
+            </div>
+            <div class="team-api-health-item">
+              <p class="k">Poslední synchronizace</p>
+              <p class="v" id="teamApiHealthLastSync">—</p>
+            </div>
+            <div class="team-api-health-item">
+              <p class="k">Poslední chyba</p>
+              <p class="v" id="teamApiHealthLastError">—</p>
+            </div>
+            <div class="team-api-health-item">
+              <p class="k">API URL</p>
+              <p class="v" id="teamApiHealthBase">—</p>
+            </div>
+          </div>
+        </section>
         <div id="teamUsersPanel" class="team-users-panel" hidden>
           <table aria-label="Seznam uživatelů (e-mail a heslo)">
             <thead>
@@ -4226,6 +4324,18 @@
       var remoteStateCache = null;
       var saveRemoteTimer = 0;
       var saveRemoteInFlight = false;
+      var apiHealth = {
+        state: "unknown",
+        lastStatusCode: null,
+        lastLatencyMs: null,
+        totalRequests: 0,
+        totalErrors: 0,
+        lastEndpoint: "",
+        lastError: "",
+        lastSyncAt: "",
+        lastOkAt: "",
+        lastErrAt: ""
+      };
 
       function cloneJson(v) {
         return JSON.parse(JSON.stringify(v));
@@ -4266,6 +4376,104 @@
         el.classList.remove("ok");
         el.classList.remove("err");
         if (cls) el.classList.add(cls);
+      }
+
+      function formatApiHealthDateTime(iso) {
+        if (!iso) return "—";
+        var d = new Date(iso);
+        if (isNaN(d.getTime())) return "—";
+        return d.toLocaleString("cs-CZ");
+      }
+
+      function renderApiHealthPanel() {
+        if (teamApiHealthBaseEl) {
+          teamApiHealthBaseEl.textContent = getTeamApiBase();
+        }
+        if (teamApiHealthStateEl) {
+          var stateMap = {
+            unknown: "NEZNÁMÝ",
+            checking: "OVĚŘUJI...",
+            ok: "ONLINE",
+            err: "CHYBA"
+          };
+          teamApiHealthStateEl.textContent = stateMap[apiHealth.state] || "NEZNÁMÝ";
+          teamApiHealthStateEl.classList.remove("ok");
+          teamApiHealthStateEl.classList.remove("err");
+          if (apiHealth.state === "ok") teamApiHealthStateEl.classList.add("ok");
+          if (apiHealth.state === "err") teamApiHealthStateEl.classList.add("err");
+        }
+        if (teamApiHealthStatusCodeEl) {
+          teamApiHealthStatusCodeEl.textContent =
+            apiHealth.lastStatusCode == null ? "—" : String(apiHealth.lastStatusCode);
+        }
+        if (teamApiHealthLatencyEl) {
+          teamApiHealthLatencyEl.textContent =
+            apiHealth.lastLatencyMs == null ? "—" : String(apiHealth.lastLatencyMs) + " ms";
+        }
+        if (teamApiHealthCountsEl) {
+          teamApiHealthCountsEl.textContent = apiHealth.totalRequests + " / " + apiHealth.totalErrors;
+        }
+        if (teamApiHealthEndpointEl) {
+          teamApiHealthEndpointEl.textContent = apiHealth.lastEndpoint || "—";
+        }
+        if (teamApiHealthLastSyncEl) {
+          teamApiHealthLastSyncEl.textContent = formatApiHealthDateTime(apiHealth.lastSyncAt);
+        }
+        if (teamApiHealthLastErrorEl) {
+          teamApiHealthLastErrorEl.textContent = apiHealth.lastError || "—";
+          teamApiHealthLastErrorEl.classList.remove("err");
+          if (apiHealth.lastError) teamApiHealthLastErrorEl.classList.add("err");
+        }
+      }
+
+      function noteApiHealthSuccess(path, method, statusCode, startedAt) {
+        apiHealth.state = "ok";
+        apiHealth.lastStatusCode = statusCode;
+        apiHealth.lastLatencyMs = Math.max(0, Date.now() - startedAt);
+        apiHealth.lastEndpoint = String(method || "GET").toUpperCase() + " " + String(path || "");
+        apiHealth.lastError = "";
+        apiHealth.lastOkAt = new Date().toISOString();
+        if (String(path || "").indexOf("/state") === 0) {
+          apiHealth.lastSyncAt = apiHealth.lastOkAt;
+        }
+        renderApiHealthPanel();
+      }
+
+      function noteApiHealthFailure(path, method, statusCode, startedAt, message) {
+        apiHealth.state = "err";
+        apiHealth.lastStatusCode = statusCode || null;
+        apiHealth.lastLatencyMs = Math.max(0, Date.now() - startedAt);
+        apiHealth.lastEndpoint = String(method || "GET").toUpperCase() + " " + String(path || "");
+        apiHealth.lastError = String(message || "Neznámá chyba");
+        apiHealth.lastErrAt = new Date().toISOString();
+        apiHealth.totalErrors += 1;
+        renderApiHealthPanel();
+      }
+
+      async function runApiHealthCheck() {
+        var base = getTeamApiBase();
+        var startedAt = Date.now();
+        apiHealth.state = "checking";
+        apiHealth.totalRequests += 1;
+        apiHealth.lastEndpoint = "GET /auth/me (health)";
+        apiHealth.lastError = "";
+        renderApiHealthPanel();
+        try {
+          var headers = {};
+          if (teamSession && teamSession.accessToken) headers.Authorization = "Bearer " + teamSession.accessToken;
+          var res = await fetch(base + "/auth/me", { method: "GET", headers: headers });
+          if (res.ok || res.status === 401 || res.status === 403) {
+            noteApiHealthSuccess("/auth/me", "GET", res.status, startedAt);
+            setTeamStatus("Health check API: server odpovídá (HTTP " + res.status + ").", "ok");
+            return;
+          }
+          var text = await res.text();
+          noteApiHealthFailure("/auth/me", "GET", res.status, startedAt, text || ("HTTP " + res.status));
+          setTeamStatus("Health check API selhal (HTTP " + res.status + ").", "err");
+        } catch (err) {
+          noteApiHealthFailure("/auth/me", "GET", 0, startedAt, err && err.message ? err.message : String(err));
+          setTeamStatus("Health check API selhal: " + (err && err.message ? err.message : String(err)), "err");
+        }
       }
 
       function saveTeamSession() {
@@ -4384,10 +4592,22 @@
 
       async function apiRequest(path, opts) {
         var options = opts || {};
+        var method = String(options.method || "GET").toUpperCase();
+        var startedAt = Date.now();
+        apiHealth.totalRequests += 1;
+        apiHealth.state = "checking";
+        apiHealth.lastEndpoint = method + " " + String(path || "");
+        renderApiHealthPanel();
         var headers = Object.assign({}, options.headers || {});
         if (!headers["Content-Type"] && options.body != null) headers["Content-Type"] = "application/json";
         if (teamSession && teamSession.accessToken) headers.Authorization = "Bearer " + teamSession.accessToken;
-        var res = await fetch(getTeamApiBase() + path, Object.assign({}, options, { headers: headers }));
+        var res;
+        try {
+          res = await fetch(getTeamApiBase() + path, Object.assign({}, options, { headers: headers }));
+        } catch (fetchErr) {
+          noteApiHealthFailure(path, method, 0, startedAt, fetchErr && fetchErr.message ? fetchErr.message : String(fetchErr));
+          throw fetchErr;
+        }
         var text = await res.text();
         var data = {};
         if (text) {
@@ -4398,11 +4618,13 @@
           var msg = "API chyba " + res.status;
           if (typeof detail === "string" && detail) msg = detail;
           if (detail && typeof detail === "object" && typeof detail.message === "string" && detail.message) msg = detail.message;
+          noteApiHealthFailure(path, method, res.status, startedAt, msg);
           var err = new Error(msg);
           err.status = res.status;
           err.data = data;
           throw err;
         }
+        noteApiHealthSuccess(path, method, res.status, startedAt);
         return data;
       }
 
@@ -8336,6 +8558,15 @@
       var changeHistoryTbody = document.getElementById("changeHistoryTbody");
       var btnChangeHistoryExport = document.getElementById("btnChangeHistoryExport");
       var btnChangeHistoryClear = document.getElementById("btnChangeHistoryClear");
+      var btnTeamApiHealthCheck = document.getElementById("btnTeamApiHealthCheck");
+      var teamApiHealthStateEl = document.getElementById("teamApiHealthState");
+      var teamApiHealthStatusCodeEl = document.getElementById("teamApiHealthStatusCode");
+      var teamApiHealthLatencyEl = document.getElementById("teamApiHealthLatency");
+      var teamApiHealthCountsEl = document.getElementById("teamApiHealthCounts");
+      var teamApiHealthEndpointEl = document.getElementById("teamApiHealthEndpoint");
+      var teamApiHealthLastSyncEl = document.getElementById("teamApiHealthLastSync");
+      var teamApiHealthLastErrorEl = document.getElementById("teamApiHealthLastError");
+      var teamApiHealthBaseEl = document.getElementById("teamApiHealthBase");
       var teamApiWrap = teamApiBaseInput ? teamApiBaseInput.closest("div") : null;
       var teamOrgWrap = teamOrgNameInput ? teamOrgNameInput.closest("div") : null;
       var teamEmailWrap = teamEmailInput ? teamEmailInput.closest("div") : null;
@@ -8397,6 +8628,7 @@
         if (!ownerAllowed) closeTeamTeamsListModal();
         if (!ownerAllowed) closeTeamAddTeamModal();
         if (!loggedIn) closeTeamSwitchOrgModal();
+        renderApiHealthPanel();
       }
 
       function getAuthFormData() {
@@ -10037,6 +10269,14 @@
 
       if (teamApiBaseInput) {
         teamApiBaseInput.value = TEAM_API_DEFAULT;
+        teamApiBaseInput.addEventListener("input", function () {
+          renderApiHealthPanel();
+        });
+      }
+      if (btnTeamApiHealthCheck) {
+        btnTeamApiHealthCheck.addEventListener("click", function () {
+          runApiHealthCheck();
+        });
       }
       if (teamEmailInput) {
         teamEmailInput.addEventListener("input", clearTeamLoginOrgChoices);
@@ -10703,6 +10943,7 @@
             "err"
           );
         }
+        renderApiHealthPanel();
         applyHolderToForm(loadState().holder);
         renderVyjimky();
         renderAprobace();
