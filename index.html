@@ -4825,10 +4825,12 @@
       function saveTeamSession() {
         try {
           if (!teamSession) {
+            sessionStorage.removeItem(SESSION_KEY);
             localStorage.removeItem(SESSION_KEY);
             return;
           }
-          localStorage.setItem(SESSION_KEY, JSON.stringify(teamSession));
+          sessionStorage.setItem(SESSION_KEY, JSON.stringify(teamSession));
+          localStorage.removeItem(SESSION_KEY);
         } catch (_e) {
           /* Local/session storage může být blokované (private mode, file sandbox). */
         }
@@ -5005,14 +5007,22 @@
 
       function loadTeamSession() {
         try {
-          var raw = localStorage.getItem(SESSION_KEY);
+          var raw = sessionStorage.getItem(SESSION_KEY);
           if (!raw) return null;
           var p = JSON.parse(raw);
           if (!p || !p.accessToken) return null;
+          localStorage.removeItem(SESSION_KEY);
           return p;
         } catch (e) {
           return null;
         }
+      }
+
+      function clearPersistedTeamSession() {
+        try {
+          sessionStorage.removeItem(SESSION_KEY);
+          localStorage.removeItem(SESSION_KEY);
+        } catch (_e) {}
       }
 
       async function apiRequest(path, opts) {
@@ -11729,6 +11739,17 @@
       (async function startApp() {
         window.addEventListener("online", function () {
           flushRemoteSyncQueue();
+        });
+        window.addEventListener("pagehide", function () {
+          clearPersistedTeamSession();
+        });
+        window.addEventListener("beforeunload", function () {
+          clearPersistedTeamSession();
+        });
+        document.addEventListener("visibilitychange", function () {
+          if (document.visibilityState === "hidden" && isPwaStandaloneMode()) {
+            clearPersistedTeamSession();
+          }
         });
         if (isPwaStandaloneMode()) {
           setPwaInstallStatus("Aplikace je už nainstalovaná.", "ok");
