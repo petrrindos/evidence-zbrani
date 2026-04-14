@@ -8824,7 +8824,7 @@
         if (btnTeamCreateMember) btnTeamCreateMember.hidden = !ownerAllowed;
         if (btnTeamSwitchOrg) btnTeamSwitchOrg.hidden = !ownerAllowed;
         if (btnTeamAudit) btnTeamAudit.hidden = !ownerAllowed;
-        if (btnTeamLogout) btnTeamLogout.hidden = !ownerAllowed;
+        if (btnTeamLogout) btnTeamLogout.hidden = !loggedIn;
         if (btnTeamLogoutTop) btnTeamLogoutTop.hidden = !loggedIn;
         if (teamApiHealthPanel) teamApiHealthPanel.hidden = !ownerAllowed;
         if (!ownerAllowed && teamUsersPanel) teamUsersPanel.hidden = true;
