@@ -5349,6 +5349,11 @@
       }
 
       function openPdfPopupDocument(title, bodyHtml) {
+        var popup = window.open("about:blank", "_blank", "width=1100,height=900");
+        if (!popup) {
+          alert("Vyskakovací okno bylo zablokováno. Povolte pop-up pro tento web.");
+          return false;
+        }
         var html =
           "<!doctype html>" +
           "<html lang=\"cs\"><head><meta charset=\"utf-8\">" +
@@ -5365,25 +5370,23 @@
           "@page{size:A4;margin:12mm;}" +
           "</style></head><body>" +
           bodyHtml +
-          "<script>" +
-          "window.addEventListener('load', function(){ setTimeout(function(){ window.focus(); window.print(); }, 450); });" +
-          "</" + "script>" +
           "</body></html>";
         try {
-          var blob = new Blob([html], { type: "text/html;charset=utf-8" });
-          var blobUrl = URL.createObjectURL(blob);
-          var popup = window.open(blobUrl, "_blank", "width=1100,height=900");
-          if (!popup) {
-            URL.revokeObjectURL(blobUrl);
-            alert("Vyskakovací okno bylo zablokováno. Povolte pop-up pro tento web.");
-            return false;
-          }
+          popup.document.open();
+          popup.document.write(html);
+          popup.document.close();
+          popup.focus();
           setTimeout(function () {
-            URL.revokeObjectURL(blobUrl);
-          }, 120000);
+            try {
+              popup.print();
+            } catch (_) {}
+          }, 500);
           return true;
         } catch (err) {
-          alert("Nepodařilo se připravit PDF okno. Zkuste to prosím znovu.");
+          try {
+            popup.close();
+          } catch (_) {}
+          alert("PDF okno se nepodařilo naplnit obsahem. Zkuste to prosím znovu.");
           return false;
         }
       }
