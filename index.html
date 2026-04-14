@@ -131,6 +131,17 @@
       gap: 0.5rem 0.65rem;
       margin-bottom: 0.6rem;
     }
+    .team-auth-actions-row {
+      flex-wrap: nowrap !important;
+      gap: 0.28rem !important;
+      overflow-x: auto;
+      padding-bottom: 0.06rem;
+    }
+    .team-auth-actions-row button {
+      padding: 0.34rem 0.5rem;
+      font-size: 0.75rem;
+      white-space: nowrap;
+    }
     .team-auth-grid label {
       display: block;
       margin: 0 0 0.22rem;
@@ -3258,10 +3269,6 @@
       <section class="team-auth" aria-label="Týmový režim" style="margin-top:0.5cm;">
         <header class="team-auth-head">
           <h2 class="team-auth-title">SÍŤOVÝ PŘÍSTUP</h2>
-          <div class="team-auth-head-actions">
-            <button type="button" id="btnTeamAudit">Stáhnout audit JSON</button>
-            <button type="button" id="btnTeamLogout">Odhlásit</button>
-          </div>
         </header>
         <div class="team-auth-grid">
           <div>
@@ -3295,13 +3302,15 @@
             </select>
           </div>
         </div>
-        <div class="toolbar" style="margin:0;">
+        <div class="toolbar team-auth-actions-row" style="margin:0;">
           <button type="button" id="btnTeamLogin">Přihlásit</button>
           <button type="button" id="btnTeamListUsers">Vypsat uživatele</button>
           <button type="button" id="btnTeamManageMemberships">Členství v týmech</button>
           <button type="button" id="btnTeamListTeams">Vypsat týmy</button>
           <button type="button" id="btnTeamCreateMember">Přidat člena</button>
           <button type="button" id="btnTeamRegisterOwner">Přidat tým</button>
+          <button type="button" id="btnTeamAudit">Stáhnout audit JSON</button>
+          <button type="button" id="btnTeamLogout">Odhlásit</button>
         </div>
         <div id="teamUsersPanel" class="team-users-panel" hidden>
           <table aria-label="Seznam uživatelů (e-mail a heslo)">
