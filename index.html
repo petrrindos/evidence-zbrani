@@ -2624,6 +2624,132 @@
       font-variant-numeric: tabular-nums;
       color: #fff;
     }
+    @media (max-width: 900px) {
+      body {
+        padding: 0.65rem 0.65rem 1.2rem;
+      }
+      .wrap {
+        max-width: none;
+      }
+      .page-head {
+        flex-wrap: wrap;
+        align-items: stretch;
+        gap: 0.45rem;
+      }
+      .page-head .page-title {
+        width: 100%;
+      }
+      .top-logout-btn {
+        width: 100%;
+      }
+      .dashboard-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      .doc-top-sections-row,
+      .doc-blue-sections-row,
+      .doc-gray-sections-row {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.55rem;
+      }
+      .doc-top-sections-row > section > details.doc-sec-disclosure > summary,
+      .doc-blue-sections-row > section > details.doc-sec-disclosure > summary,
+      .doc-gray-sections-row > section > details.doc-sec-disclosure > summary {
+        min-height: 4.2rem;
+      }
+      .toolbar-docs.toolbar-docs-foot .toolbar-foot-primary {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      .team-auth-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      .team-auth-actions-row {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      .team-api-health-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+    @media (max-width: 640px) {
+      h1.page-title {
+        font-size: 1.25rem;
+        letter-spacing: 0.05em;
+      }
+      .dashboard-grid,
+      .doc-top-sections-row,
+      .doc-blue-sections-row,
+      .doc-gray-sections-row,
+      .toolbar-docs.toolbar-docs-foot .toolbar-foot-primary,
+      .team-auth-grid,
+      .team-auth-actions-row,
+      .team-api-health-grid {
+        grid-template-columns: 1fr;
+      }
+      .toolbar button {
+        width: 100%;
+      }
+      .team-auth .toolbar button,
+      .team-auth-head-actions button {
+        font-size: 0.82rem;
+      }
+      .team-auth-head-actions {
+        width: 100%;
+      }
+      .holder-modal-backdrop,
+      .reg-zbrane-modal-backdrop,
+      .vyjimky-modal-backdrop,
+      .aprobace-modal-backdrop,
+      .naboje-modal-backdrop,
+      .prehled-str-modal-backdrop,
+      .naklady-zbrane-modal-backdrop,
+      .streleby-modal-backdrop,
+      .nakupy-modal-backdrop {
+        padding: 0.45rem;
+      }
+      .holder-modal,
+      .reg-zbrane-modal,
+      .vyjimky-modal,
+      .aprobace-modal,
+      .naboje-modal,
+      .prehled-str-modal,
+      .naklady-zbrane-modal,
+      .streleby-modal,
+      .nakupy-modal,
+      .team-auth-modal-dialog,
+      .team-memberships-modal-dialog,
+      .team-teams-list-modal-dialog {
+        width: calc(100vw - 0.9rem);
+        max-width: calc(100vw - 0.9rem);
+        max-height: calc(100vh - 0.9rem);
+        border-radius: 10px;
+      }
+      .reg-zbrane-modal-head-start,
+      .vyjimky-modal-head-start,
+      .aprobace-modal-head-start,
+      .naboje-modal-head-start,
+      .prehled-str-modal-head-start,
+      .naklady-zbrane-modal-head-start,
+      .streleby-modal-head-start,
+      .nakupy-modal-head-start {
+        width: 100%;
+      }
+      table {
+        min-width: 38rem;
+      }
+      section.naboje-section .naboje-table-total-row,
+      .naboje-modal-body .naboje-table-total-row {
+        grid-template-columns: 1fr;
+      }
+      section.naboje-section .naboje-table-total-values,
+      .naboje-modal-body .naboje-table-total-values {
+        grid-column: 1 / -1;
+        align-items: flex-start;
+        text-align: left;
+      }
+      section.naboje-section .naboje-total-line,
+      .naboje-modal-body .naboje-total-line {
+        justify-content: flex-start;
+      }
+    }
     /* Tisk / PDF: jen náboje, přehled střeleb, náklady na zbraně — čitelně: bílé pozadí, černý text (třída na body před window.print) */
     @media print {
       body.print-pdf-naboje-prehled-naklady {
