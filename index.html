@@ -8799,12 +8799,10 @@
       function updateTeamAuthVisibility() {
         var loggedIn = teamModeEnabled();
         syncTeamAuthPlacement(loggedIn);
-        var typedEmail = (teamEmailInput && teamEmailInput.value ? teamEmailInput.value : "").trim().toLowerCase();
         var ownerAllowed = !!(
           teamSession &&
           String(teamSession.email || "").trim().toLowerCase() === TEAM_OWNER_EMAIL
         );
-        var ownerLoginCandidate = !loggedIn && typedEmail === TEAM_OWNER_EMAIL;
         if (teamAuthSection) {
           teamAuthSection.classList.toggle("team-auth-logged-in", loggedIn);
         }
@@ -8818,7 +8816,7 @@
         if (teamLoginOrgWrap) teamLoginOrgWrap.style.display = loggedIn ? "none" : "";
         if (teamRoleWrap) teamRoleWrap.style.display = "none";
         if (teamAuthToolbar) teamAuthToolbar.style.display = "";
-        if (btnTeamLogin) btnTeamLogin.hidden = loggedIn || !ownerLoginCandidate;
+        if (btnTeamLogin) btnTeamLogin.hidden = loggedIn;
         if (btnTeamRegisterOwner) btnTeamRegisterOwner.hidden = !ownerAllowed;
         if (btnTeamListUsers) btnTeamListUsers.hidden = !ownerAllowed;
         if (btnTeamManageMemberships) btnTeamManageMemberships.hidden = !ownerAllowed;
