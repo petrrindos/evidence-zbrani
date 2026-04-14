@@ -9809,6 +9809,7 @@
         bindTeamSession(teamSession);
         clearTeamLoginOrgChoices();
         setTeamStatus(successText + " (role: " + teamSession.role + ")", "ok");
+        notifyHolderExpiryAfterLogin();
         flushRemoteSyncQueue();
       }
 
@@ -9860,6 +9861,55 @@
       function isIsoDateOrEmpty(value) {
         var s = String(value || "").trim();
         return !s || /^\d{4}-\d{2}-\d{2}$/.test(s);
+      }
+
+      function parseIsoDateStrict(iso) {
+        var s = String(iso || "").trim();
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) return null;
+        var m = s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+        if (!m) return null;
+        var y = Number(m[1]);
+        var mo = Number(m[2]);
+        var d = Number(m[3]);
+        var dt = new Date(y, mo - 1, d);
+        if (dt.getFullYear() !== y || dt.getMonth() !== mo - 1 || dt.getDate() !== d) return null;
+        dt.setHours(0, 0, 0, 0);
+        return dt;
+      }
+
+      function buildHolderExpiryAlertText(holder) {
+        var h = Object.assign(emptyHolder(), holder || {});
+        var iso = normalizeDatumToIso(h.platnostDo || "");
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(iso)) return "";
+        var exp = parseIsoDateStrict(iso);
+        if (!exp) return "";
+        var today = new Date();
+        today.setHours(0, 0, 0, 0);
+        var warnUntil = new Date(today.getTime());
+        warnUntil.setMonth(warnUntil.getMonth() + 3);
+        if (exp.getTime() > warnUntil.getTime()) return "";
+        var diffDays = Math.ceil((exp.getTime() - today.getTime()) / 86400000);
+        if (diffDays < 0) {
+          return "Upozornění: platnost zbrojního oprávnění vypršela dne " + formatDate(iso) + ".";
+        }
+        if (diffDays === 0) {
+          return "Upozornění: platnost zbrojního oprávnění končí dnes (" + formatDate(iso) + ").";
+        }
+        return (
+          "Upozornění: platnost zbrojního oprávnění končí za " +
+          diffDays +
+          " dní (" +
+          formatDate(iso) +
+          ")."
+        );
+      }
+
+      function notifyHolderExpiryAfterLogin() {
+        var msg = buildHolderExpiryAlertText(loadState().holder);
+        if (!msg) return;
+        setTimeout(function () {
+          alert(msg);
+        }, 120);
       }
 
       function hasAnyDigit(value) {
