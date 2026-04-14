@@ -9011,6 +9011,9 @@
       function setTeamSwitchOrgChoices(orgs, preferredOrgId) {
         if (!teamSwitchOrgSelect) return;
         var rows = Array.isArray(orgs) ? orgs : [];
+        if (!rows.length && preferredOrgId != null && preferredOrgId !== "") {
+          rows = [{ organization_id: Number(preferredOrgId), organization_name: "Aktuální tým" }];
+        }
         var opts = ["<option value=\"\">Vyberte tým...</option>"];
         rows.forEach(function (org) {
           var orgId = Number(org && org.organization_id);
@@ -9062,8 +9065,12 @@
           var data = await apiRequest("/admin/teams-list");
           var teams = data && Array.isArray(data.teams) ? data.teams : [];
           if (!teams.length) {
-            setTeamSwitchOrgChoices([], "");
-            setTeamSwitchOrgStatus("Zadejte heslo. Týmy načteme z vašeho účtu.", "");
+            var fallbackOrgId = teamSession && teamSession.organizationId ? Number(teamSession.organizationId) : 0;
+            setTeamSwitchOrgChoices(
+              [],
+              Number.isFinite(fallbackOrgId) && fallbackOrgId > 0 ? fallbackOrgId : ""
+            );
+            setTeamSwitchOrgStatus("Seznam týmů z API je prázdný. Je předvyplněn aktuální tým.", "");
           } else {
             setTeamSwitchOrgChoices(teams, teamSession && teamSession.organizationId ? teamSession.organizationId : "");
             setTeamSwitchOrgStatus("Vyberte tým a zadejte heslo.");
