@@ -157,17 +157,19 @@
       margin-bottom: 0.6rem;
     }
     .team-auth-actions-row {
-      display: grid !important;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
+      display: flex !important;
+      flex-wrap: nowrap !important;
       gap: 0.45rem !important;
       width: 100%;
     }
     .team-auth-actions-row button {
-      width: 100%;
-      padding: 0.62rem 0.58rem;
-      font-size: 0.9rem;
+      flex: 1 1 0;
+      min-width: 0;
+      padding: 0.58rem 0.4rem;
+      font-size: 0.84rem;
       font-weight: 700;
-      white-space: nowrap;
+      white-space: normal;
+      line-height: 1.2;
     }
     .team-auth-grid label {
       display: block;
