@@ -3313,6 +3313,11 @@
           <p class="hint" id="dashboardRoundsSplit">9 mm Luger: 0 ks | .223 REM: 0 ks</p>
         </article>
         <article class="dashboard-card">
+          <p class="k">ZŮSTATEK NÁBOJŮ</p>
+          <p class="v" id="dashboardAmmoBalanceTotal">0 ks</p>
+          <p class="hint" id="dashboardAmmoBalanceSplit">9 mm Luger: 0 ks | .223 REM: 0 ks</p>
+        </article>
+        <article class="dashboard-card">
           <p class="k">POSLEDNÍ STŘELBY</p>
           <p class="v" id="dashboardLastStreleba">—</p>
           <p class="hint" id="dashboardLastStrelebaHint">Bez záznamu</p>
@@ -8907,11 +8912,19 @@
       function renderDashboard() {
         var regRows = loadRegZbrane().map(normalizeRegZbraneRow).filter(Boolean);
         var strRows = loadStreleby().map(normalizeStrelebaRow).filter(Boolean);
+        var nakRows = loadNakupy().map(normalizeNakupRow).filter(Boolean);
         var totalRounds = 0;
         var totalRoundsLuger = 0;
         var totalRounds223 = 0;
+        var boughtRoundsLuger = 0;
+        var boughtRounds223 = 0;
         var latestStrelbaIso = "";
         var latestStrelbaZbran = "";
+        nakRows.forEach(function (r) {
+          var d = ammoDruhFromNakupRow(r);
+          if (d === "9 mm Luger") boughtRoundsLuger += parsePocetNakupKs(r.pocet);
+          if (d === ".223 REM") boughtRounds223 += parsePocetNakupKs(r.pocet);
+        });
         strRows.forEach(function (r) {
           var rounds = parsePocetNabojuNum(r.pocetNaboju);
           totalRounds += rounds;
@@ -8935,6 +8948,14 @@
         setText(
           "dashboardRoundsSplit",
           "9 mm Luger: " + formatIntegerCs(totalRoundsLuger) + " ks | .223 REM: " + formatIntegerCs(totalRounds223) + " ks"
+        );
+        var balanceLuger = boughtRoundsLuger - totalRoundsLuger;
+        var balance223 = boughtRounds223 - totalRounds223;
+        var balanceTotal = balanceLuger + balance223;
+        setText("dashboardAmmoBalanceTotal", formatIntegerCs(balanceTotal) + " ks");
+        setText(
+          "dashboardAmmoBalanceSplit",
+          "9 mm Luger: " + formatIntegerCs(balanceLuger) + " ks | .223 REM: " + formatIntegerCs(balance223) + " ks"
         );
         setText("dashboardLastStreleba", latestStrelbaIso ? formatDate(latestStrelbaIso) : "—");
         setText(
