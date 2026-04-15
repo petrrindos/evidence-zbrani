@@ -3403,6 +3403,7 @@
       <div id="holderPanelSlot">
       <div id="holderDetailBody" class="holder-detail-body">
       <div class="doc-section-edit-bar">
+        <button type="button" class="holder-add-btn" id="btnHolderExpiryAlertNow">Upozornění na platnost (test)</button>
         <button type="submit" form="holderForm" class="holder-add-btn" id="btnSaveHolder">Uložit</button>
       </div>
       <form id="holderForm" class="fields grid-2" novalidate>
@@ -9391,6 +9392,7 @@
       var holderExpiryAlertText = document.getElementById("holderExpiryAlertText");
       var holderExpiryAlertEmail = document.getElementById("holderExpiryAlertEmail");
       var holderExpiryAlertOk = document.getElementById("holderExpiryAlertOk");
+      var btnHolderExpiryAlertNow = document.getElementById("btnHolderExpiryAlertNow");
       var pwaInstallModalBackdrop = document.getElementById("pwaInstallModalBackdrop");
       var pwaInstallModalClose = document.getElementById("pwaInstallModalClose");
       var pwaInstallStatus = document.getElementById("pwaInstallStatus");
@@ -10553,6 +10555,28 @@
         }, 120);
       }
 
+      function showHolderExpiryAlertManual() {
+        var holder = loadState().holder;
+        var msg = buildHolderExpiryAlertText(holder);
+        if (msg) {
+          openHolderExpiryAlertModal(msg);
+          return;
+        }
+        var h = Object.assign(emptyHolder(), holder || {});
+        var iso = normalizeDatumToIso(h.platnostDo || "");
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(iso)) {
+          openHolderExpiryAlertModal(
+            "Upozornění zatím nelze vyhodnotit. Vyplňte prosím pole „Platnost do“ ve formátu RRRR-MM-DD."
+          );
+          return;
+        }
+        openHolderExpiryAlertModal(
+          "Aktuálně bez upozornění: platnost (" +
+            formatDate(iso) +
+            ") je mimo varovné okno 3 měsíců."
+        );
+      }
+
       function hasAnyDigit(value) {
         return /[0-9]/.test(String(value || ""));
       }
@@ -11354,6 +11378,11 @@
       }
       if (holderExpiryAlertClose) {
         holderExpiryAlertClose.addEventListener("click", closeHolderExpiryAlertModal);
+      }
+      if (btnHolderExpiryAlertNow) {
+        btnHolderExpiryAlertNow.addEventListener("click", function () {
+          showHolderExpiryAlertManual();
+        });
       }
       if (holderExpiryAlertEmail) {
         holderExpiryAlertEmail.addEventListener("click", function () {
