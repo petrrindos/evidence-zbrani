@@ -3189,6 +3189,45 @@
       border-color: rgba(147, 197, 253, 0.78);
       box-shadow: 0 0 0 2px rgba(147, 197, 253, 0.16);
     }
+
+    /* Iconography: section headers and key action buttons. */
+    details.doc-sec-disclosure > summary h2 {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    details.doc-sec-disclosure > summary h2::before {
+      width: 1.15rem;
+      min-width: 1.15rem;
+      height: 1.15rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.95rem;
+      line-height: 1;
+      opacity: 0.9;
+    }
+    .holder-section-head h2::before { content: "👤"; }
+    .vyjimky-section-head h2::before { content: "🛡"; }
+    .aprobace-section-head h2::before { content: "✅"; }
+    .reg-zbrane-section-head h2::before { content: "🔫"; }
+    .naboje-section-head h2::before { content: "🎯"; }
+    .prehled-streleb-head h2::before { content: "📊"; }
+    .naklady-zbrane-head h2::before { content: "💰"; }
+    .streleby-section-head h2::before { content: "🧭"; }
+    .nakupy-section-head h2::before { content: "🧾"; }
+
+    #btnExport::before,
+    .toolbar .file-wrap > button::before,
+    #btnChangeHistoryShow::before,
+    .team-auth-title::before {
+      margin-right: 0.45rem;
+      opacity: 0.92;
+    }
+    #btnExport::before { content: "⬇"; }
+    .toolbar .file-wrap > button::before { content: "⬆"; }
+    #btnChangeHistoryShow::before { content: "🕘"; }
+    .team-auth-title::before { content: "🌐"; }
     .doc-section-fold-mark {
       border-color: rgba(147, 197, 253, 0.5);
       background: rgba(16, 26, 42, 0.55);
