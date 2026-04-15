@@ -740,6 +740,18 @@
       color: #dc2626;
       padding: 0.85rem;
     }
+    .change-history-modal {
+      max-width: min(96vw, 84rem);
+    }
+    .change-history-modal .team-users-panel table {
+      table-layout: auto;
+    }
+    .change-history-modal .team-users-panel th:nth-child(4),
+    .change-history-modal .team-users-panel td:nth-child(4) {
+      min-width: 26rem;
+      white-space: normal;
+      word-break: break-word;
+    }
     .expiry-alert-message {
       margin: 0;
       font-size: 0.95rem;
@@ -4535,7 +4547,7 @@
     aria-hidden="true"
   >
     <div
-      class="holder-modal"
+      class="holder-modal change-history-modal"
       role="dialog"
       aria-modal="true"
       aria-labelledby="changeHistoryModalTitle"
