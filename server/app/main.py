@@ -1,9 +1,13 @@
 from __future__ import annotations
 
+import asyncio
+from contextlib import suppress
 import os
 import secrets
+import smtplib
 from dataclasses import dataclass
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, date, datetime, timedelta
+from email.message import EmailMessage
 from typing import Any
 
 import jwt
@@ -34,6 +38,15 @@ JWT_SECRET = os.getenv("EVIDENCE_JWT_SECRET", "change-me-in-production")
 JWT_ALG = "HS256"
 ACCESS_TTL_MIN = int(os.getenv("EVIDENCE_ACCESS_TTL_MIN", "120"))
 ALLOWED_OWNER_EMAIL = os.getenv("EVIDENCE_ALLOWED_OWNER_EMAIL", "petr.rindos@gmail.com").strip().lower()
+SMTP_HOST = os.getenv("EVIDENCE_SMTP_HOST", "").strip()
+SMTP_PORT = int(os.getenv("EVIDENCE_SMTP_PORT", "587"))
+SMTP_USER = os.getenv("EVIDENCE_SMTP_USER", "").strip()
+SMTP_PASS = os.getenv("EVIDENCE_SMTP_PASS", "")
+SMTP_FROM = os.getenv("EVIDENCE_SMTP_FROM", SMTP_USER or "no-reply@localhost").strip()
+SMTP_USE_TLS = os.getenv("EVIDENCE_SMTP_USE_TLS", "1").strip().lower() not in {"0", "false", "no"}
+REMINDER_LOOKAHEAD_DAYS = int(os.getenv("EVIDENCE_REMINDER_LOOKAHEAD_DAYS", "90"))
+REMINDER_INTERVAL_MINUTES = int(os.getenv("EVIDENCE_REMINDER_INTERVAL_MINUTES", "60"))
+REMINDER_WORKER_ENABLED = os.getenv("EVIDENCE_REMINDER_WORKER_ENABLED", "1").strip().lower() not in {"0", "false", "no"}
 
 ROLE_OWNER = "owner"
 ROLE_ADMIN = "admin"
@@ -112,6 +125,28 @@ class AuditLog(Base):
     before_json: Mapped[dict[str, Any] | None] = mapped_column(JSON, nullable=True)
     after_json: Mapped[dict[str, Any] | None] = mapped_column(JSON, nullable=True)
     meta_json: Mapped[dict[str, Any] | None] = mapped_column(JSON, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(UTC), index=True)
+
+
+class ReminderDispatch(Base):
+    __tablename__ = "reminder_dispatch_log"
+    __table_args__ = (
+        UniqueConstraint(
+            "organization_id",
+            "recipient_email",
+            "expiry_date",
+            "reminder_day",
+            name="uq_reminder_dispatch_daily",
+        ),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    organization_id: Mapped[int] = mapped_column(ForeignKey("organizations.id", ondelete="CASCADE"), index=True)
+    recipient_email: Mapped[str] = mapped_column(String(255), index=True)
+    expiry_date: Mapped[str] = mapped_column(String(10), index=True)
+    reminder_day: Mapped[str] = mapped_column(String(10), index=True)
+    status: Mapped[str] = mapped_column(String(20), index=True, default="sent")
+    detail: Mapped[str | None] = mapped_column(String(500), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(UTC), index=True)
 
 
@@ -344,6 +379,18 @@ class AdminCreateTeamMemberIn(BaseModel):
     role: str = Field(default=ROLE_VIEWER, max_length=20)
 
 
+class RestoreStateIn(BaseModel):
+    audit_id: int = Field(ge=1)
+
+
+class ReminderDispatchOut(BaseModel):
+    checked_organizations: int
+    candidate_organizations: int
+    sent: int
+    failed: int
+    skipped: int
+
+
 def ensure_allowed_owner_email(ctx: AuthContext) -> None:
     actor_email = str(ctx.user.email or "").strip().lower()
     if actor_email != ALLOWED_OWNER_EMAIL:
@@ -364,11 +411,204 @@ app.add_middleware(
 @app.on_event("startup")
 def startup() -> None:
     Base.metadata.create_all(bind=engine)
+    if REMINDER_WORKER_ENABLED and smtp_is_configured() and REMINDER_INTERVAL_MINUTES > 0:
+        app.state.reminder_task = asyncio.create_task(reminder_worker_loop())
+
+
+@app.on_event("shutdown")
+async def shutdown() -> None:
+    task = getattr(app.state, "reminder_task", None)
+    if task:
+        task.cancel()
+        with suppress(asyncio.CancelledError):
+            await task
 
 
 @app.get("/api/health")
 def health() -> dict[str, str]:
     return {"status": "ok"}
+
+
+def smtp_is_configured() -> bool:
+    return bool(SMTP_HOST and SMTP_FROM and SMTP_USER and SMTP_PASS)
+
+
+def parse_iso_date(value: str | None) -> date | None:
+    s = str(value or "").strip()
+    if not s:
+        return None
+    try:
+        return datetime.strptime(s, "%Y-%m-%d").date()
+    except ValueError:
+        return None
+
+
+def build_state_expiry_payload(state_data: dict[str, Any] | None, now_date: date) -> dict[str, Any] | None:
+    data = normalize_state(state_data)
+    holder = data.get("holder", {}) if isinstance(data.get("holder"), dict) else {}
+    expiry_raw = holder.get("platnostDo")
+    expiry_dt = parse_iso_date(str(expiry_raw or ""))
+    if not expiry_dt:
+        return None
+    diff_days = (expiry_dt - now_date).days
+    if diff_days > REMINDER_LOOKAHEAD_DAYS:
+        return None
+    holder_name = " ".join(
+        [str(holder.get("jmeno", "")).strip(), str(holder.get("prijmeni", "")).strip()]
+    ).strip() or "Držitel"
+    severity = "INFO"
+    action_line = "Doporučení: Zkontrolujte platnost a naplánujte další kroky."
+    if diff_days < 0:
+        severity = "URGENT"
+        action_line = "Doporučení: Platnost už vypršela, vyřešte obnovení bez odkladu."
+    elif diff_days <= 7:
+        severity = "DŮLEŽITÉ"
+        action_line = "Doporučení: Platnost končí brzy, vyřiďte obnovení včas."
+    elif diff_days <= 30:
+        severity = "PŘIPOMÍNKA"
+        action_line = "Doporučení: Zahajte přípravu obnovení ještě tento měsíc."
+    return {
+        "holder_name": holder_name,
+        "expiry_date": expiry_dt,
+        "diff_days": diff_days,
+        "severity": severity,
+        "action_line": action_line,
+    }
+
+
+def compose_reminder_email(org_name: str, payload: dict[str, Any]) -> tuple[str, str]:
+    diff_days = int(payload["diff_days"])
+    expiry_date = payload["expiry_date"]
+    holder_name = str(payload["holder_name"])
+    severity = str(payload["severity"])
+    if diff_days < 0:
+        timeline = f"Platnost vypršela před {abs(diff_days)} dny."
+    elif diff_days == 0:
+        timeline = "Platnost končí dnes."
+    else:
+        timeline = f"Platnost končí za {diff_days} dní."
+    subject = f"{severity}: Platnost zbrojního oprávnění - {holder_name} ({org_name})"
+    body = "\n".join(
+        [
+            "Automatická připomínka z aplikace Zbrojní evidence",
+            "",
+            f"Tým: {org_name}",
+            f"Držitel: {holder_name}",
+            f"Platnost do: {expiry_date.strftime('%d.%m.%Y')}",
+            timeline,
+            "",
+            str(payload["action_line"]),
+            "",
+            f"Vygenerováno: {datetime.now(UTC).astimezone().strftime('%d.%m.%Y %H:%M:%S')}",
+        ]
+    )
+    return subject, body
+
+
+def send_smtp_email(*, recipient: str, subject: str, body: str) -> tuple[bool, str]:
+    if not smtp_is_configured():
+        return False, "SMTP není nakonfigurované."
+    msg = EmailMessage()
+    msg["From"] = SMTP_FROM
+    msg["To"] = recipient
+    msg["Subject"] = subject
+    msg.set_content(body)
+    try:
+        with smtplib.SMTP(SMTP_HOST, SMTP_PORT, timeout=20) as smtp:
+            if SMTP_USE_TLS:
+                smtp.starttls()
+            smtp.login(SMTP_USER, SMTP_PASS)
+            smtp.send_message(msg)
+        return True, "OK"
+    except Exception as exc:  # noqa: BLE001
+        return False, str(exc)
+
+
+def dispatch_expiry_reminders(db: Session, *, force: bool = False) -> ReminderDispatchOut:
+    today = utc_now().date()
+    today_key = today.isoformat()
+    checked_orgs = 0
+    candidate_orgs = 0
+    sent = 0
+    failed = 0
+    skipped = 0
+
+    org_rows = db.scalars(select(Organization)).all()
+    for org in org_rows:
+        checked_orgs += 1
+        state_row = db.get(OrganizationState, org.id)
+        if not state_row:
+            skipped += 1
+            continue
+        payload = build_state_expiry_payload(state_row.data_json, today)
+        if not payload:
+            skipped += 1
+            continue
+        candidate_orgs += 1
+        expiry_key = payload["expiry_date"].isoformat()
+
+        recipients = db.scalars(
+            select(User.email)
+            .join(Membership, Membership.user_id == User.id)
+            .where(
+                Membership.organization_id == org.id,
+                Membership.role.in_([ROLE_OWNER, ROLE_ADMIN]),
+                User.is_active.is_(True),
+            )
+        ).all()
+        clean_recipients = sorted({str(x or "").strip().lower() for x in recipients if str(x or "").strip()})
+        if not clean_recipients:
+            skipped += 1
+            continue
+
+        for recipient in clean_recipients:
+            already_sent = db.scalar(
+                select(ReminderDispatch.id).where(
+                    ReminderDispatch.organization_id == org.id,
+                    ReminderDispatch.recipient_email == recipient,
+                    ReminderDispatch.expiry_date == expiry_key,
+                    ReminderDispatch.reminder_day == today_key,
+                    ReminderDispatch.status == "sent",
+                )
+            )
+            if already_sent and not force:
+                skipped += 1
+                continue
+
+            subject, body = compose_reminder_email(org.name, payload)
+            ok, detail = send_smtp_email(recipient=recipient, subject=subject, body=body)
+            db.add(
+                ReminderDispatch(
+                    organization_id=org.id,
+                    recipient_email=recipient,
+                    expiry_date=expiry_key,
+                    reminder_day=today_key,
+                    status="sent" if ok else "failed",
+                    detail=(detail or "")[:500] or None,
+                )
+            )
+            if ok:
+                sent += 1
+            else:
+                failed += 1
+    db.commit()
+    return ReminderDispatchOut(
+        checked_organizations=checked_orgs,
+        candidate_organizations=candidate_orgs,
+        sent=sent,
+        failed=failed,
+        skipped=skipped,
+    )
+
+
+async def reminder_worker_loop() -> None:
+    while True:
+        try:
+            with SessionLocal() as db:
+                dispatch_expiry_reminders(db, force=False)
+        except Exception:
+            pass
+        await asyncio.sleep(max(5, REMINDER_INTERVAL_MINUTES * 60))
 
 
 @app.post("/api/auth/register-owner", response_model=TokenOut)
@@ -1015,6 +1255,52 @@ def put_state(
     return StateOut(data=normalize_state(row.data_json), updated_at=row.updated_at, updated_by_user_id=row.updated_by_user_id)
 
 
+@app.post("/api/state/restore", response_model=StateOut)
+def restore_state(
+    payload: RestoreStateIn,
+    ctx: AuthContext = Depends(require_role(ROLE_EDITOR)),
+    db: Session = Depends(get_db),
+) -> StateOut:
+    audit_row = db.get(AuditLog, payload.audit_id)
+    if not audit_row or audit_row.organization_id != ctx.organization_id:
+        raise HTTPException(status_code=404, detail="Požadovaná verze v auditu nebyla nalezena.")
+    if not isinstance(audit_row.after_json, dict):
+        raise HTTPException(status_code=422, detail="Vybraný audit záznam neobsahuje obnovitelný stav.")
+    if audit_row.entity != "organization_state":
+        raise HTTPException(status_code=422, detail="Vybraný audit záznam není stav organizace.")
+
+    row = db.get(OrganizationState, ctx.organization_id)
+    previous = normalize_state(row.data_json if row else {})
+    restored = normalize_state(audit_row.after_json)
+    if not row:
+        row = OrganizationState(
+            organization_id=ctx.organization_id,
+            data_json=restored,
+            updated_by_user_id=ctx.user.id,
+            updated_at=utc_now(),
+        )
+        db.add(row)
+    else:
+        row.data_json = restored
+        row.updated_by_user_id = ctx.user.id
+        row.updated_at = utc_now()
+
+    log_audit(
+        db,
+        organization_id=ctx.organization_id,
+        actor_user_id=ctx.user.id,
+        action="state.restore",
+        entity="organization_state",
+        entity_id=str(ctx.organization_id),
+        before=previous,
+        after=restored,
+        meta={"source_audit_id": audit_row.id},
+    )
+    db.commit()
+    db.refresh(row)
+    return StateOut(data=normalize_state(row.data_json), updated_at=row.updated_at, updated_by_user_id=row.updated_by_user_id)
+
+
 @app.get("/api/audit", response_model=list[AuditOut])
 def get_audit_logs(
     limit: int = Query(default=100, ge=1, le=500),
@@ -1043,6 +1329,21 @@ def get_audit_logs(
         )
         for r in rows
     ]
+
+
+@app.post("/api/admin/reminders/dispatch", response_model=ReminderDispatchOut)
+def dispatch_reminders_now(
+    force: bool = Query(default=False),
+    ctx: AuthContext = Depends(require_role(ROLE_ADMIN)),
+    db: Session = Depends(get_db),
+) -> ReminderDispatchOut:
+    ensure_allowed_owner_email(ctx)
+    if not smtp_is_configured():
+        raise HTTPException(
+            status_code=422,
+            detail="SMTP není nakonfigurované. Nastavte EVIDENCE_SMTP_HOST/PORT/USER/PASS/FROM.",
+        )
+    return dispatch_expiry_reminders(db, force=force)
 
 
 @app.post("/api/admin/generate-teams-users")

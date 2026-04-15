@@ -4199,6 +4199,8 @@
           <button type="button" id="btnTeamRegisterOwner">Přidat tým</button>
           <button type="button" id="btnTeamSwitchOrg">Změnit tým</button>
           <button type="button" id="btnTeamAudit">Stáhnout audit JSON</button>
+          <button type="button" id="btnTeamDispatchReminders">Spustit e-mail připomínky</button>
+          <button type="button" id="btnTeamRestoreAuditState">Obnovit verzi (audit ID)</button>
         </div>
         <section id="teamApiHealthPanel" class="team-api-health" aria-label="Health panel API">
           <div class="team-api-health-head">
@@ -4553,6 +4555,7 @@
               <th>Akce</th>
               <th>Změna</th>
               <th>Režim</th>
+              <th>Obnovit</th>
             </tr>
           </thead>
           <tbody id="changeHistoryTbody"></tbody>
@@ -5289,7 +5292,8 @@
           user: getHistoryActorLabel(),
           action: action || "Uložení",
           detail: detail,
-          mode: teamModeEnabled() ? "týmový" : "lokální"
+          mode: teamModeEnabled() ? "týmový" : "lokální",
+          stateSnapshot: cloneJson(nextState)
         });
         if (rows.length > CHANGE_HISTORY_LIMIT) rows = rows.slice(0, CHANGE_HISTORY_LIMIT);
         saveChangeHistory(rows);
@@ -9338,6 +9342,8 @@
       var btnTeamListTeams = document.getElementById("btnTeamListTeams");
       var btnTeamCreateMember = document.getElementById("btnTeamCreateMember");
       var btnTeamSwitchOrg = document.getElementById("btnTeamSwitchOrg");
+      var btnTeamDispatchReminders = document.getElementById("btnTeamDispatchReminders");
+      var btnTeamRestoreAuditState = document.getElementById("btnTeamRestoreAuditState");
       var teamAuthSectionHost = document.getElementById("teamAuthSectionHost");
       var teamAuthModalBackdrop = document.getElementById("teamAuthModalBackdrop");
       var teamAuthModalBody = document.getElementById("teamAuthModalBody");
@@ -9467,6 +9473,8 @@
         if (btnTeamCreateMember) btnTeamCreateMember.hidden = !ownerAllowed;
         if (btnTeamSwitchOrg) btnTeamSwitchOrg.hidden = !ownerAllowed;
         if (btnTeamAudit) btnTeamAudit.hidden = !ownerAllowed;
+        if (btnTeamDispatchReminders) btnTeamDispatchReminders.hidden = !ownerAllowed;
+        if (btnTeamRestoreAuditState) btnTeamRestoreAuditState.hidden = !ownerAllowed;
         if (btnTeamLogout) btnTeamLogout.hidden = !loggedIn;
         if (btnTeamLogoutTop) btnTeamLogoutTop.hidden = !loggedIn;
         if (teamApiHealthPanel) teamApiHealthPanel.hidden = !ownerAllowed;
@@ -10047,10 +10055,14 @@
             "Počet záznamů: " + String(rows.length) + " (max. " + String(CHANGE_HISTORY_LIMIT) + ").";
         }
         if (!rows.length) {
-          changeHistoryTbody.innerHTML = "<tr><td colspan=\"5\">Zatím bez změn.</td></tr>";
+          changeHistoryTbody.innerHTML = "<tr><td colspan=\"6\">Zatím bez změn.</td></tr>";
           return;
         }
         changeHistoryTbody.innerHTML = rows.map(function (row) {
+          var canRestoreLocal = row && row.stateSnapshot && typeof row.stateSnapshot === "object";
+          var restoreCell = canRestoreLocal
+            ? "<button type=\"button\" data-history-restore=\"" + escapeHtmlLite(row.id || "") + "\">Obnovit</button>"
+            : "—";
           return (
             "<tr>" +
               "<td>" + escapeHtmlLite(formatHistoryDateTime(row.at)) + "</td>" +
@@ -10058,6 +10070,7 @@
               "<td>" + escapeHtmlLite(row.action || "Uložení") + "</td>" +
               "<td>" + escapeHtmlLite(row.detail || "") + "</td>" +
               "<td>" + escapeHtmlLite(row.mode || "—") + "</td>" +
+              "<td>" + restoreCell + "</td>" +
             "</tr>"
           );
         }).join("");
@@ -10068,6 +10081,29 @@
         renderChangeHistoryModalRows();
         changeHistoryModalBackdrop.hidden = false;
         changeHistoryModalBackdrop.setAttribute("aria-hidden", "false");
+      }
+
+      function restoreLocalHistoryVersion(historyId) {
+        var rows = loadChangeHistory();
+        var row = rows.find(function (x) {
+          return String(x && x.id ? x.id : "") === String(historyId || "");
+        });
+        if (!row || !row.stateSnapshot || typeof row.stateSnapshot !== "object") {
+          alert("Vybraná verze nelze obnovit.");
+          return;
+        }
+        if (!confirm("Obnovit vybranou lokální verzi stavu?")) return;
+        var restored = normalizeTeamStateShape(row.stateSnapshot);
+        if (!saveState(restored, { action: "Obnovení verze", detail: "Obnova z historie změn." })) return;
+        applyHolderToForm(loadState().holder);
+        resetDocManageUi();
+        renderVyjimky();
+        renderAprobace();
+        renderRegZbrane();
+        renderStreleby();
+        renderNakupy();
+        renderChangeHistoryModalRows();
+        setTeamStatus("Lokální verze byla obnovena.", "ok");
       }
 
       function updateTeamMembershipsGlobalSummary(payload) {
@@ -11380,6 +11416,13 @@
           if (ev.target === changeHistoryModalBackdrop) closeChangeHistoryModal();
         });
       }
+      if (changeHistoryTbody) {
+        changeHistoryTbody.addEventListener("click", function (ev) {
+          var restoreBtn = ev.target && ev.target.closest ? ev.target.closest("button[data-history-restore]") : null;
+          if (!restoreBtn) return;
+          restoreLocalHistoryVersion(restoreBtn.getAttribute("data-history-restore"));
+        });
+      }
       if (holderExpiryAlertClose) {
         holderExpiryAlertClose.addEventListener("click", closeHolderExpiryAlertModal);
       }
@@ -11983,6 +12026,59 @@
             setTeamStatus("Audit byl stažen (" + audit.length + " záznamů).", "ok");
           } catch (err) {
             setTeamStatus("Načtení auditu selhalo: " + (err && err.message ? err.message : String(err)), "err");
+          }
+        });
+      }
+      if (btnTeamDispatchReminders) {
+        btnTeamDispatchReminders.addEventListener("click", async function () {
+          if (!teamModeEnabled()) return alert("Nejdřív se přihlaste.");
+          if (!confirm("Spustit automatické e-mail připomínky nyní?")) return;
+          try {
+            var remindersOut = await apiRequest("/admin/reminders/dispatch", { method: "POST" });
+            setTeamStatus(
+              "Připomínky: odesláno " +
+                String(remindersOut.sent || 0) +
+                ", selhalo " +
+                String(remindersOut.failed || 0) +
+                ", přeskočeno " +
+                String(remindersOut.skipped || 0) +
+                ".",
+              remindersOut.failed ? "err" : "ok"
+            );
+          } catch (err) {
+            setTeamStatus("Spuštění připomínek selhalo: " + (err && err.message ? err.message : String(err)), "err");
+          }
+        });
+      }
+      if (btnTeamRestoreAuditState) {
+        btnTeamRestoreAuditState.addEventListener("click", async function () {
+          if (!teamModeEnabled()) return alert("Nejdřív se přihlaste.");
+          var raw = prompt("Zadejte ID audit záznamu pro obnovu verze:", "");
+          if (raw == null) return;
+          var auditId = Number(String(raw || "").trim());
+          if (!Number.isFinite(auditId) || auditId <= 0) {
+            alert("Audit ID musí být kladné číslo.");
+            return;
+          }
+          if (!confirm("Opravdu obnovit stav podle audit ID " + String(auditId) + "?")) return;
+          try {
+            var restoredOut = await apiRequest("/state/restore", {
+              method: "POST",
+              body: JSON.stringify({ audit_id: auditId })
+            });
+            var restoredState = normalizeTeamStateShape(restoredOut && restoredOut.data ? restoredOut.data : {});
+            remoteStateCache = cloneJson(restoredState);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(restoredState));
+            applyHolderToForm(loadState().holder);
+            resetDocManageUi();
+            renderVyjimky();
+            renderAprobace();
+            renderRegZbrane();
+            renderStreleby();
+            renderNakupy();
+            setTeamStatus("Verze byla obnovena z auditu ID " + String(auditId) + ".", "ok");
+          } catch (err) {
+            setTeamStatus("Obnova verze selhala: " + (err && err.message ? err.message : String(err)), "err");
           }
         });
       }
