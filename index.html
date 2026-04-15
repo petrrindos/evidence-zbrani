@@ -3364,6 +3364,7 @@
   <div class="wrap">
     <div class="page-head">
       <h1 class="page-title">Zbrojní evidence</h1>
+      <button type="button" id="btnHolderExpiryAlertTop" class="top-logout-btn">Upozornění (test)</button>
       <button type="button" id="btnTeamLogoutTop" class="top-logout-btn" hidden>Odhlásit</button>
     </div>
     <div class="dashboard-body" style="padding:0 0 0.85rem;">
@@ -9351,6 +9352,7 @@
       var btnTeamAudit = document.getElementById("btnTeamAudit");
       var btnTeamLogout = document.getElementById("btnTeamLogout");
       var btnTeamLogoutTop = document.getElementById("btnTeamLogoutTop");
+      var btnHolderExpiryAlertTop = document.getElementById("btnHolderExpiryAlertTop");
       var teamAuthSection = document.querySelector("section.team-auth");
       var teamAuthGrid = teamAuthSection ? teamAuthSection.querySelector(".team-auth-grid") : null;
       var teamAuthTitle = teamAuthSection ? teamAuthSection.querySelector(".team-auth-title") : null;
@@ -11381,6 +11383,11 @@
       }
       if (btnHolderExpiryAlertNow) {
         btnHolderExpiryAlertNow.addEventListener("click", function () {
+          showHolderExpiryAlertManual();
+        });
+      }
+      if (btnHolderExpiryAlertTop) {
+        btnHolderExpiryAlertTop.addEventListener("click", function () {
           showHolderExpiryAlertManual();
         });
       }
