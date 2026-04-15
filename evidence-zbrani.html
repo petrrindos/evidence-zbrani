@@ -2,7 +2,7 @@
 <html lang="cs">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#0c0f14" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -3283,6 +3283,533 @@
     .streleby-modal-head,
     .nakupy-modal-head {
       border-bottom-color: rgba(122, 154, 207, 0.35);
+    }
+    /* Professional visual refresh (screen only, no logic changes). */
+    @media screen {
+      :root {
+        --pro-bg-1: #09111e;
+        --pro-bg-2: #0c1627;
+        --pro-surface-1: rgba(20, 32, 51, 0.82);
+        --pro-surface-2: rgba(24, 38, 61, 0.9);
+        --pro-border: rgba(148, 181, 235, 0.26);
+        --pro-border-strong: rgba(148, 181, 235, 0.4);
+        --pro-shadow-soft: 0 14px 34px rgba(3, 8, 16, 0.34);
+        --pro-shadow-strong: 0 28px 64px rgba(2, 7, 16, 0.5);
+      }
+
+      body {
+        font-family: "Inter", "Segoe UI", "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+        background:
+          radial-gradient(1300px 720px at 10% -10%, #16335b 0%, transparent 56%),
+          radial-gradient(1200px 640px at 95% 0%, #142f54 0%, transparent 58%),
+          linear-gradient(180deg, var(--pro-bg-1) 0%, var(--pro-bg-2) 100%);
+        color: #edf4ff;
+      }
+
+      .wrap {
+        max-width: 1200px;
+      }
+
+      .page-head {
+        padding: 0.88rem 1rem;
+        border: 1px solid var(--pro-border);
+        border-radius: 16px;
+        background: linear-gradient(180deg, rgba(27, 42, 68, 0.82), rgba(16, 27, 44, 0.82));
+        box-shadow: var(--pro-shadow-soft);
+        margin-bottom: 1.1rem;
+      }
+
+      .page-title {
+        text-transform: none;
+        letter-spacing: 0.015em;
+        font-weight: 700;
+      }
+
+      section {
+        border: 1px solid var(--pro-border);
+        border-radius: 14px;
+        background: linear-gradient(180deg, var(--pro-surface-2), var(--pro-surface-1));
+        box-shadow: var(--pro-shadow-soft);
+        overflow: clip;
+      }
+
+      section + section {
+        margin-top: 0.9rem;
+      }
+
+      .dashboard-body {
+        margin-bottom: 1rem;
+      }
+
+      .dashboard-grid {
+        gap: 0.82rem;
+      }
+
+      .dashboard-card {
+        border: 1px solid var(--pro-border);
+        border-radius: 14px;
+        background: linear-gradient(180deg, rgba(30, 48, 77, 0.86), rgba(16, 28, 46, 0.86));
+        box-shadow: var(--pro-shadow-soft);
+      }
+
+      .dashboard-card .k {
+        color: #b7caea;
+      }
+
+      .dashboard-card .v {
+        color: #f2f7ff;
+      }
+
+      .toolbar button,
+      .team-auth-head-actions button,
+      .team-api-health-head button,
+      .form-actions button,
+      .cell-actions button,
+      .top-logout-btn,
+      .reg-zbrane-modal-export-btn,
+      .vyjimky-modal-export-btn,
+      .aprobace-modal-export-btn,
+      .naboje-modal-export-btn,
+      .prehled-str-modal-export-btn,
+      .naklady-zbrane-modal-export-btn,
+      .streleby-modal-export-btn,
+      .nakupy-modal-export-btn {
+        border-radius: 10px;
+        border: 1px solid var(--pro-border);
+        background: linear-gradient(180deg, rgba(39, 62, 98, 0.92), rgba(29, 48, 76, 0.92));
+        color: #eaf2ff;
+        box-shadow: 0 6px 16px rgba(6, 12, 24, 0.24);
+        transition: transform 120ms ease, border-color 120ms ease, filter 120ms ease;
+      }
+
+      .toolbar button:hover,
+      .team-auth-head-actions button:hover,
+      .team-api-health-head button:hover,
+      .form-actions button:hover,
+      .cell-actions button:hover,
+      .top-logout-btn:hover,
+      .reg-zbrane-modal-export-btn:hover,
+      .vyjimky-modal-export-btn:hover,
+      .aprobace-modal-export-btn:hover,
+      .naboje-modal-export-btn:hover,
+      .prehled-str-modal-export-btn:hover,
+      .naklady-zbrane-modal-export-btn:hover,
+      .streleby-modal-export-btn:hover,
+      .nakupy-modal-export-btn:hover {
+        transform: translateY(-1px);
+        border-color: var(--pro-border-strong);
+        filter: brightness(1.07);
+      }
+
+      /* Unified hover highlight across all clickable buttons. */
+      button:not(:disabled):hover {
+        border-color: var(--pro-border-strong) !important;
+        filter: brightness(1.07);
+        box-shadow: 0 10px 20px rgba(6, 14, 28, 0.3);
+      }
+
+      button:not(:disabled):active {
+        transform: translateY(0);
+      }
+
+      details.doc-sec-disclosure > summary:hover {
+        border-color: var(--pro-border-strong) !important;
+        box-shadow: 0 10px 20px rgba(6, 14, 28, 0.3);
+        filter: brightness(1.07);
+      }
+
+      details.doc-sec-disclosure > summary:hover .doc-section-fold-mark {
+        border-color: var(--pro-border-strong);
+        box-shadow: 0 0 0 2px rgba(147, 197, 253, 0.16);
+      }
+
+      .toolbar button.primary {
+        background: linear-gradient(180deg, #5fb2ff, #3f8de8);
+        border-color: rgba(166, 209, 255, 0.56);
+      }
+
+      input[type="text"],
+      input[type="date"],
+      textarea,
+      select {
+        border-radius: 11px;
+        border-color: var(--pro-border);
+        background: linear-gradient(180deg, rgba(15, 27, 45, 0.98), rgba(11, 20, 35, 0.98));
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+      }
+
+      input:focus,
+      textarea:focus,
+      select:focus,
+      button:focus-visible {
+        outline: 2px solid rgba(120, 189, 255, 0.9);
+        outline-offset: 2px;
+      }
+
+      .table-wrap {
+        border: 1px solid var(--pro-border);
+        border-radius: 12px;
+        background: rgba(9, 16, 29, 0.58);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02);
+      }
+
+      section .table-wrap table thead th {
+        background: linear-gradient(180deg, rgba(40, 61, 96, 0.92), rgba(28, 46, 73, 0.92));
+        color: #d8e7ff;
+        border-bottom-color: rgba(151, 183, 236, 0.32);
+      }
+
+      section .table-wrap table tbody tr {
+        transition: background 120ms ease;
+      }
+
+      section .table-wrap table tbody tr:hover td,
+      section .table-wrap table tbody tr:hover th {
+        background: rgba(69, 103, 155, 0.2);
+      }
+
+      .holder-modal-backdrop,
+      .reg-zbrane-modal-backdrop,
+      .vyjimky-modal-backdrop,
+      .aprobace-modal-backdrop,
+      .naboje-modal-backdrop,
+      .prehled-str-modal-backdrop,
+      .naklady-zbrane-modal-backdrop,
+      .streleby-modal-backdrop,
+      .nakupy-modal-backdrop,
+      .streleby-pdf-preview-modal-backdrop {
+        backdrop-filter: blur(4px);
+        background: rgba(6, 11, 19, 0.66);
+      }
+
+      .holder-modal,
+      .reg-zbrane-modal,
+      .vyjimky-modal,
+      .aprobace-modal,
+      .naboje-modal,
+      .prehled-str-modal,
+      .naklady-zbrane-modal,
+      .streleby-modal,
+      .nakupy-modal,
+      .streleby-pdf-preview-modal {
+        border: 1px solid var(--pro-border-strong);
+        border-radius: 16px;
+        background: linear-gradient(180deg, rgba(20, 33, 55, 0.98), rgba(14, 24, 39, 0.98));
+        box-shadow: var(--pro-shadow-strong);
+      }
+
+      .holder-modal-head,
+      .reg-zbrane-modal-head,
+      .vyjimky-modal-head,
+      .aprobace-modal-head,
+      .naboje-modal-head,
+      .prehled-str-modal-head,
+      .naklady-zbrane-modal-head,
+      .streleby-modal-head,
+      .nakupy-modal-head,
+      .streleby-pdf-preview-modal-head {
+        background: linear-gradient(180deg, rgba(39, 61, 98, 0.82), rgba(27, 45, 70, 0.82));
+        border-bottom: 1px solid var(--pro-border);
+      }
+
+      .team-auth,
+      .team-api-health,
+      .team-users-panel,
+      .team-memberships-panel,
+      .team-teams-panel {
+        border-radius: 14px;
+        border-color: var(--pro-border);
+        box-shadow: var(--pro-shadow-soft);
+      }
+    }
+    /* iPhone Safari optimization pass (safe areas, tap targets, viewport). */
+    @supports (padding: max(0px)) {
+      body {
+        padding-left: max(1rem, env(safe-area-inset-left));
+        padding-right: max(1rem, env(safe-area-inset-right));
+        padding-bottom: max(2.5rem, env(safe-area-inset-bottom));
+      }
+      .wrap {
+        padding-bottom: env(safe-area-inset-bottom);
+      }
+      .team-auth-modal-dialog,
+      .team-memberships-modal-dialog,
+      .team-teams-list-modal-dialog,
+      .holder-modal,
+      .reg-zbrane-modal,
+      .vyjimky-modal,
+      .aprobace-modal,
+      .naboje-modal,
+      .prehled-str-modal,
+      .naklady-zbrane-modal,
+      .streleby-modal,
+      .nakupy-modal,
+      .streleby-pdf-preview-modal {
+        margin-bottom: env(safe-area-inset-bottom);
+      }
+    }
+
+    @supports (-webkit-touch-callout: none) {
+      html, body {
+        min-height: 100%;
+      }
+      body {
+        min-height: 100dvh;
+        -webkit-text-size-adjust: 100%;
+      }
+      input[type="text"],
+      input[type="date"],
+      input[type="email"],
+      input[type="password"],
+      input[type="number"],
+      textarea,
+      select {
+        font-size: 16px;
+      }
+      button,
+      .toolbar button,
+      .form-actions button,
+      .cell-actions button,
+      .top-logout-btn {
+        min-height: 44px;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .page-head {
+        gap: 0.5rem;
+      }
+      .page-head .page-title {
+        font-size: 1.38rem;
+      }
+      .toolbar {
+        gap: 0.45rem 0.5rem;
+      }
+      .toolbar button {
+        min-height: 44px;
+      }
+    }
+    /* Pro UI v2: hierarchy, tables, form controls, modal structure. */
+    @media screen {
+      :root {
+        --space-1: 0.25rem;
+        --space-2: 0.5rem;
+        --space-3: 0.75rem;
+        --space-4: 1rem;
+        --space-5: 1.25rem;
+        --space-6: 1.5rem;
+        --radius-sm: 10px;
+        --radius-md: 14px;
+        --radius-lg: 18px;
+      }
+
+      body {
+        line-height: 1.5;
+      }
+
+      h1.page-title {
+        font-size: clamp(1.2rem, 1rem + 1.1vw, 1.82rem);
+        letter-spacing: 0.01em;
+      }
+
+      section > details > summary h2 {
+        font-size: 1rem;
+        letter-spacing: 0.01em;
+        font-weight: 700;
+      }
+
+      .dashboard-card {
+        padding: var(--space-4);
+      }
+
+      .dashboard-card .k {
+        font-size: 0.76rem;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+      }
+
+      .dashboard-card .v {
+        font-size: clamp(1.12rem, 0.95rem + 0.8vw, 1.65rem);
+        font-weight: 700;
+      }
+
+      .dashboard-card .hint {
+        font-size: 0.84rem;
+        color: #bbcbdf;
+      }
+
+      .toolbar button,
+      .form-actions button,
+      .top-logout-btn {
+        padding: 0.58rem 0.92rem;
+        font-size: 0.93rem;
+        font-weight: 700;
+      }
+
+      .toolbar button.primary,
+      .form-actions .save,
+      #btnSaveHolder {
+        background: linear-gradient(180deg, #67bbff 0%, #458fe8 100%);
+        border-color: rgba(184, 220, 255, 0.6);
+        color: #f6fbff;
+      }
+
+      .toolbar button:not(.primary),
+      .form-actions button:not(.save),
+      .cell-actions button,
+      .top-logout-btn {
+        background: linear-gradient(180deg, rgba(36, 56, 88, 0.92), rgba(25, 41, 66, 0.92));
+      }
+
+      .cell-actions button.del,
+      .form-actions .ghost.del,
+      .danger {
+        border-color: rgba(248, 113, 113, 0.46) !important;
+        background: linear-gradient(180deg, rgba(120, 45, 59, 0.64), rgba(91, 35, 46, 0.64)) !important;
+        color: #ffd9df !important;
+      }
+
+      input[type="text"],
+      input[type="date"],
+      input[type="email"],
+      input[type="password"],
+      input[type="number"],
+      textarea,
+      select {
+        min-height: 44px;
+        padding: 0.62rem 0.72rem;
+        font-size: 0.95rem;
+      }
+
+      .fields label {
+        font-size: 0.83rem;
+        font-weight: 700;
+        color: #bed0ea;
+        letter-spacing: 0.02em;
+      }
+
+      .table-wrap {
+        border-radius: var(--radius-md);
+        overflow: auto;
+      }
+
+      section .table-wrap table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+      }
+
+      section .table-wrap table thead th {
+        position: sticky;
+        top: 0;
+        z-index: 2;
+        font-size: 0.83rem;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        backdrop-filter: blur(2px);
+      }
+
+      section .table-wrap table tbody td,
+      section .table-wrap table tbody th {
+        padding-top: 0.58rem;
+        padding-bottom: 0.58rem;
+        vertical-align: middle;
+      }
+
+      section .table-wrap table td.num,
+      section .table-wrap table th.num {
+        font-variant-numeric: tabular-nums;
+        font-feature-settings: "tnum";
+      }
+
+      .empty {
+        border: 1px dashed rgba(147, 179, 229, 0.42);
+        border-radius: var(--radius-sm);
+        background: rgba(21, 34, 55, 0.6);
+        padding: 0.72rem 0.82rem;
+        color: #c1d3eb;
+      }
+
+      .holder-modal,
+      .reg-zbrane-modal,
+      .vyjimky-modal,
+      .aprobace-modal,
+      .naboje-modal,
+      .prehled-str-modal,
+      .naklady-zbrane-modal,
+      .streleby-modal,
+      .nakupy-modal,
+      .streleby-pdf-preview-modal {
+        display: grid;
+        grid-template-rows: auto minmax(0, 1fr);
+        max-height: min(90dvh, 920px);
+        border-radius: var(--radius-lg);
+      }
+
+      .holder-modal-head,
+      .reg-zbrane-modal-head,
+      .vyjimky-modal-head,
+      .aprobace-modal-head,
+      .naboje-modal-head,
+      .prehled-str-modal-head,
+      .naklady-zbrane-modal-head,
+      .streleby-modal-head,
+      .nakupy-modal-head,
+      .streleby-pdf-preview-modal-head {
+        position: sticky;
+        top: 0;
+        z-index: 3;
+      }
+
+      .holder-modal-body,
+      .reg-zbrane-modal-body,
+      .vyjimky-modal-body,
+      .aprobace-modal-body,
+      .naboje-modal-body,
+      .prehled-str-modal-body,
+      .naklady-zbrane-modal-body,
+      .streleby-modal-body,
+      .nakupy-modal-body,
+      .streleby-pdf-preview-modal-body {
+        padding: var(--space-4);
+      }
+
+      .doc-section-edit-bar {
+        position: sticky;
+        top: 0;
+        z-index: 1;
+        background: linear-gradient(180deg, rgba(18, 31, 50, 0.98), rgba(18, 31, 50, 0.88));
+        backdrop-filter: blur(2px);
+        border-bottom: 1px solid rgba(138, 170, 219, 0.26);
+        padding: 0.62rem 0.28rem 0.68rem;
+      }
+
+      @media (max-width: 900px) {
+        .dashboard-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+
+      @media (max-width: 640px) {
+        .dashboard-grid {
+          grid-template-columns: 1fr;
+        }
+        .holder-modal,
+        .reg-zbrane-modal,
+        .vyjimky-modal,
+        .aprobace-modal,
+        .naboje-modal,
+        .prehled-str-modal,
+        .naklady-zbrane-modal,
+        .streleby-modal,
+        .nakupy-modal,
+        .streleby-pdf-preview-modal {
+          max-height: 92dvh;
+        }
+        section .table-wrap table thead th {
+          top: 0;
+        }
+      }
     }
     @media (max-width: 900px) {
       .wrap {
