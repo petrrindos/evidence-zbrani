@@ -4145,6 +4145,7 @@
         </span>
         <button type="button" id="btnExport">Export JSON</button>
         <button type="button" id="btnChangeHistoryShow">Historie změn</button>
+        <button type="button" id="btnHolderExpiryAlertToolbar">Upozornění (test)</button>
       </div>
     </div>
     <div id="teamAuthSectionHost">
@@ -9321,6 +9322,7 @@
       var btnExport = document.getElementById("btnExport");
       var btnExportPdfStats = document.getElementById("btnExportPdfStats");
       var btnChangeHistoryShow = document.getElementById("btnChangeHistoryShow");
+      var btnHolderExpiryAlertToolbar = document.getElementById("btnHolderExpiryAlertToolbar");
       var btnPwaInstall = document.getElementById("btnPwaInstall");
       var importFile = document.getElementById("importFile");
       var teamApiBaseInput = document.getElementById("teamApiBase");
@@ -11388,6 +11390,11 @@
       }
       if (btnHolderExpiryAlertTop) {
         btnHolderExpiryAlertTop.addEventListener("click", function () {
+          showHolderExpiryAlertManual();
+        });
+      }
+      if (btnHolderExpiryAlertToolbar) {
+        btnHolderExpiryAlertToolbar.addEventListener("click", function () {
           showHolderExpiryAlertManual();
         });
       }
