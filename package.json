@@ -1,0 +1,48 @@
+{
+  "name": "evidence-zbrani-desktop",
+  "version": "1.0.0",
+  "description": "Desktop build for Zbrojni evidence",
+  "main": "electron/main.js",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "pack:mac": "electron-builder --mac dmg --publish never",
+    "pack:win": "electron-builder --win nsis --x64 --publish never"
+  },
+  "devDependencies": {
+    "electron": "^37.2.0",
+    "electron-builder": "^26.0.12"
+  },
+  "build": {
+    "appId": "cz.evidencezbrani.desktop",
+    "productName": "Zbrojni evidence",
+    "files": [
+      "electron/**/*",
+      "index.html",
+      "manifest.webmanifest",
+      "sw.js",
+      "icon-192.svg",
+      "icon-512.svg",
+      "assets/**/*"
+    ],
+    "mac": {
+      "target": [
+        "dmg"
+      ],
+      "category": "public.app-category.productivity"
+    },
+    "dmg": {
+      "artifactName": "${productName}-${version}-${arch}.${ext}"
+    },
+    "win": {
+      "target": [
+        "nsis"
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "artifactName": "${productName}-Setup-${version}-${arch}.${ext}"
+    }
+  }
+}

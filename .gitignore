@@ -14,3 +14,8 @@ audit-log-evidence-zbrani.json
 # Local SSH key files (do not commit)
 petrrindos
 petrrindos.pub
+
+# Node/Electron build artifacts
+node_modules/
+dist/
+release/

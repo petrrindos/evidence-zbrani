@@ -4582,6 +4582,7 @@
       <div class="holder-modal-body">
         <p id="holderExpiryAlertText" class="expiry-alert-message"></p>
         <div class="expiry-alert-actions">
+          <button type="button" id="holderExpiryAlertEmail">Poslat e-mail připomínku</button>
           <button type="button" id="holderExpiryAlertOk">Rozumím</button>
         </div>
       </div>
@@ -4945,6 +4946,7 @@
       var SESSION_KEY = "cz.app.evidenceZbrani.teamSession.v1";
       var CHANGE_HISTORY_KEY = "cz.app.evidenceZbrani.changeHistory.v1";
       var CHANGE_HISTORY_LIMIT = 300;
+      var REMINDER_EMAIL_KEY = "cz.app.evidenceZbrani.reminderEmail.v1";
       var TEAM_API_DEFAULT = "https://evidence-zbrani.onrender.com/api";
       var TEAM_OWNER_EMAIL = "petr.rindos@gmail.com";
       var REMOTE_SYNC_QUEUE_KEY_BASE = "cz.app.evidenceZbrani.remoteSyncQueue.v1";
@@ -9387,6 +9389,7 @@
       var holderExpiryAlertBackdrop = document.getElementById("holderExpiryAlertBackdrop");
       var holderExpiryAlertClose = document.getElementById("holderExpiryAlertClose");
       var holderExpiryAlertText = document.getElementById("holderExpiryAlertText");
+      var holderExpiryAlertEmail = document.getElementById("holderExpiryAlertEmail");
       var holderExpiryAlertOk = document.getElementById("holderExpiryAlertOk");
       var pwaInstallModalBackdrop = document.getElementById("pwaInstallModalBackdrop");
       var pwaInstallModalClose = document.getElementById("pwaInstallModalClose");
@@ -9848,6 +9851,120 @@
         holderExpiryAlertText.textContent = String(text || "").trim();
         holderExpiryAlertBackdrop.hidden = false;
         holderExpiryAlertBackdrop.setAttribute("aria-hidden", "false");
+      }
+
+      function loadReminderEmail() {
+        try {
+          return String(localStorage.getItem(REMINDER_EMAIL_KEY) || "").trim();
+        } catch (_e) {
+          return "";
+        }
+      }
+
+      function saveReminderEmail(email) {
+        try {
+          var normalized = String(email || "").trim();
+          if (!normalized) {
+            localStorage.removeItem(REMINDER_EMAIL_KEY);
+            return;
+          }
+          localStorage.setItem(REMINDER_EMAIL_KEY, normalized);
+        } catch (_e) {}
+      }
+
+      function isLikelyEmail(email) {
+        var s = String(email || "").trim();
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s);
+      }
+
+      function getReminderEmailDefault() {
+        var remembered = loadReminderEmail();
+        if (remembered) return remembered;
+        if (teamSession && teamSession.email) {
+          var sessionEmail = String(teamSession.email || "").trim();
+          if (sessionEmail) return sessionEmail;
+        }
+        return TEAM_OWNER_EMAIL || "";
+      }
+
+      function buildHolderFullName(holder) {
+        var h = Object.assign(emptyHolder(), holder || {});
+        var fullName = [String(h.jmeno || "").trim(), String(h.prijmeni || "").trim()].filter(Boolean).join(" ");
+        return fullName || "Držitel";
+      }
+
+      function buildHolderExpiryReminderEmail(holder) {
+        var h = Object.assign(emptyHolder(), holder || {});
+        var iso = normalizeDatumToIso(h.platnostDo || "");
+        var exp = parseIsoDateStrict(iso);
+        if (!exp) return null;
+        var today = new Date();
+        today.setHours(0, 0, 0, 0);
+        var diffDays = Math.ceil((exp.getTime() - today.getTime()) / 86400000);
+        var holderName = buildHolderFullName(h);
+        var severityPrefix = "UPOZORNENI";
+        var actionLine = "Doporuceni: Zkontrolujte platnost a naplanujte dalsi kroky.";
+        if (diffDays < 0) {
+          severityPrefix = "URGENT";
+          actionLine = "Doporuceni: Platnost uz vyprsela, vyreste obnoveni bez odkladu.";
+        } else if (diffDays <= 7) {
+          severityPrefix = "DULEZITE";
+          actionLine = "Doporuceni: Platnost konci brzy, vyridte obnoveni vcas.";
+        } else if (diffDays <= 30) {
+          severityPrefix = "PRIPOMINKA";
+          actionLine = "Doporuceni: Zahajte pripravu obnoveni jeste tento mesic.";
+        }
+        var timelineText = "";
+        if (diffDays < 0) {
+          timelineText = "Platnost vyprsela pred " + String(Math.abs(diffDays)) + " dny.";
+        } else if (diffDays === 0) {
+          timelineText = "Platnost konci dnes.";
+        } else {
+          timelineText = "Platnost konci za " + String(diffDays) + " dni.";
+        }
+        var subject = severityPrefix + ": Platnost zbrojniho opravneni - " + holderName;
+        var body = [
+          "Automaticka pripominka z aplikace Zbrojni evidence",
+          "",
+          "Drzitel: " + holderName,
+          "Platnost do: " + formatDate(iso),
+          timelineText,
+          "",
+          actionLine,
+          "",
+          "Vygenerovano: " + new Date().toLocaleString("cs-CZ")
+        ].join("\n");
+        return { subject: subject, body: body };
+      }
+
+      function openHolderExpiryReminderEmailDraft() {
+        var holder = loadState().holder;
+        var reminder = buildHolderExpiryReminderEmail(holder);
+        if (!reminder) {
+          alert("Nejdriv doplnte platne datum v poli Platnost do.");
+          return;
+        }
+        var defaultRecipient = getReminderEmailDefault();
+        var recipientInput = prompt("Zadejte e-mail prijemce pripominky:", defaultRecipient);
+        if (recipientInput == null) return;
+        var recipient = String(recipientInput || "").trim();
+        if (!recipient) {
+          alert("E-mail prijemce je prazdny.");
+          return;
+        }
+        if (!isLikelyEmail(recipient)) {
+          alert("E-mail prijemce nema platny format.");
+          return;
+        }
+        saveReminderEmail(recipient);
+        var mailtoHref =
+          "mailto:" +
+          encodeURIComponent(recipient) +
+          "?subject=" +
+          encodeURIComponent(reminder.subject) +
+          "&body=" +
+          encodeURIComponent(reminder.body);
+        window.location.href = mailtoHref;
       }
 
       function closePwaInstallModal() {
@@ -11237,6 +11354,11 @@
       }
       if (holderExpiryAlertClose) {
         holderExpiryAlertClose.addEventListener("click", closeHolderExpiryAlertModal);
+      }
+      if (holderExpiryAlertEmail) {
+        holderExpiryAlertEmail.addEventListener("click", function () {
+          openHolderExpiryReminderEmailDraft();
+        });
       }
       if (holderExpiryAlertOk) {
         holderExpiryAlertOk.addEventListener("click", closeHolderExpiryAlertModal);
